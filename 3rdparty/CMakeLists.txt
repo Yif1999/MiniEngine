@@ -1,0 +1,21 @@
+set(third_party_folder "ThirdParty")
+
+set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+
+if(NOT TARGET glfw)
+    option(GLFW_BUILD_EXAMPLES "" OFF)
+    option(GLFW_BUILD_TESTS "" OFF)
+    option(GLFW_BUILD_DOCS "" OFF)
+    option(GLFW_INSTALL "" OFF)
+    add_subdirectory(glfw)
+    set_target_properties(glfw PROPERTIES FOLDER ${third_party_folder}/glfw)
+    set_target_properties(update_mappings PROPERTIES FOLDER ${third_party_folder}/glfw)
+endif()
+
+if(NOT TARGET glad)
+    file(GLOB_RECURSE HEADER_FILES ${CMAKE_CURRENT_SOURCE_DIR}/glad/*.h)
+    file(GLOB_RECURSE SOURCE_FILES ${CMAKE_CURRENT_SOURCE_DIR}/glad/*.c)
+    add_library(glad ${HEADER_FILES} ${SOURCE_FILES})
+    target_include_directories(glad PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/glad/include)
+    set_target_properties(glad PROPERTIES FOLDER ${third_party_folder}/glad)
+endif()
