@@ -13,9 +13,32 @@ if(NOT TARGET glfw)
 endif()
 
 if(NOT TARGET glad)
-    file(GLOB_RECURSE HEADER_FILES ${CMAKE_CURRENT_SOURCE_DIR}/glad/*.h)
-    file(GLOB_RECURSE SOURCE_FILES ${CMAKE_CURRENT_SOURCE_DIR}/glad/*.c)
-    add_library(glad ${HEADER_FILES} ${SOURCE_FILES})
+    file(GLOB_RECURSE glad_header ${CMAKE_CURRENT_SOURCE_DIR}/glad/*.h)
+    file(GLOB_RECURSE glad_source ${CMAKE_CURRENT_SOURCE_DIR}/glad/*.c)
+    add_library(glad ${glad_header} ${glad_source})
     target_include_directories(glad PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/glad/include)
     set_target_properties(glad PROPERTIES FOLDER ${third_party_folder}/glad)
+endif()
+
+if(NOT TARGET imgui)
+    file(GLOB imgui_header 
+        ${CMAKE_CURRENT_SOURCE_DIR}/imgui/*.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/imgui/backends/imgui_impl_glfw.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/imgui/backends/imgui_impl_opengl3.h)
+    file(GLOB imgui_source 
+        ${CMAKE_CURRENT_SOURCE_DIR}/imgui/*.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/imgui/backends/imgui_impl_glfw.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/imgui/backends/imgui_impl_opengl3.cpp)
+    add_library(imgui ${imgui_header} ${imgui_source})
+    target_link_libraries(imgui PUBLIC glfw)
+    target_include_directories(imgui PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/imgui)
+    set_target_properties(imgui PROPERTIES FOLDER ${third_party_folder}/imgui LINKER_LANGUAGE CXX)
+endif()
+
+if(NOT TARGET glm)
+    option(BUILD_STATIC_LIBS "" ON)
+    option(BUILD_TESTING "" OFF)
+    option(GLM_TEST_ENABLE "" OFF)
+    add_subdirectory(glm)
+    set_target_properties(glm_static PROPERTIES FOLDER ${third_party_folder}/glm)
 endif()
