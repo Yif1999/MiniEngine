@@ -18,7 +18,5 @@ endif()
 set(PROJ_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
 set(CMAKE_INSTALL_PREFIX "${PROJ_ROOT_DIR}/bin")
 set(BIN_ROOT_DIR "${CMAKE_INSTALL_PREFIX}/")
-set(THIRD_PARTY_DIR "${PROJ_ROOT_DIR}/3rdparty")
 
-add_subdirectory(3rdparty)
 add_subdirectory(engine)
