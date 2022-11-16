@@ -28,3 +28,8 @@ target_include_directories(
     ${TARGET_NAME} 
     PUBLIC ${THIRD_PARTY_DIR}/glm
 )
+
+target_include_directories(
+    ${TARGET_NAME} 
+    PUBLIC ${THIRD_PARTY_DIR}/tinyobjloader
+)
