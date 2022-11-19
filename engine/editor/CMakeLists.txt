@@ -2,15 +2,13 @@ set(TARGET_NAME "Editor")
 
 file(GLOB EDITOR_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/source/*.cpp)
 file(GLOB EDITOR_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/include/*.h)
-file(GLOB GLSL_SHADERS ${CMAKE_CURRENT_SOURCE_DIR}/shader/*)
-include_directories(include)
-add_executable(${TARGET_NAME} ${EDITOR_SOURCES} ${EDITOR_HEADERS})
-set_target_properties(${TARGET_NAME} PROPERTIES FOLDER ${engine_folder})
 
-target_link_libraries(${TARGET_NAME} glfw)
-target_link_libraries(${TARGET_NAME} glad)
-target_link_libraries(${TARGET_NAME} imgui)
-target_link_libraries(${TARGET_NAME} stb)
+add_executable(${TARGET_NAME} ${EDITOR_SOURCES} ${EDITOR_HEADERS})
+
+target_include_directories(
+    ${TARGET_NAME} 
+    PUBLIC ${ENGINE_ROOT_DIR}
+)
 
 target_include_directories(
     ${TARGET_NAME} 
@@ -33,5 +31,13 @@ target_include_directories(
     PUBLIC ${THIRD_PARTY_DIR}/tinyobjloader
 )
 
+target_link_libraries(${TARGET_NAME} glfw)
+target_link_libraries(${TARGET_NAME} glad)
+target_link_libraries(${TARGET_NAME} imgui)
+target_link_libraries(${TARGET_NAME} stb)
+target_link_libraries(${TARGET_NAME} Runtime)
+
 file(GLOB ASSETS "./asset" "./shader" "./resource")
 file(COPY ${ASSETS} DESTINATION ${EXECUTABLE_OUTPUT_PATH})
+
+set_target_properties(${TARGET_NAME} PROPERTIES FOLDER ${engine_folder})

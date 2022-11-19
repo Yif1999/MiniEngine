@@ -6,8 +6,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include <runtime/resource/component/shader.h>
-#include <runtime/resource/component/camera.h>
+#include <shader.h>
+#include <camera.h>
 
 #include <iostream>
 
@@ -30,7 +30,7 @@ bool firstMouse = true;
 float deltaTime = 0.0f;	// time between current frame and last frame
 float lastFrame = 0.0f;
 
-int main()
+int backup()
 {
     // glfw: initialize and configure
     // ------------------------------
