@@ -27,7 +27,7 @@ namespace MiniEngine
     {
     public:
         // model data
-        vector<Object> objs;
+        vector<Mesh> meshes;
         vector<Material> mats;
 
         // constructor, expects a filepath to a 3D model.
@@ -39,9 +39,8 @@ namespace MiniEngine
         // draws the model, and thus all its meshes
         void Draw(Shader &shader)
         {
-            for (unsigned int i = 0; i < objs.size(); i++)
-                for (unsigned int j = 0; j < objs[i].meshes.size(); j++)
-                objs[i].meshes[j].Draw(shader);
+            for (unsigned int i = 0; i < meshes.size(); i++)
+                meshes[i].Draw(shader);
         }
 
     private:
@@ -86,13 +85,12 @@ namespace MiniEngine
             std::cout << "顶点数：" << attrib.vertices.size() / 3 << std::endl;
             std::cout << "法线数：" << attrib.normals.size() / 3 << std::endl;
             std::cout << "UV数：" << attrib.texcoords.size() / 2 << std::endl;
-            std::cout << "子模型数：" << shapes.size() << std::endl;
+            std::cout << "子模型数：" << materials.size() << std::endl;
 #endif
 
-            objs.resize(shapes.size());
-            mats.resize(materials.size());
 
             // Load Material Data
+            mats.resize(materials.size());
             for (size_t m = 0; m < materials.size(); ++m)
             {
                 Material mat;
@@ -115,15 +113,17 @@ namespace MiniEngine
                 mats[m] = mat;
             }
 
+            // data to fill
+            vector<vector<Vertex>> vertices(materials.size());
+            vector<vector<unsigned int>> indices(materials.size());
+            vector<std::unordered_map<Vertex, unsigned int>> uniqueVertices(materials.size());
+            
             // Load Mesh Data
             for (size_t s = 0; s < shapes.size(); s++)
             {
-                // data to fill
-                vector<Vertex> vertices;
-                vector<unsigned int> indices;
-
-                std::unordered_map<Vertex, unsigned int> uniqueVertices = {};
                 size_t index_offset = 0;
+                unsigned int mat_id;
+                // loop the faces
                 for (size_t f = 0; f < shapes[s].mesh.num_face_vertices.size(); f++)
                 {
                     size_t fv = size_t(shapes[s].mesh.num_face_vertices[f]);
@@ -219,6 +219,8 @@ namespace MiniEngine
                         glm::normalize(tangent);
                     }
 
+                    mat_id = shapes[s].mesh.material_ids[f];
+
                     for (size_t i = 0; i < 3; i++)
                     {
                         Vertex mesh_vert;
@@ -238,18 +240,22 @@ namespace MiniEngine
                         mesh_vert.Tangent.y = tangent.y;
                         mesh_vert.Tangent.z = tangent.z;
 
-                        if (uniqueVertices.count(mesh_vert) == 0)
+                        if (uniqueVertices[mat_id].count(mesh_vert) == 0)
                         {
-                            uniqueVertices[mesh_vert] = static_cast<unsigned int>(vertices.size());
-                            vertices.push_back(mesh_vert);
+                            uniqueVertices[mat_id][mesh_vert] = static_cast<unsigned int>(vertices[mat_id].size());
+                            vertices[mat_id].push_back(mesh_vert);
                         }
 
-                        indices.push_back(uniqueVertices[mesh_vert]);
+                        indices[mat_id].push_back(uniqueVertices[mat_id][mesh_vert]);
                     }
                 }
-
-                objs[s].meshes.push_back(Mesh(vertices, indices, mats[1]));
             }
+
+            for (size_t i = 0; i < materials.size(); i++)
+            {
+                meshes.push_back(Mesh(vertices[i], indices[i], mats[i]));
+            }
+
         }
     };
 } // MiniEngine namespace

@@ -1,4 +1,4 @@
-#define DEBUG_MATERIAL
+#define DEBUG_MESH
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
