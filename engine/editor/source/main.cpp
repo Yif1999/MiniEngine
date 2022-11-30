@@ -1,4 +1,4 @@
-#define DEBUG_OBJLOADER
+#define DEBUG_MATERIAL
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -9,7 +9,7 @@
 
 #include <runtime/resource/component/shader.h>
 #include <runtime/resource/component/camera.h>
-#include <runtime/resource/component/model.h>
+#include <runtime/resource/common/model.h>
 
 #include <iostream>
 
