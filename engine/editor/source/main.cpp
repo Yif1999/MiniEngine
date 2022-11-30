@@ -84,7 +84,7 @@ int main()
 
     // load models
     // -----------
-    MiniEngine::Model ourModel("/Volumes/T7/Dev/MiniEngine/scene/cube.obj");
+    MiniEngine::Model ourModel("../scene/staircase/stairscase.obj");
 
     
     // draw in wireframe

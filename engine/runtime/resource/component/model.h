@@ -222,14 +222,6 @@ namespace MiniEngine
                     }
                 }
 
-                // diffuse maps
-                // vector<Texture> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
-                // textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
-
-
-
-
-
                 meshes.push_back(Mesh(vertices, indices, textures));
             }
         }

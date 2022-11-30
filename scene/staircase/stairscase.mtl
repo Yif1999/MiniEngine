@@ -1,0 +1,87 @@
+newmtl ceilingLight
+Kd 0 0 0
+Ks 0 0 0
+Tr 1 1 1
+Ns 1
+Ni 1
+newmtl starisLight
+Kd 0 0 0
+Ks 0 0 0
+Tr 1 1 1
+Ns 1
+Ni 1
+newmtl leftTopLight
+Kd 0 0 0
+Ks 0 0 0
+Tr 1 1 1
+Ns 1
+Ni 1
+newmtl leftLight
+Kd 0 0 0
+Ks 0 0 0
+Tr 1 1 1
+Ns 1
+Ni 1
+newmtl backLight
+Kd 0 0 0
+Ks 0 0 0
+Tr 1 1 1
+Ns 1
+Ni 1
+newmtl bottomLight
+Kd 0 0 0
+Ks 0 0 0
+Tr 1 1 1
+Ns 1
+Ni 1
+newmtl Glass
+Kd 0.5 0.5 0.5
+Ks 0 0 0
+Tr 0.8 1 0.95
+Ns 1
+Ni 1.5
+newmtl Wood
+Kd 0.5 0.5 0.5
+Ks 0 0 0
+Tr 1 1 1
+Ns 1
+Ni 1
+map_Kd textures/wood5.jpg
+newmtl FloorTiles
+Kd 0.5 0.5 0.5
+Ks 0.2 0.3 0.4
+Tr 1 1 1
+Ns 250
+Ni 1
+map_Kd textures/Tiles.jpg
+newmtl Wall
+Kd 0.893289 0.893289 0.893289
+Ks 0 0 0
+Tr 1 1 1
+Ns 1
+Ni 1
+newmtl Wallpaper
+Kd 0.5 0.5 0.5
+Ks 0 0 0
+Tr 1 1 1
+Ns 1
+Ni 1
+map_Kd textures/Wallpaper.jpg
+newmtl SpotHolder
+Kd 1 1 1
+Ks 0 0 0
+Tr 1 1 1
+Ns 1
+Ni 1
+newmtl Metal
+Kd 0.2 0.2 0.2
+Ks 0 0.8 0.8
+Tr 1 1 1
+Ns 1000
+Ni 1
+newmtl Chrome
+Kd 0.8 0.8 0.6
+Ks 0.8 0.8 0.6
+Tr 1 1 1
+Ns 500
+Ni 1

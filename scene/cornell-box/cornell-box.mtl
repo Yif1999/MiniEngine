@@ -1,0 +1,24 @@
+newmtl DiffuseWhite
+Kd 0.79 0.76 0.73
+Ks 0 0 0
+Tr 1 1 1
+Ns 1
+Ni 1
+newmtl LeftWall
+Kd 0 0.24 0.9
+Ks 0 0 0
+Tr 1 1 1
+Ns 1
+Ni 1
+newmtl RightWall
+Kd 0.2 0.76 0
+Ks 0 0 0
+Tr 1 1 1
+Ns 1
+Ni 1
+newmtl Light
+Kd 0 0 0
+Ks 0 0 0
+Tr 1 1 1
+Ns 1
+Ni 1

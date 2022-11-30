@@ -1,0 +1,48 @@
+newmtl material0
+Kd 0.5 0.5 0.5
+Ks 0 0 0
+Tr 1 1 1
+Ns 1
+Ni 1
+newmtl material1
+Kd 0.3 0.2 0.1
+Ks 0.3 0.2 0.1
+Tr 1 1 1
+Ns 1000
+Ni 1
+newmtl material2
+Kd 0.3 0.2 0.1
+Ks 0.3 0.2 0.1
+Tr 1 1 1
+Ns 500
+Ni 1
+newmtl material3
+Kd 0.3 0.2 0.1
+Ks 0.3 0.2 0.1
+Tr 1 1 1
+Ns 200
+Ni 1
+newmtl material4
+Kd 0.3 0.2 0.1
+Ks 0.3 0.2 0.1
+Tr 1 1 1
+Ns 50
+Ni 1
+newmtl light1
+Kd 0.0 0.0 0.0
+Ks 0 0 0
+Tr 1 1 1
+Ns 1
+Ni 1
+newmtl light2
+Kd 0.0 0.0 0.0
+Ks 0 0 0
+Tr 1 1 1
+Ns 1
+Ni 1
+newmtl light3
+Kd 0.0 0.0 0.0
+Ks 0 0 0
+Tr 1 1 1
+Ns 1
+Ni 1
