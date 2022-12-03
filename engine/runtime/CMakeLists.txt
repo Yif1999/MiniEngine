@@ -28,8 +28,11 @@ target_include_directories(
     PUBLIC ${THIRD_PARTY_DIR}/glad/include
 )
 
+target_link_libraries(${TARGET_NAME} glfw)
+target_link_libraries(${TARGET_NAME} glad)
 target_link_libraries(${TARGET_NAME} stb)
 target_link_libraries(${TARGET_NAME} glad)
+target_link_libraries(${TARGET_NAME} spdlog::spdlog)
 
 set_target_properties(${TARGET_NAME} PROPERTIES CXX_STANDARD 17)
 set_target_properties(${TARGET_NAME} PROPERTIES FOLDER ${engine_folder})
