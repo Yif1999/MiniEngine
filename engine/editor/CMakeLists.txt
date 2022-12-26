@@ -37,7 +37,7 @@ target_link_libraries(${TARGET_NAME} imgui)
 target_link_libraries(${TARGET_NAME} stb)
 target_link_libraries(${TARGET_NAME} Runtime)
 
-file(GLOB ASSETS "./asset" "./shader" "./resource")
+file(GLOB ASSETS "./asset" "./shader" "./config/editor.ini")
 file(COPY ${ASSETS} DESTINATION ${EXECUTABLE_OUTPUT_PATH})
 
 set_target_properties(${TARGET_NAME} PROPERTIES FOLDER ${engine_folder})

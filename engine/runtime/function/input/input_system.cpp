@@ -4,11 +4,12 @@
 
 #include "runtime/engine/engine.h"
 #include "runtime/function/global/global_contex.h"
-// #include "runtime/function/render/render_camera.h"
+#include "runtime/resource/res_type/component/camera.h"
 #include "runtime/function/render/render_system.h"
 #include "runtime/function/render/window_system.h"
 
 #include <GLFW/glfw3.h>
+#include <iostream>
 
 namespace MiniEngine
 {
@@ -115,25 +116,6 @@ namespace MiniEngine
         m_cursor_delta_y = 0;
     }
 
-    void InputSystem::calculateCursorDeltaAngles()
-    {
-        std::array<int, 2> window_size = g_runtime_global_context.m_window_system->getWindowSize();
-
-        if (window_size[0] < 1 || window_size[1] < 1)
-        {
-            return;
-        }
-
-        // std::shared_ptr<RenderCamera> render_camera = g_runtime_global_context.m_render_system->getRenderCamera();
-        // const Vector2&                fov           = render_camera->getFOV();
-
-        // Radian cursor_delta_x(Math::degreesToRadians(m_cursor_delta_x));
-        // Radian cursor_delta_y(Math::degreesToRadians(m_cursor_delta_y));
-
-        // m_cursor_delta_yaw   = (cursor_delta_x / (float)window_size[0]) * fov.x;
-        // m_cursor_delta_pitch = -(cursor_delta_y / (float)window_size[1]) * fov.y;
-    }
-
     void InputSystem::initialize()
     {
         std::shared_ptr<WindowSystem> window_system = g_runtime_global_context.m_window_system;
@@ -151,7 +133,6 @@ namespace MiniEngine
 
     void InputSystem::tick()
     {
-        calculateCursorDeltaAngles();
         clear();
 
         std::shared_ptr<WindowSystem> window_system = g_runtime_global_context.m_window_system;

@@ -52,7 +52,7 @@ namespace MiniEngine
     void Editor::run()
     {
         assert(m_engine_runtime);
-        assert(m_editor_ui);
+        // assert(m_editor_ui);
         float delta_time;
         while (true)
         {

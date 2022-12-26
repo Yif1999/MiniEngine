@@ -6,10 +6,8 @@ namespace MiniEngine
     class Object
     {
     public:
-        vector<Mesh> meshes;
+        std::vector<Mesh> meshes;
     };
 }
-
-
 
 #endif

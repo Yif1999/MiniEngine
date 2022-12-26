@@ -2,9 +2,11 @@
 #include "runtime/core/base/macro.h"
 #include "runtime/function/global/global_contex.h"
 // #include "runtime/function/framework/world/world_manager.h"
-// #include "runtime/function/input/input_system.h"
-// #include "runtime/function/render/render_system.h"
-// #include "runtime/function/render/window_system.h"
+#include "runtime/function/input/input_system.h"
+#include "runtime/function/render/render_system.h"
+#include "runtime/function/render/window_system.h"
+
+#include <unistd.h> 
 
 namespace MiniEngine
 {
@@ -29,18 +31,19 @@ namespace MiniEngine
     }
 
     void Engine::initialize() {}
+
     void Engine::clear() {}
 
     void Engine::run()
     {
-        // std::shared_ptr<WindowSystem> window_system = g_runtime_global_context.m_window_system;
-        // ASSERT(window_system);
+        std::shared_ptr<WindowSystem> window_system = g_runtime_global_context.m_window_system;
+        ASSERT(window_system);
 
-        // while (!window_system->shouldClose())
-        // {
-        //     const float delta_time = calculateDeltaTime();
-        //     tickOneFrame(delta_time);
-        // }
+        while (!window_system->shouldClose())
+        {
+            const float delta_time = calculateDeltaTime();
+            tickOneFrame(delta_time);
+        }
     }
 
     float Engine::calculateDeltaTime()
@@ -65,33 +68,27 @@ namespace MiniEngine
 
         // single thread
         // exchange data between logic and render contexts
-        // g_runtime_global_context.m_render_system->swapLogicRenderData();
 
         rendererTick(delta_time);
 
-#ifdef ENABLE_PHYSICS_DEBUG_RENDERER
-        g_runtime_global_context.m_physics_manager->renderPhysicsWorld(delta_time);
-#endif
+        g_runtime_global_context.m_window_system->pollEvents();
 
-        // g_runtime_global_context.m_window_system->pollEvents();
+        g_runtime_global_context.m_window_system->setTitle(
+            std::string("MiniEngine - " + std::to_string(getFPS()) + " FPS").c_str());
 
-
-        // g_runtime_global_context.m_window_system->setTitle(
-        //     std::string("Piccolo - " + std::to_string(getFPS()) + " FPS").c_str());
-
-        // const bool should_window_close = g_runtime_global_context.m_window_system->shouldClose();
-        // return !should_window_close;
+        const bool should_window_close = g_runtime_global_context.m_window_system->shouldClose();
+        return !should_window_close;
     }
 
     void Engine::logicalTick(float delta_time)
     {
         // g_runtime_global_context.m_world_manager->tick(delta_time);
-        // g_runtime_global_context.m_input_system->tick();
+        g_runtime_global_context.m_input_system->tick();
     }
 
     bool Engine::rendererTick(float delta_time)
     {
-        // g_runtime_global_context.m_render_system->tick(delta_time);
+        g_runtime_global_context.m_render_system->tick(delta_time);
         return true;
     }
 

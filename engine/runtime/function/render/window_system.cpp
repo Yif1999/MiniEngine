@@ -41,6 +41,13 @@ namespace MiniEngine
         }
         glfwMakeContextCurrent(m_window);
 
+        // glad load all OpenGL function pointers
+        if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+        {
+            LOG_FATAL(__FUNCTION__, "failed to create window");
+            return;
+        }
+
         // Setup input callbacks
         glfwSetWindowUserPointer(m_window, this);
         glfwSetKeyCallback(m_window, keyCallback);

@@ -19,12 +19,12 @@ int main(int argc, char** argv)
     engine->startEngine(config_file_path.generic_string());
     engine->initialize();
 
-    // MiniEngine::Editor* editor = new MiniEngine::Editor();
-    // editor->initialize(engine);
+    MiniEngine::Editor* editor = new MiniEngine::Editor();
+    editor->initialize(engine);
 
-    // editor->run();
+    editor->run();
 
-    // editor->clear();
+    editor->clear();
 
     engine->clear();
     engine->shutdownEngine();

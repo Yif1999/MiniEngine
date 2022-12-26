@@ -8,9 +8,9 @@
 #include <stb_image.h>
 #include <tiny_obj_loader.h>
 
-#include <runtime/resource/component/mesh.h>
-#include <runtime/resource/component/shader.h>
-#include <runtime/resource/common/object.h>
+#include <runtime/resource/res_type/component/mesh.h>
+#include <runtime/resource/res_type/component/shader.h>
+#include <runtime/resource/res_type/common/object.h>
 #include <runtime/core/base/hash.h>
 
 #include <string>
@@ -20,6 +20,8 @@
 #include <map>
 #include <vector>
 #include <unordered_map>
+
+using namespace std;
 
 namespace MiniEngine
 {
@@ -37,7 +39,7 @@ namespace MiniEngine
         }
 
         // draws the model, and thus all its meshes
-        void Draw(Shader &shader)
+        void Draw(shared_ptr<Shader> shader)
         {
             for (unsigned int i = 0; i < meshes.size(); i++)
                 meshes[i].Draw(shader);
