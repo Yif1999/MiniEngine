@@ -1,7 +1,7 @@
 #include "runtime/engine/engine.h"
 #include "runtime/core/base/macro.h"
 #include "runtime/function/global/global_contex.h"
-// #include "runtime/function/framework/world/world_manager.h"
+#include "runtime/function/framework/world/world_manager.h"
 #include "runtime/function/input/input_system.h"
 #include "runtime/function/render/render_system.h"
 #include "runtime/function/render/window_system.h"

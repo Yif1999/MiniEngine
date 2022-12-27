@@ -1,5 +1,4 @@
-#ifndef CAMERA_H
-#define CAMERA_H
+#pragma once
 
 #include <glad/glad.h>
 #include <glm/glm.hpp>
@@ -130,5 +129,3 @@ namespace MiniEngine
         }
     };
 }
-
-#endif

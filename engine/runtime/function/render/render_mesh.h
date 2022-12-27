@@ -1,12 +1,11 @@
-#ifndef MESH_H
-#define MESH_H
+#pragma once
 
 #include <glad/glad.h> // holds all OpenGL type declarations
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include "runtime/resource/res_type/component/shader.h"
+#include "runtime/function/render/render_shader.h"
 
 #include <string>
 #include <vector>
@@ -117,4 +116,3 @@ namespace MiniEngine
         }
     };
 }
-#endif

@@ -4,7 +4,7 @@
 
 #include "runtime/engine/engine.h"
 #include "runtime/function/global/global_contex.h"
-#include "runtime/resource/res_type/component/camera.h"
+#include "runtime/function/render/render_camera.h"
 #include "runtime/function/render/render_system.h"
 #include "runtime/function/render/window_system.h"
 

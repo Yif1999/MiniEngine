@@ -1,5 +1,4 @@
-#ifndef MODEL_H
-#define MODEL_H
+#pragma once
 
 #include <glad/glad.h>
 
@@ -8,9 +7,8 @@
 #include <stb_image.h>
 #include <tiny_obj_loader.h>
 
-#include <runtime/resource/res_type/component/mesh.h>
-#include <runtime/resource/res_type/component/shader.h>
-#include <runtime/resource/res_type/common/object.h>
+#include <runtime/function/render/render_mesh.h>
+#include <runtime/function/render/render_shader.h>
 #include <runtime/core/base/hash.h>
 
 #include <string>
@@ -261,5 +259,3 @@ namespace MiniEngine
         }
     };
 } // MiniEngine namespace
-
-#endif

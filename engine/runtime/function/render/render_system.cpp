@@ -5,9 +5,9 @@
 
 #include "runtime/function/render/window_system.h"
 #include "runtime/function/global/global_contex.h"
-#include "runtime/resource/res_type/component/shader.h"
-#include "runtime/resource/res_type/common/model.h"
-#include "runtime/resource/res_type/component/camera.h"
+#include "runtime/function/render/render_shader.h"
+#include "runtime/function/render/render_model.h"
+#include "runtime/function/render/render_camera.h"
 #include "runtime/function/render/render_system.h"
 
 #include <glm/glm.hpp>
