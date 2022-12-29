@@ -48,3 +48,8 @@ if(NOT TARGET spdlog)
     add_subdirectory(spdlog)
     set_target_properties(spdlog PROPERTIES FOLDER ${third_party_folder}/spdlog)
 endif()
+
+if(NOT TARGET json11)
+    add_subdirectory(json11)
+    set_target_properties(json11 PROPERTIES FOLDER ${third_party_folder}/json11)
+endif()

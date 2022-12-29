@@ -1,10 +1,13 @@
 #include "runtime/engine/engine.h"
 #include "runtime/core/base/macro.h"
+#include "runtime/core/meta/reflection/reflection_register.h"
+
 #include "runtime/function/global/global_contex.h"
 #include "runtime/function/framework/world/world_manager.h"
 #include "runtime/function/input/input_system.h"
 #include "runtime/function/render/render_system.h"
 #include "runtime/function/render/window_system.h"
+
 
 #include <unistd.h> 
 
@@ -14,7 +17,7 @@ namespace MiniEngine
 
     void Engine::startEngine(const std::string& config_file_path)
     {
-        // Reflection::TypeMetaRegister::metaRegister();
+        Reflection::TypeMetaRegister::metaRegister();
 
         g_runtime_global_context.startSystems(config_file_path);
 
@@ -27,7 +30,7 @@ namespace MiniEngine
 
         g_runtime_global_context.shutdownSystems();
 
-        // Reflection::TypeMetaRegister::metaUnregister();
+        Reflection::TypeMetaRegister::metaUnregister();
     }
 
     void Engine::initialize() {}

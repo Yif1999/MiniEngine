@@ -7,6 +7,7 @@
 
 #include <map>
 #include <set>
+#include <iostream>
 
 namespace Generator
 {
@@ -111,6 +112,7 @@ namespace Generator
         }
 
         m_head_file_list.emplace_back(Utils::makeRelativePath(m_root_path, file_path).string());
+
         return 0;
     }
     void ReflectionGenerator::finish()
@@ -118,6 +120,8 @@ namespace Generator
         Mustache::data mustache_data;
         Mustache::data include_headfiles = Mustache::data::type::list;
         Mustache::data class_defines     = Mustache::data::type::list;
+
+        
 
         for (auto& head_file : m_head_file_list)
         {
