@@ -41,3 +41,7 @@ file(GLOB ASSETS "./asset" "./shader" "./config/editor.ini")
 file(COPY ${ASSETS} DESTINATION ${EXECUTABLE_OUTPUT_PATH})
 
 set_target_properties(${TARGET_NAME} PROPERTIES FOLDER ${engine_folder})
+
+#precompile
+#set global vari used by precompile
+set(EDITOR_HEADS “${EDITOR_HEADERS}” PARENT_SCOPE)

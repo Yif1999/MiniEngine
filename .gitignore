@@ -1,5 +1,6 @@
 build/
 bin/
+generated/
 .DS_Store
 
 # CPM
