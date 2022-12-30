@@ -10,6 +10,8 @@
 #include "editor/include/editor_scene_manager.h"
 #include "editor/include/editor_ui.h"
 
+#include <assert.h>
+
 namespace MiniEngine
 {
     // void registerEdtorTickComponent(std::string component_type_name)
