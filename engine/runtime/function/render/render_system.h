@@ -33,6 +33,7 @@ namespace MiniEngine
     private:
         GLFWwindow* m_window {nullptr};
         std::shared_ptr<Model> m_model;
+        std::shared_ptr<Model> m_display;
         std::shared_ptr<Camera> m_camera;
         std::shared_ptr<Shader> m_shader;
     };

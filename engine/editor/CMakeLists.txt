@@ -17,12 +17,6 @@ target_include_directories(
 
 target_include_directories(
     ${TARGET_NAME} 
-    PUBLIC ${THIRD_PARTY_DIR}/imgui
-    ${THIRD_PARTY_DIR}/imgui/backends
-)
-
-target_include_directories(
-    ${TARGET_NAME} 
     PUBLIC ${THIRD_PARTY_DIR}/glm
 )
 
@@ -33,7 +27,6 @@ target_include_directories(
 
 target_link_libraries(${TARGET_NAME} glfw)
 target_link_libraries(${TARGET_NAME} glad)
-target_link_libraries(${TARGET_NAME} imgui)
 target_link_libraries(${TARGET_NAME} stb)
 target_link_libraries(${TARGET_NAME} Runtime)
 
