@@ -9,6 +9,8 @@
 #include "runtime/function/render/render_model.h"
 #include "runtime/function/render/render_camera.h"
 #include "runtime/function/render/render_system.h"
+#include "runtime/function/render/zbuffer/transform.h"
+#include "runtime/function/render/zbuffer/zbuffer.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -37,12 +39,14 @@ namespace MiniEngine
         pixels = new unsigned char[3*720*720];
         m_window = init_info.window_system->getWindow();
         // setup render model
-        m_model = std::make_shared<Model>("../scene/staircase/stairscase.obj");
+        m_model = std::make_shared<Model>("../scene/veach-mis/veach-mis.obj");
         m_display = std::make_shared<Model>("asset/mesh/plane.obj");
         // setup render shader
         m_shader = std::make_shared<Shader>("shader/glsl/unlit.vert", "shader/glsl/unlit.frag");
         // setup render camera
-        m_camera = std::make_shared<Camera>(glm::vec3(0.0f, 1.0f, 0.0f));
+        m_camera = std::make_shared<Camera>(glm::vec3(0.0f, 10.0f, 0.0f));
+        // setup virtual camera
+        m_virtualcamera = std::make_shared<Camera>(glm::vec3(0.0f, 1.0f, 0.0f));
 
         //setup imgui
         IMGUI_CHECKVERSION();
@@ -66,10 +70,8 @@ namespace MiniEngine
         // set viewport
         m_shader->use();
         glm::mat4 projection = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, 0.0f, 10.0f);
-        glm::mat4 view = m_camera->GetViewMatrix();
+        glm::mat4 view = m_virtualcamera->GetViewMatrix();
         glm::mat4 model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); 
-        model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	
         m_shader->setMat4("projection", projection);
         m_shader->setMat4("view", view);
         m_shader->setMat4("model", model);
@@ -82,8 +84,15 @@ namespace MiniEngine
         glClear(GL_COLOR_BUFFER_BIT);
 
         // render RT
+        m_shader->use();
         m_shader->setInt("texture1", 0);
         m_display->Draw(m_shader);
+
+        // single thread do MVP transform
+        glm::mat4 projection = glm::perspective(glm::radians(m_camera->Zoom), (float)720 / (float)720, 0.01f, 1000.0f);
+        glm::mat4 view = m_camera->GetViewMatrix();
+        glm::mat4 model = glm::mat4(1.0f);
+        transform(m_model,model,view,projection);
 
         // RT update
         for (int t; t<720*720; t++)

@@ -35,6 +35,7 @@ namespace MiniEngine
         std::shared_ptr<Model> m_model;
         std::shared_ptr<Model> m_display;
         std::shared_ptr<Camera> m_camera;
+        std::shared_ptr<Camera> m_virtualcamera;
         std::shared_ptr<Shader> m_shader;
     };
 } 
