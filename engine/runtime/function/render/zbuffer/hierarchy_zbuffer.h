@@ -10,27 +10,25 @@ namespace MiniEngine
     struct Mipmap
     {
     public:
-        int flag;
         float depth;
+
         Mipmap *parent;
         Mipmap *childs[4];
 
         Mipmap()
         {
-            flag = 0;
-            depth = 0;
+            depth = window_size;
 
             parent = nullptr;
             childs[0] = nullptr;
             childs[1] = nullptr;
             childs[2] = nullptr;
             childs[3] = nullptr;
-        };
+        }
 
         Mipmap(Mipmap *c0, Mipmap *c1, Mipmap *c2, Mipmap *c3)
         {
-            flag = 0;
-            depth = 0;
+            depth = window_size;
 
             c0->parent = this;
             c1->parent = this;
@@ -40,7 +38,38 @@ namespace MiniEngine
             childs[1] = c1;
             childs[2] = c2;
             childs[3] = c3;
-        };
+        }
+
+        void update(float z)
+        {
+            depth = z;
+
+            if (parent == nullptr)
+                return;
+            else
+                parent->depth = max({parent->childs[0]->depth,
+                                     parent->childs[1]->depth,
+                                     parent->childs[2]->depth,
+                                     parent->childs[3]->depth});
+
+            if (parent->depth >= z)
+                return;
+            else
+                parent->update(z);
+        }
+
+        void refresh()
+        {
+            depth = window_size;
+
+            if (childs[0] != nullptr)
+            {
+                childs[0]->refresh();
+                childs[1]->refresh();
+                childs[2]->refresh();
+                childs[3]->refresh();
+            }
+        }
     };
 
     struct EdgeEquation
@@ -51,7 +80,7 @@ namespace MiniEngine
         bool tie;
 
         EdgeEquation(const Vertex &v0, const Vertex &v1)
-        {
+        {   
             a = v0.Position.y - v1.Position.y;
             b = v1.Position.x - v0.Position.x;
             c = -(a * (v0.Position.x + v1.Position.x) + b * (v0.Position.y + v1.Position.y)) / 2;
@@ -107,12 +136,12 @@ namespace MiniEngine
 
     void hierarchy_zbuffer_initialize(int size);
 
-    Mipmap* build_mipmap(int size);
+    Mipmap *build_mipmap(int size);
 
     void triangle_render(Model *m_model,
                          unsigned char *pixels,
                          unsigned char *texture,
-                         int width, 
+                         int width,
                          int height);
 
     bool ztest(float z, int x, int y);

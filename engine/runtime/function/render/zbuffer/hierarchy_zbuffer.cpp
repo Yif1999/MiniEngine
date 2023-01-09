@@ -74,6 +74,9 @@ namespace MiniEngine
 
     void triangle_render(Model *m_model, unsigned char *pixels, unsigned char *texture, int width, int height)
     {
+        // refresh zbuffer
+        zbuffer->refresh();
+
         // save vertices of one triangle
         vector<Vertex> vertices(3);
 
@@ -128,14 +131,14 @@ namespace MiniEngine
                     {
                         float z = depth.interpolate(px, py);
 
-                        if (!ztest(z,px,py))  
-                            continue;
-
-                        float u = texcoord_s.interpolate(px, py);
-                        float v = texcoord_t.interpolate(px, py);
-                        pixels[3 * (window_size * py + px) + 0] = texture[3 * (width * int(height * v + 0.5) + int(width * u + 0.5)) + 0];
-                        pixels[3 * (window_size * py + px) + 1] = texture[3 * (width * int(height * v + 0.5) + int(width * u + 0.5)) + 1];
-                        pixels[3 * (window_size * py + px) + 2] = texture[3 * (width * int(height * v + 0.5) + int(width * u + 0.5)) + 2];
+                        if (ztest(z,px,py))  
+                        {
+                            float u = texcoord_s.interpolate(px, py);
+                            float v = texcoord_t.interpolate(px, py);
+                            pixels[3 * (window_size * py + px) + 0] = texture[3 * (width * int(height * v + 0.5) + int(width * u + 0.5)) + 0];
+                            pixels[3 * (window_size * py + px) + 1] = texture[3 * (width * int(height * v + 0.5) + int(width * u + 0.5)) + 1];
+                            pixels[3 * (window_size * py + px) + 2] = texture[3 * (width * int(height * v + 0.5) + int(width * u + 0.5)) + 2];
+                        }
                     }
                 }
             }
@@ -145,6 +148,43 @@ namespace MiniEngine
     bool ztest(float z, int x, int y)
     {
         int texel_size= window_size;
+        auto mipmap = zbuffer;
+
+        while (mipmap->childs[0] != nullptr)
+        {
+            texel_size=texel_size>>1;
+
+            if (mipmap->depth <= z)
+            {
+                return false;
+            }
+            else
+            {
+                if (x<texel_size && y<texel_size)
+                {
+                    mipmap=mipmap->childs[0];
+                }
+                else if (x>=texel_size && y<texel_size)
+                {
+                    x-=texel_size;
+                    mipmap=mipmap->childs[1];
+                }
+                else if (x<texel_size && y>=texel_size)
+                {
+                    y-=texel_size;
+                    mipmap=mipmap->childs[2];
+                }
+                else if (x>=texel_size && y>=texel_size)
+                {
+                    x-=texel_size;
+                    y-=texel_size;
+                    mipmap=mipmap->childs[3];
+                }
+            }
+        }
+
+        mipmap->update(z);
+        
         return true;
     }
 }

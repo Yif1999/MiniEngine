@@ -47,7 +47,7 @@ namespace MiniEngine
         // setup render shader
         m_shader = std::make_shared<Shader>("shader/glsl/unlit.vert", "shader/glsl/unlit.frag");
         // setup render camera
-        m_camera = std::make_shared<Camera>(glm::vec3(0.0f, 5.0f, 0.0f),glm::vec3(0.0f, 1.0f, 0.0f));
+        m_camera = std::make_shared<Camera>(glm::vec3(0.0f, 3.0f, 0.0f),glm::vec3(0.0f, 1.0f, 0.0f));
         // setup virtual camera
         m_virtualcamera = std::make_shared<Camera>(glm::vec3(0.0f, 1.0f, 0.0f));
         // setup material texture
@@ -109,7 +109,8 @@ namespace MiniEngine
         glTexSubImage2D(GL_TEXTURE_2D,0,0,0,window_size,window_size,GL_RGB,GL_UNSIGNED_BYTE,pixels);
 
         // update camera
-        m_camera->ProcessMouseMovement(1.0f,0.f,true);
+        // m_camera->ProcessMouseMovement(1.0f,0.f,true);
+        // m_camera->ProcessKeyboard(FORWARD,0.001f);
 
         // draw UI
         ImGui_ImplOpenGL3_NewFrame();
