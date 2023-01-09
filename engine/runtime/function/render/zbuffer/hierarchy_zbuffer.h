@@ -87,7 +87,7 @@ namespace MiniEngine
             tie = a != 0 ? a > 0 : b > 0;
         }
 
-        // Test if the given point is inside the edge.
+        // test if the given point is inside the edge
         bool evaluate(float x, float y)
         {
             float t = a * x + b * y + c;
@@ -117,7 +117,7 @@ namespace MiniEngine
             c = factor * (p0 * e0.c + p1 * e1.c + p2 * e2.c);
         }
 
-        /// compute the parameter equation for the given point.
+        // compute the parameter equation for the given point
         float interpolate(float x, float y)
         {
             return a * x + b * y + c;

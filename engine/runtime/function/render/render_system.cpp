@@ -42,17 +42,17 @@ namespace MiniEngine
         pixels = new unsigned char[3*window_size*window_size];
         m_window = init_info.window_system->getWindow();
         // setup render model
-        m_model = std::make_shared<Model>("asset/mesh/monkey.obj");
+        m_model = std::make_shared<Model>("asset/scene/3.obj");
         m_display = std::make_shared<Model>("asset/mesh/plane.obj");
         // setup render shader
         m_shader = std::make_shared<Shader>("shader/glsl/unlit.vert", "shader/glsl/unlit.frag");
         // setup render camera
-        m_camera = std::make_shared<Camera>(glm::vec3(0.0f, 3.0f, 0.0f),glm::vec3(0.0f, 1.0f, 0.0f));
+        m_camera = std::make_shared<Camera>(glm::vec3(0.0f, 4.0f, -12.0f),glm::vec3(0.0f, 1.0f, 0.0f),90.0f,-20.0f);
         // setup virtual camera
         m_virtualcamera = std::make_shared<Camera>(glm::vec3(0.0f, 1.0f, 0.0f));
         // setup material texture
         stbi_set_flip_vertically_on_load(true);
-        texture=stbi_load(m_model->mats[0].map_Kd.c_str(), &width, &height, &nChannels, 3);
+        texture=stbi_load("asset/scene/bag.jpg", &width, &height, &nChannels, 3);
 
         //setup imgui
         IMGUI_CHECKVERSION();
@@ -109,8 +109,8 @@ namespace MiniEngine
         glTexSubImage2D(GL_TEXTURE_2D,0,0,0,window_size,window_size,GL_RGB,GL_UNSIGNED_BYTE,pixels);
 
         // update camera
-        // m_camera->ProcessMouseMovement(1.0f,0.f,true);
-        // m_camera->ProcessKeyboard(FORWARD,0.001f);
+        m_camera->ProcessMouseMovement(1.5f,0.f,true);
+        m_camera->ProcessKeyboard(LEFT,0.012f);
 
         // draw UI
         ImGui_ImplOpenGL3_NewFrame();
