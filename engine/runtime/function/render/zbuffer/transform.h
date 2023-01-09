@@ -6,5 +6,5 @@
 
 namespace MiniEngine
 {
-    void transform(std::shared_ptr<Model> m_model, glm::mat4 &model, glm::mat4 &view, glm::mat4 &projection);
+    void screen_space_transform(Model *m_model, glm::mat4 &model, glm::mat4 &view, glm::mat4 &projection);
 }

@@ -88,7 +88,6 @@ namespace MiniEngine
             std::cout << "顶点数：" << attrib.vertices.size() / 3 << std::endl;
             std::cout << "法线数：" << attrib.normals.size() / 3 << std::endl;
             std::cout << "UV数：" << attrib.texcoords.size() / 2 << std::endl;
-            std::cout << "子网格数：" << shapes.size() << std::endl;
             std::cout << "材质数：" << materials.size() << std::endl;
 #endif
 
