@@ -1,6 +1,7 @@
 #pragma once
 
 #include "runtime/function/render/zbuffer/hierarchy_zbuffer.h"
+#include "runtime/resource/acc_struct/octree.h"
 
 #include <array>
 #include <memory>
@@ -46,5 +47,7 @@ namespace MiniEngine
         int scene_id,last_scene =0;
 
         SoftRasterizer renderer;
+        OctTree oct_builder;
+        
     };
 } 

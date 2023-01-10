@@ -46,7 +46,7 @@ namespace MiniEngine
         m_camera = std::make_shared<Camera>(glm::vec3(0.0f, 4.5f, -15.0f),glm::vec3(0.0f, 1.0f, 0.0f),90.0f,-15.0f);
         // load render model
         m_model = std::make_shared<Model>("asset/scene/1.obj");
-        // build_octo_tree(m_model);
+        OctTree::OctNode *model_root = oct_builder.build_oct_tree(m_model);
         // load material texture
         stbi_set_flip_vertically_on_load(true);
         texture=stbi_load("asset/scene/bag.jpg", &width, &height, &nChannels, 3);

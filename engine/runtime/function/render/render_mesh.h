@@ -51,6 +51,8 @@ namespace MiniEngine
         Material material;
         unsigned int VAO;
 
+        Mesh()=default;
+
         // constructor
         Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, Material material)
         {
