@@ -27,6 +27,7 @@ namespace MiniEngine
     unsigned char *pixels;
     unsigned char *texture;
     int width, height, nChannels;
+    int scene_id,last_scene =0;
 
     RenderSystem::~RenderSystem()
     {
@@ -42,12 +43,13 @@ namespace MiniEngine
         pixels = new unsigned char[3*window_size*window_size];
         m_window = init_info.window_system->getWindow();
         // setup render model
-        m_model = std::make_shared<Model>("asset/scene/2.obj");
+        m_model = std::make_shared<Model>("asset/mesh/ring.obj");
         m_display = std::make_shared<Model>("asset/mesh/plane.obj");
         // setup render shader
         m_shader = std::make_shared<Shader>("shader/glsl/unlit.vert", "shader/glsl/unlit.frag");
         // setup render camera
         m_camera = std::make_shared<Camera>(glm::vec3(0.0f, 4.0f, -12.0f),glm::vec3(0.0f, 1.0f, 0.0f),90.0f,-20.0f);
+        // m_camera = std::make_shared<Camera>(glm::vec3(0.0f, 4.0f, -2.0f),glm::vec3(0.0f, 1.0f, 0.0f),90.0f,-70.0f);
         // setup virtual camera
         m_virtualcamera = std::make_shared<Camera>(glm::vec3(0.0f, 1.0f, 0.0f));
         // setup material texture
@@ -109,17 +111,31 @@ namespace MiniEngine
         glTexSubImage2D(GL_TEXTURE_2D,0,0,0,window_size,window_size,GL_RGB,GL_UNSIGNED_BYTE,pixels);
 
         // update camera
-        m_camera->ProcessMouseMovement(1.5f,0.f,true);
-        m_camera->ProcessKeyboard(LEFT,0.012f);
+        m_camera->ProcessMouseMovement(3.f,0.f,true);
+        m_camera->ProcessKeyboard(LEFT,0.024f);
 
         // draw UI
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
-        ImGui::Begin("Hello, world!"); 
+        ImGui::Begin("scene manager");
+        ImGui::RadioButton("scene 1",&scene_id,0);
+        ImGui::SameLine();
+        ImGui::RadioButton("scene 2",&scene_id,1);
+        ImGui::SameLine();
+        ImGui::RadioButton("scene 3",&scene_id,2);
+        ImGui::SameLine();
         ImGui::End();
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+        // update scene
+        if (scene_id!=last_scene)
+        {
+            m_model.reset();
+            m_model = std::make_shared<Model>("asset/scene/"+std::to_string(scene_id+1)+".obj");
+            last_scene=scene_id;
+        }
 
         // swap buffers and poll IO events
         glfwSwapBuffers(m_window);

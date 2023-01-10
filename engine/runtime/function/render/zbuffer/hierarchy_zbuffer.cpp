@@ -3,6 +3,8 @@
 #include <iostream>
 #include <cmath>
 
+#define DEPTH
+
 using namespace std;
 
 namespace MiniEngine
@@ -129,7 +131,7 @@ namespace MiniEngine
 
             // skip backface
             float area = 0.5 * (e0.c + e1.c + e2.c);
-            if (area < 0)
+            if (area < 0.1)
                 continue;
 
             ParameterEquation depth(vertices[0].Position.z,
@@ -157,9 +159,15 @@ namespace MiniEngine
                         {
                             float u = texcoord_s.interpolate(px, py);
                             float v = texcoord_t.interpolate(px, py);
+#ifdef DEPTH
+                            pixels[3 * (window_size * py + px) + 0] = z*64+128;
+                            pixels[3 * (window_size * py + px) + 1] = z*64+128;
+                            pixels[3 * (window_size * py + px) + 2] = z*64+128;
+#else             
                             pixels[3 * (window_size * py + px) + 0] = texture[3 * (width * int(height * v + 0.5) + int(width * u + 0.5)) + 0];
                             pixels[3 * (window_size * py + px) + 1] = texture[3 * (width * int(height * v + 0.5) + int(width * u + 0.5)) + 1];
                             pixels[3 * (window_size * py + px) + 2] = texture[3 * (width * int(height * v + 0.5) + int(width * u + 0.5)) + 2];
+#endif
                         }
                     }
                 }
@@ -176,7 +184,7 @@ namespace MiniEngine
         {
             texel_size=texel_size>>1;
 
-            if (mipmap->depth <= z)
+            if (mipmap->depth < z)
             {
                 return false;
             }
