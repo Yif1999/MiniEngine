@@ -87,19 +87,41 @@ namespace MiniEngine
             vertices[1] = m_model->meshes[0].vertices[m_model->meshes[0].indices[id + 1]];
             vertices[2] = m_model->meshes[0].vertices[m_model->meshes[0].indices[id + 2]];
 
-            int ax, ay, bx, by, cx, cy, px, py;
-            ax = vertices[0].Position.x + 0.5;
-            ay = vertices[0].Position.y + 0.5;
-            bx = vertices[1].Position.x + 0.5;
-            by = vertices[1].Position.y + 0.5;
-            cx = vertices[2].Position.x + 0.5;
-            cy = vertices[2].Position.y + 0.5;
+            vertices[0].Position.x=int(vertices[0].Position.x+0.5);
+            vertices[1].Position.x=int(vertices[1].Position.x+0.5);
+            vertices[2].Position.x=int(vertices[2].Position.x+0.5);
+            vertices[0].Position.y=int(vertices[0].Position.y+0.5);
+            vertices[1].Position.y=int(vertices[1].Position.y+0.5);
+            vertices[2].Position.y=int(vertices[2].Position.y+0.5);
+            
+            // float az,bz,cz;
+            // az=vertices[0].Position.z;
+            // bz=vertices[1].Position.z;
+            // cz=vertices[2].Position.z;
+
+            // float zmin=min({az,bz,cz});
+
+            // if (az==zmin)
+            // {
+            //     if (!ztest(zmin,vertices[0].Position.x,vertices[0].Position.y))
+            //         continue;
+            // }
+            // else if (bz==zmin)
+            // {
+            //     if (!ztest(zmin,vertices[1].Position.x,vertices[1].Position.y))
+            //         continue;                    
+            // }
+            // else{
+            //     if (!ztest(zmin,vertices[2].Position.x,vertices[2].Position.y))
+            //         continue;
+            // }
+            
 
             int xmin, xmax, ymin, ymax;
-            xmin = max(min({ax, bx, cx}), 0);
-            xmax = min(max({ax, bx, cx}), window_size - 1);
-            ymin = max(min({ay, by, cy}), 0);
-            ymax = min(max({ay, by, cy}), window_size - 1);
+            xmin = max(int(min({vertices[0].Position.x, vertices[1].Position.x, vertices[2].Position.x})), 0);
+            xmax = min(int(max({vertices[0].Position.x, vertices[1].Position.x, vertices[2].Position.x})), window_size -1);
+            ymin = max(int(min({vertices[0].Position.y, vertices[1].Position.y, vertices[2].Position.y})), 0);
+            ymax = min(int(max({vertices[0].Position.y, vertices[1].Position.y, vertices[2].Position.y})), window_size -1);
 
             EdgeEquation e0(vertices[1], vertices[2]);
             EdgeEquation e1(vertices[2], vertices[0]);
@@ -123,9 +145,9 @@ namespace MiniEngine
                                          vertices[2].TexCoords.t,
                                          e0, e1, e2, area);
 
-            for (px = xmin; px <= xmax; px++)
+            for (int px = xmin; px <= xmax; px++)
             {
-                for (py = ymin; py <= ymax; py++)
+                for (int py = ymin; py <= ymax; py++)
                 {
                     if (e0.evaluate(px, py) && e1.evaluate(px, py) && e2.evaluate(px, py))
                     {

@@ -42,7 +42,7 @@ namespace MiniEngine
         pixels = new unsigned char[3*window_size*window_size];
         m_window = init_info.window_system->getWindow();
         // setup render model
-        m_model = std::make_shared<Model>("asset/scene/3.obj");
+        m_model = std::make_shared<Model>("asset/scene/2.obj");
         m_display = std::make_shared<Model>("asset/mesh/plane.obj");
         // setup render shader
         m_shader = std::make_shared<Shader>("shader/glsl/unlit.vert", "shader/glsl/unlit.frag");

@@ -74,9 +74,9 @@ namespace MiniEngine
 
     struct EdgeEquation
     {
-        float a;
-        float b;
-        float c;
+        int a;
+        int b;
+        int c;
         bool tie;
 
         EdgeEquation(const Vertex &v0, const Vertex &v1)
@@ -88,9 +88,9 @@ namespace MiniEngine
         }
 
         // test if the given point is inside the edge
-        bool evaluate(float x, float y)
+        bool evaluate(int x, int y)
         {
-            float t = a * x + b * y + c;
+            int t = a * x + b * y + c;
             return (t > 0 || t == 0 && tie);
         }
     };
