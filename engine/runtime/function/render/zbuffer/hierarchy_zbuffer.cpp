@@ -3,15 +3,13 @@
 #include <iostream>
 #include <cmath>
 
-#define DEPTH
+// #define DEPTH
 
 using namespace std;
 
 namespace MiniEngine
 {
-    Mipmap *zbuffer;
-
-    void hierarchy_zbuffer_rasterize(
+    void SoftRasterizer::hierarchy_zbuffer_rasterize(
         Model *m_model,
         glm::mat4 &model,
         glm::mat4 &view,
@@ -22,15 +20,15 @@ namespace MiniEngine
         int height)
     {
         screen_space_transform(m_model, model, view, projection);
-        triangle_render(m_model, pixels, texture, width, height);
+        SoftRasterizer::triangle_render(m_model, pixels, texture, width, height);
     }
 
-    void hierarchy_zbuffer_initialize(int size)
+    void SoftRasterizer::hierarchy_zbuffer_initialize(int size)
     {
-        zbuffer = build_mipmap(size);
+        zbuffer = SoftRasterizer::build_mipmap(size);
     }
 
-    Mipmap* build_mipmap(int size)
+    SoftRasterizer::Mipmap* SoftRasterizer::build_mipmap(int size)
     {
         vector<vector<vector<Mipmap *>>> texel;
         texel.resize(log2(size) + 1);
@@ -74,7 +72,7 @@ namespace MiniEngine
         return texel[0][0][0];
     }
 
-    void triangle_render(Model *m_model, unsigned char *pixels, unsigned char *texture, int width, int height)
+    void SoftRasterizer::triangle_render(Model *m_model, unsigned char *pixels, unsigned char *texture, int width, int height)
     {
         // refresh zbuffer
         zbuffer->refresh();
@@ -96,28 +94,12 @@ namespace MiniEngine
             vertices[1].Position.y=int(vertices[1].Position.y+0.5);
             vertices[2].Position.y=int(vertices[2].Position.y+0.5);
             
-            // float az,bz,cz;
-            // az=vertices[0].Position.z;
-            // bz=vertices[1].Position.z;
-            // cz=vertices[2].Position.z;
+            float az,bz,cz;
+            az=vertices[0].Position.z;
+            bz=vertices[1].Position.z;
+            cz=vertices[2].Position.z;
 
-            // float zmin=min({az,bz,cz});
-
-            // if (az==zmin)
-            // {
-            //     if (!ztest(zmin,vertices[0].Position.x,vertices[0].Position.y))
-            //         continue;
-            // }
-            // else if (bz==zmin)
-            // {
-            //     if (!ztest(zmin,vertices[1].Position.x,vertices[1].Position.y))
-            //         continue;                    
-            // }
-            // else{
-            //     if (!ztest(zmin,vertices[2].Position.x,vertices[2].Position.y))
-            //         continue;
-            // }
-            
+            float zmin=min({az,bz,cz});
 
             int xmin, xmax, ymin, ymax;
             xmin = max(int(min({vertices[0].Position.x, vertices[1].Position.x, vertices[2].Position.x})), 0);
@@ -160,9 +142,9 @@ namespace MiniEngine
                             float u = texcoord_s.interpolate(px, py);
                             float v = texcoord_t.interpolate(px, py);
 #ifdef DEPTH
-                            pixels[3 * (window_size * py + px) + 0] = z*64+128;
-                            pixels[3 * (window_size * py + px) + 1] = z*64+128;
-                            pixels[3 * (window_size * py + px) + 2] = z*64+128;
+                            pixels[3 * (window_size * py + px) + 0] = z*16+32;
+                            pixels[3 * (window_size * py + px) + 1] = z*16+32;
+                            pixels[3 * (window_size * py + px) + 2] = z*16+32;
 #else             
                             pixels[3 * (window_size * py + px) + 0] = texture[3 * (width * int(height * v + 0.5) + int(width * u + 0.5)) + 0];
                             pixels[3 * (window_size * py + px) + 1] = texture[3 * (width * int(height * v + 0.5) + int(width * u + 0.5)) + 1];
@@ -175,7 +157,7 @@ namespace MiniEngine
         }
     }
 
-    bool ztest(float z, int x, int y)
+    bool SoftRasterizer::ztest(float z, int x, int y)
     {
         int texel_size= window_size;
         auto mipmap = zbuffer;
@@ -184,7 +166,7 @@ namespace MiniEngine
         {
             texel_size=texel_size>>1;
 
-            if (mipmap->depth < z)
+            if (mipmap->depth <= z)
             {
                 return false;
             }
@@ -215,6 +197,7 @@ namespace MiniEngine
 
         mipmap->update(z);
         
-        return true;
+        return true;    
+
     }
 }
