@@ -94,7 +94,7 @@ namespace MiniEngine
             bool evaluate(int x, int y)
             {
                 float t = a * x + b * y + c;
-                return (t > 0 || t == 0 && tie);
+                return (t > 0 || (t == 0 && tie));
             }
         };
 
