@@ -37,7 +37,7 @@ namespace MiniEngine
         {
             return;
         }
-        
+
         OctTree::Bound bound = model_root->bound[1];
         screen_space_transform(&bound, model, view, projection);
         float xmin, xmax, ymin, ymax, zmin, zmax;
@@ -66,14 +66,14 @@ namespace MiniEngine
         }
 
         if (!ztest(zmin, xmin, xmax, ymin, ymax))
-        {
+        { 
+            model_root->visibility=false;
+            model_root->checked=true;
             return;
         }
 
         if (model_root->childs[0] == nullptr)
         {
-
-            model_root->rendered = true;
             Mesh mesh = model_root->triangles;
             screen_space_transform(&mesh, model, view, projection);
             triangle_render(&mesh, pixels, texture, width, height);
@@ -101,6 +101,17 @@ namespace MiniEngine
         int width,
         int height)
     {
+        if (model_root->visibility)
+        {
+            return;
+        }
+
+        if (model_root->checked)
+        {   
+            model_root->checked=false;
+            return;
+        }
+
         OctTree::Bound bound = model_root->bound[1];
         screen_space_transform(&bound, model, view, projection);
         float xmin, xmax, ymin, ymax, zmin, zmax;
@@ -130,8 +141,6 @@ namespace MiniEngine
 
         if (!ztest(zmin, xmin, xmax, ymin, ymax))
         {
-            cout << "haha" << endl;
-            model_root->visibility = false;
             return;
         }
 
@@ -139,16 +148,9 @@ namespace MiniEngine
 
         if (model_root->childs[0] == nullptr)
         {
-            if (!model_root->rendered)
-            {
-                Mesh mesh = model_root->triangles;
-                screen_space_transform(&mesh, model, view, projection);
-                triangle_render(&mesh, pixels, texture, width, height);
-            }
-            else
-            {
-                model_root->rendered = false;
-            }
+            Mesh mesh = model_root->triangles;
+            screen_space_transform(&mesh, model, view, projection);
+            triangle_render(&mesh, pixels, texture, width, height);
             return;
         }
 
