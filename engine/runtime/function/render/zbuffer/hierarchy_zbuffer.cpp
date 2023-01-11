@@ -10,7 +10,7 @@ using namespace std;
 namespace MiniEngine
 {
     void SoftRasterizer::hierarchy_zbuffer_rasterize(
-        Model *m_model,
+        OctTree::OctNode *model_root,
         glm::mat4 &model,
         glm::mat4 &view,
         glm::mat4 &projection,
@@ -19,8 +19,26 @@ namespace MiniEngine
         int width,
         int height)
     {
-        screen_space_transform(m_model, model, view, projection);
-        SoftRasterizer::triangle_render(m_model, pixels, texture, width, height);
+        // screen_space_transform(m_model, model, view, projection);
+        // SoftRasterizer::triangle_render(m_model, pixels, texture, width, height);
+
+        if (model_root->parent==nullptr)
+        {   
+            Mesh mesh=model_root->triangles;
+            screen_space_transform(&mesh,model,view,projection);
+            triangle_render(&mesh, pixels, texture, width, height);
+            return;
+        }
+
+        for (int i=0;i<8;i++)
+        {
+            if (model_root->childs[i]->empty)
+            {
+                continue;
+            }
+            
+            hierarchy_zbuffer_rasterize(model_root->childs[i],model,view,projection,pixels,texture,width,height);
+        }
     }
 
     void SoftRasterizer::hierarchy_zbuffer_initialize(int size)
@@ -72,7 +90,7 @@ namespace MiniEngine
         return texel[0][0][0];
     }
 
-    void SoftRasterizer::triangle_render(Model *m_model, unsigned char *pixels, unsigned char *texture, int width, int height)
+    void SoftRasterizer::triangle_render(Mesh *triangles, unsigned char *pixels, unsigned char *texture, int width, int height)
     {
         // refresh zbuffer
         zbuffer->refresh();
@@ -81,11 +99,11 @@ namespace MiniEngine
         vector<Vertex> vertices(3);
 
         // loop triangle faces
-        for (int id = 0; id < m_model->meshes[0].indices.size(); id += 3)
+        for (int id = 0; id < triangles->indices.size(); id += 3)
         {
-            vertices[0] = m_model->meshes[0].vertices[m_model->meshes[0].indices[id]];
-            vertices[1] = m_model->meshes[0].vertices[m_model->meshes[0].indices[id + 1]];
-            vertices[2] = m_model->meshes[0].vertices[m_model->meshes[0].indices[id + 2]];
+            vertices[0] = triangles->vertices[triangles->indices[id]];
+            vertices[1] = triangles->vertices[triangles->indices[id + 1]];
+            vertices[2] = triangles->vertices[triangles->indices[id + 2]];
 
             vertices[0].Position.x=int(vertices[0].Position.x+0.5);
             vertices[1].Position.x=int(vertices[1].Position.x+0.5);

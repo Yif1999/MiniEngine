@@ -9,7 +9,7 @@
 #include <vector>
 #include <iostream>
 
-#define MaxFaceNum 100
+#define MaxFaceNum 1000
 
 namespace MiniEngine
 {
@@ -28,22 +28,32 @@ namespace MiniEngine
             Mesh triangles;
             Bound bound[2]; // two sets bbox: 1 for splitting, 2 for actual info.
             bool visibility = false;
-            bool empty = true;
+            bool empty = false;
 
             OctNode *parent;
             OctNode *childs[8];
 
+            OctNode()=default;
             OctNode(Mesh triangles)
             {
                 this->triangles = triangles;
+                this->parent = nullptr;
+                this->childs[0] = nullptr;
+                this->childs[1] = nullptr;
+                this->childs[2] = nullptr;
+                this->childs[3] = nullptr;
+                this->childs[4] = nullptr;
+                this->childs[5] = nullptr;
+                this->childs[6] = nullptr;
+                this->childs[7] = nullptr;
             }
         };
 
-        OctNode *build_oct_tree(std::shared_ptr<Model> m_model)
+        OctNode build_oct_tree(std::shared_ptr<Model> m_model)
         {
             Mesh mesh = m_model->meshes[0];
 
-            static OctNode model_root = OctNode(mesh);
+            OctNode model_root = OctNode(mesh);
 
             float xmin, xmax, ymin, ymax, zmin, zmax;
             xmin = mesh.vertices[0].Position.x-0.1;
@@ -82,7 +92,7 @@ namespace MiniEngine
 
             space_split(&model_root, nullptr, bound, -1);
 
-            return &model_root;
+            return model_root;
         }
 
     private:
@@ -97,8 +107,6 @@ namespace MiniEngine
 
             if (id < 0)
             {
-                node->empty=false;
-                
                 node->bound[1].corner[0] = node->bound[0].corner[0];
                 node->bound[1].corner[1] = node->bound[0].corner[1];
                 node->bound[1].corner[2] = node->bound[0].corner[2];
@@ -108,15 +116,6 @@ namespace MiniEngine
                 node->bound[1].corner[6] = node->bound[0].corner[6];
                 node->bound[1].corner[7] = node->bound[0].corner[7];
                 
-                node->parent = nullptr;
-                node->childs[0] = nullptr;
-                node->childs[1] = nullptr;
-                node->childs[2] = nullptr;
-                node->childs[3] = nullptr;
-                node->childs[4] = nullptr;
-                node->childs[5] = nullptr;
-                node->childs[6] = nullptr;
-                node->childs[7] = nullptr;
             }
             else
             {
@@ -176,6 +175,7 @@ namespace MiniEngine
                     // clean cache
                     submesh.vertices.clear();
                     submesh.indices.clear();
+                    uniqueVertices.clear();
 
                     // cauculate split bound
                     for (int j = 0; j < 8; j++)
@@ -202,9 +202,11 @@ namespace MiniEngine
                         }
                     }
 
-                    // create child node
-                    OctNode child_node = OctNode(submesh);
-                    space_split(&child_node, node, split_bound, i);
+                    // create child node in PM
+                    OctNode sub_node = OctNode(submesh);
+                    OctNode *child_node =(OctNode*)malloc(sizeof(sub_node));
+                    *child_node = sub_node;
+                    space_split(child_node, node, split_bound, i);
                 }
             }
         }

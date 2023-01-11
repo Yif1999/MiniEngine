@@ -47,7 +47,7 @@ namespace MiniEngine
         int scene_id,last_scene =0;
 
         SoftRasterizer renderer;
-        OctTree oct_builder;
+        OctTree::OctNode model_root;
         
     };
 } 

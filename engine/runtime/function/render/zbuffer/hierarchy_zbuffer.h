@@ -2,6 +2,7 @@
 
 #include "runtime/function/render/render_model.h"
 #include "runtime/function/transform/transform.h"
+#include "runtime/resource/acc_struct/octree.h"
 
 #define window_size 512
 
@@ -129,7 +130,7 @@ namespace MiniEngine
         Mipmap *build_mipmap(int size);
 
         void hierarchy_zbuffer_rasterize(
-            Model *m_model,
+            OctTree::OctNode *model_root,
             glm::mat4 &model,
             glm::mat4 &view,
             glm::mat4 &projection,
@@ -140,7 +141,7 @@ namespace MiniEngine
 
         void hierarchy_zbuffer_initialize(int size);
 
-        void triangle_render(Model *m_model,
+        void triangle_render(Mesh *triangles,
                             unsigned char *pixels,
                             unsigned char *texture,
                             int width,
