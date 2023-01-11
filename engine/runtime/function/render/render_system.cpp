@@ -50,7 +50,7 @@ namespace MiniEngine
         model_root = oct_builder.build_oct_tree(m_model);
         // load material texture
         stbi_set_flip_vertically_on_load(true);
-        texture=stbi_load("asset/scene/bag.jpg", &width, &height, &nChannels, 3);
+        texture=stbi_load(("asset/scene/"+m_model->meshes[0].material.map_Kd).c_str(), &width, &height, &nChannels, 3);
 
         //setup imgui
         IMGUI_CHECKVERSION();
@@ -93,7 +93,7 @@ namespace MiniEngine
         // clean RT
         memset(pixels,0,sizeof(char)*window_size*window_size*3);
 
-        // render RT
+        // swap RT
         m_shader->use();
         m_shader->setInt("texture1", 0);
         m_display->Draw(m_shader);
@@ -102,6 +102,7 @@ namespace MiniEngine
         glm::mat4 projection = glm::perspective(glm::radians(m_camera->Zoom), (float)window_size / (float)window_size, 0.1f, 1000.0f);
         glm::mat4 view = m_camera->GetViewMatrix();
         glm::mat4 model = glm::mat4(1.0f);
+        renderer.zbuffer->refresh();
         renderer.hierarchy_zbuffer_rasterize(&model_root,model,view,projection,pixels,texture,width,height);
         glTexSubImage2D(GL_TEXTURE_2D,0,0,0,window_size,window_size,GL_RGB,GL_UNSIGNED_BYTE,pixels);
 

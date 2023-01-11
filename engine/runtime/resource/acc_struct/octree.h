@@ -9,7 +9,7 @@
 #include <vector>
 #include <iostream>
 
-#define MaxFaceNum 1000
+#define MaxFaceNum 100
 
 namespace MiniEngine
 {
@@ -26,8 +26,9 @@ namespace MiniEngine
         struct OctNode
         {
             Mesh triangles;
-            Bound bound[2]; // two sets bbox: 1 for splitting, 2 for actual info.
-            bool visibility = false;
+            Bound bound[2]; // two sets bbox: 0 for splitting, 1 for actual info.
+            bool visibility =false;
+            bool rendered =false;
             bool empty = false;
 
             OctNode *parent;

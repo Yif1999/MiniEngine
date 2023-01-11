@@ -77,9 +77,9 @@ namespace MiniEngine
 
         struct EdgeEquation
         {
-            int a;
-            int b;
-            int c;
+            float a;
+            float b;
+            float c;
             bool tie;
 
             EdgeEquation(const Vertex &v0, const Vertex &v1)
@@ -93,7 +93,7 @@ namespace MiniEngine
             // test if the given point is inside the edge
             bool evaluate(int x, int y)
             {
-                int t = a * x + b * y + c;
+                float t = a * x + b * y + c;
                 return (t > 0 || t == 0 && tie);
             }
         };
@@ -139,6 +139,26 @@ namespace MiniEngine
             int width,
             int height);
 
+        void pass_one_rasterization(
+        OctTree::OctNode *model_root,
+        glm::mat4 &model,
+        glm::mat4 &view,
+        glm::mat4 &projection,
+        unsigned char *pixels,
+        unsigned char *texture,
+        int width,
+        int height);
+
+        void pass_two_rasterization(
+        OctTree::OctNode *model_root,
+        glm::mat4 &model,
+        glm::mat4 &view,
+        glm::mat4 &projection,
+        unsigned char *pixels,
+        unsigned char *texture,
+        int width,
+        int height);
+
         void hierarchy_zbuffer_initialize(int size);
 
         void triangle_render(Mesh *triangles,
@@ -148,6 +168,7 @@ namespace MiniEngine
                             int height);
 
         bool ztest(float z, int x, int y);
+        bool ztest(float z, float xmin, float xmax, float ymin, float ymax);
     
         Mipmap *zbuffer;
     };
