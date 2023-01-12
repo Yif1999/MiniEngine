@@ -14,6 +14,12 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include <imgui.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_opengl3.h>
+
+#define window_size 512
+
 namespace MiniEngine
 {
     RenderSystem::~RenderSystem()
@@ -23,56 +29,120 @@ namespace MiniEngine
 
     void RenderSystem::initialize(RenderSystemInitInfo init_info)
     {
-        std::shared_ptr<ConfigManager> config_manager = g_runtime_global_context.m_config_manager;
-        ASSERT(config_manager);
-        std::shared_ptr<AssetManager> asset_manager = g_runtime_global_context.m_asset_manager;
-        ASSERT(asset_manager);
-
-        // configure global opengl state
+        // configure opengl state
         glEnable(GL_MULTISAMPLE);
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
+        // initialization
+        pixels = new unsigned char[3*window_size*window_size];
         m_window = init_info.window_system->getWindow();
-
-        // setup render model
-        m_model = std::make_shared<Model>("../scene/staircase/stairscase.obj");
-
-        // setup render shader
+        // load display model
+        m_display = std::make_shared<Model>("asset/mesh/plane.obj");
+        // load display shader
         m_shader = std::make_shared<Shader>("shader/glsl/unlit.vert", "shader/glsl/unlit.frag");
-
+        // setup virtual camera
+        m_virtualcamera = std::make_shared<Camera>(glm::vec3(0.0f, 1.0f, 0.0f));
+        
         // setup render camera
-        m_camera = std::make_shared<Camera>(glm::vec3(0.0f, 0.0f, 3.0f));
+        m_camera = std::make_shared<Camera>(glm::vec3(0.0f, 1.0f, -12.0f),glm::vec3(0.0f, 1.0f, 0.0f),90.0f,-2.0f);
+        // load render model
+        m_model = std::make_shared<Model>("asset/scene/1.obj");
+        OctTree oct_builder;
+        model_root = oct_builder.build_oct_tree(m_model);
+        // load material texture
+        stbi_set_flip_vertically_on_load(true);
+        texture=stbi_load(("asset/scene/"+m_model->meshes[0].material.map_Kd).c_str(), &width, &height, &nChannels, 3);
+
+        //setup imgui
+        IMGUI_CHECKVERSION();
+        ImGui::CreateContext();
+        ImGuiIO& io = ImGui::GetIO(); (void)io;
+        ImGui_ImplGlfw_InitForOpenGL(m_window,true);
+        ImGui_ImplOpenGL3_Init("#version 330");
+
+        // create render texture
+        unsigned int texture1;
+        glGenTextures(1, &texture1);
+        glBindTexture(GL_TEXTURE_2D, texture1);
+        // set the texture wrapping parameters
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        // set texture filtering parameters
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, window_size , window_size, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
+
+        // set viewport
+        m_shader->use();
+        glm::mat4 projection = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, 0.0f, 10.0f);
+        glm::mat4 view = m_virtualcamera->GetViewMatrix();
+        glm::mat4 model = glm::mat4(1.0f);
+        m_shader->setMat4("projection", projection);
+        m_shader->setMat4("view", view);
+        m_shader->setMat4("model", model);
+
+        // zbuffer initialize
+        renderer.hierarchy_zbuffer_initialize(window_size);
     }
 
     void RenderSystem::tick(float delta_time)
     {
-        // render
-        // ------
-        glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        // clean canvas
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
 
+        // clean RT
+        memset(pixels,0,sizeof(char)*window_size*window_size*3);
+
+        // swap RT
         m_shader->use();
+        m_shader->setInt("texture1", 0);
+        m_display->Draw(m_shader);
 
-        glm::mat4 projection = glm::perspective(glm::radians(m_camera->Zoom), (float)1280 / (float)720, 0.01f, 1000.0f);
+        // update RT
+        glm::mat4 projection = glm::perspective(glm::radians(m_camera->Zoom), (float)window_size / (float)window_size, 0.1f, 1000.0f);
         glm::mat4 view = m_camera->GetViewMatrix();
-        m_shader->setMat4("projection", projection);
-        m_shader->setMat4("view", view);
-
         glm::mat4 model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // translate it down so it's at the center of the scene
-        model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// it's a bit too big for our scene, so scale it down
-        m_shader->setMat4("model", model);
-        m_model->Draw(m_shader);
+        renderer.zbuffer->refresh();
+        renderer.hierarchy_zbuffer_rasterize(&model_root,model,view,projection,pixels,texture,width,height);
+        glTexSubImage2D(GL_TEXTURE_2D,0,0,0,window_size,window_size,GL_RGB,GL_UNSIGNED_BYTE,pixels);
 
-        // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
-        // -------------------------------------------------------------------------------
+        // update camera
+        m_camera->ProcessMouseMovement(3.f,0.f,true);
+        m_camera->ProcessKeyboard(LEFT,0.024f);
+
+        // draw UI
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+        ImGui::Begin("scene manager");
+        ImGui::RadioButton("scene 1 (3k faces)",&scene_id,0);
+        ImGui::SameLine();
+        ImGui::RadioButton("scene 2 (25k faces)",&scene_id,1);
+        ImGui::SameLine();
+        ImGui::RadioButton("scene 3 (68k faces)",&scene_id,2);
+        ImGui::SameLine();
+        ImGui::End();
+        ImGui::Render();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+        // update scene
+        if (scene_id!=last_scene)
+        {
+            m_model.reset();
+            m_model = std::make_shared<Model>("asset/scene/"+std::to_string(scene_id+1)+".obj");
+            OctTree oct_builder;
+            model_root = oct_builder.build_oct_tree(m_model);
+            last_scene=scene_id;
+        }
+
+        // swap buffers and poll IO events
         glfwSwapBuffers(m_window);
         glfwPollEvents();
-
     }
 
     void RenderSystem::clear()
     {
+        m_display.reset();
         m_model.reset();
         m_shader.reset();
         m_camera.reset();

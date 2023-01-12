@@ -5,6 +5,6 @@
 template<> struct std::hash<MiniEngine::Vertex> {
     size_t operator()(MiniEngine::Vertex const& vertex) const {
         return ((hash<glm::vec3>()(vertex.Position) ^
-            (hash<glm::vec2>()(vertex.TexCoords) << 1)) >> 1);
+                (hash<glm::vec2>()(vertex.TexCoords) << 1)) >> 1);
     }
 };

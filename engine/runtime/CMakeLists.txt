@@ -33,12 +33,19 @@ target_include_directories(
     PUBLIC ${THIRD_PARTY_DIR}/json11
 )
 
+target_include_directories(
+    ${TARGET_NAME} 
+    PUBLIC ${THIRD_PARTY_DIR}/imgui
+    ${THIRD_PARTY_DIR}/imgui/backends
+)
+
 target_link_libraries(${TARGET_NAME} glfw)
 target_link_libraries(${TARGET_NAME} glad)
 target_link_libraries(${TARGET_NAME} stb)
 target_link_libraries(${TARGET_NAME} glad)
 target_link_libraries(${TARGET_NAME} spdlog::spdlog)
 target_link_libraries(${TARGET_NAME} json11)
+target_link_libraries(${TARGET_NAME} imgui)
 
 set_target_properties(${TARGET_NAME} PROPERTIES CXX_STANDARD 17)
 set_target_properties(${TARGET_NAME} PROPERTIES FOLDER ${engine_folder})

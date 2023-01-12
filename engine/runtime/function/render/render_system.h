@@ -1,5 +1,8 @@
 #pragma once
 
+#include "runtime/function/render/zbuffer/hierarchy_zbuffer.h"
+#include "runtime/resource/acc_struct/octree.h"
+
 #include <array>
 #include <memory>
 #include <optional>
@@ -32,8 +35,19 @@ namespace MiniEngine
 
     private:
         GLFWwindow* m_window {nullptr};
+        std::shared_ptr<Model> m_display;
         std::shared_ptr<Model> m_model;
         std::shared_ptr<Camera> m_camera;
+        std::shared_ptr<Camera> m_virtualcamera;
         std::shared_ptr<Shader> m_shader;
+
+        unsigned char *pixels;
+        unsigned char *texture;
+        int width, height, nChannels;
+        int scene_id,last_scene =0;
+
+        SoftRasterizer renderer;
+        OctTree::OctNode model_root;
+        
     };
 } 

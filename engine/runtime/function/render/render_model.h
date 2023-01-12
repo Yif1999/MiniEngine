@@ -1,5 +1,8 @@
 #pragma once
 
+// #define DEBUG_MESH
+// #define DEBUG_MATERIAL
+
 #include <glad/glad.h>
 
 #include <glm/glm.hpp>
@@ -85,9 +88,8 @@ namespace MiniEngine
             std::cout << "顶点数：" << attrib.vertices.size() / 3 << std::endl;
             std::cout << "法线数：" << attrib.normals.size() / 3 << std::endl;
             std::cout << "UV数：" << attrib.texcoords.size() / 2 << std::endl;
-            std::cout << "子模型数：" << materials.size() << std::endl;
+            std::cout << "材质数：" << materials.size() << std::endl;
 #endif
-
 
             // Load Material Data
             mats.resize(materials.size());
@@ -117,7 +119,7 @@ namespace MiniEngine
             vector<vector<Vertex>> vertices(materials.size());
             vector<vector<unsigned int>> indices(materials.size());
             vector<std::unordered_map<Vertex, unsigned int>> uniqueVertices(materials.size());
-            
+
             // Load Mesh Data
             for (size_t s = 0; s < shapes.size(); s++)
             {
@@ -247,6 +249,7 @@ namespace MiniEngine
                         }
 
                         indices[mat_id].push_back(uniqueVertices[mat_id][mesh_vert]);
+
                     }
                 }
             }
