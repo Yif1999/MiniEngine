@@ -46,8 +46,6 @@ namespace MiniEngine
         m_camera = std::make_shared<Camera>(glm::vec3(0.0f, 1.0f, -12.0f),glm::vec3(0.0f, 1.0f, 0.0f),90.0f,-2.0f);
         // load render model
         m_model = std::make_shared<Model>("asset/scene/1.obj");
-        OctTree oct_builder;
-        model_root = oct_builder.build_oct_tree(m_model);
         // load material texture
         stbi_set_flip_vertically_on_load(true);
         texture=stbi_load(("asset/scene/"+m_model->meshes[0].material.map_Kd).c_str(), &width, &height, &nChannels, 3);
@@ -80,8 +78,11 @@ namespace MiniEngine
         m_shader->setMat4("view", view);
         m_shader->setMat4("model", model);
 
-        // zbuffer initialize
-        renderer.hierarchy_zbuffer_initialize(window_size);
+        // pathtracer initialize
+        MiniEngine::PathTracer* tracer = new MiniEngine::PathTracer();
+        std::thread pt(&PathTracer::startRender,tracer,pixels);
+        pt.detach();
+
     }
 
     void RenderSystem::tick(float delta_time)
@@ -91,7 +92,7 @@ namespace MiniEngine
         glClear(GL_COLOR_BUFFER_BIT);
 
         // clean RT
-        memset(pixels,0,sizeof(char)*window_size*window_size*3);
+        // memset(pixels,0,sizeof(char)*window_size*window_size*3);
 
         // swap RT
         m_shader->use();
@@ -99,41 +100,33 @@ namespace MiniEngine
         m_display->Draw(m_shader);
 
         // update RT
-        glm::mat4 projection = glm::perspective(glm::radians(m_camera->Zoom), (float)window_size / (float)window_size, 0.1f, 1000.0f);
-        glm::mat4 view = m_camera->GetViewMatrix();
-        glm::mat4 model = glm::mat4(1.0f);
-        renderer.zbuffer->refresh();
-        renderer.hierarchy_zbuffer_rasterize(&model_root,model,view,projection,pixels,texture,width,height);
         glTexSubImage2D(GL_TEXTURE_2D,0,0,0,window_size,window_size,GL_RGB,GL_UNSIGNED_BYTE,pixels);
 
         // update camera
         m_camera->ProcessMouseMovement(3.f,0.f,true);
         m_camera->ProcessKeyboard(LEFT,0.024f);
 
-        // draw UI
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplGlfw_NewFrame();
-        ImGui::NewFrame();
-        ImGui::Begin("scene manager");
-        ImGui::RadioButton("scene 1 (3k faces)",&scene_id,0);
-        ImGui::SameLine();
-        ImGui::RadioButton("scene 2 (25k faces)",&scene_id,1);
-        ImGui::SameLine();
-        ImGui::RadioButton("scene 3 (68k faces)",&scene_id,2);
-        ImGui::SameLine();
-        ImGui::End();
-        ImGui::Render();
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+        // // draw UI
+        // ImGui_ImplOpenGL3_NewFrame();
+        // ImGui_ImplGlfw_NewFrame();
+        // ImGui::NewFrame();
+        // ImGui::Begin("scene manager");
+        // ImGui::RadioButton("scene 1 (3k faces)",&scene_id,0);
+        // ImGui::SameLine();
+        // ImGui::RadioButton("scene 2 (25k faces)",&scene_id,1);
+        // ImGui::SameLine();
+        // ImGui::RadioButton("scene 3 (68k faces)",&scene_id,2);
+        // ImGui::SameLine();
+        // ImGui::End();
+        // ImGui::Render();
+        // ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
-        // update scene
-        if (scene_id!=last_scene)
-        {
-            m_model.reset();
-            m_model = std::make_shared<Model>("asset/scene/"+std::to_string(scene_id+1)+".obj");
-            OctTree oct_builder;
-            model_root = oct_builder.build_oct_tree(m_model);
-            last_scene=scene_id;
-        }
+        // // update scene
+        // if (scene_id!=last_scene)
+        // {
+        //     m_model.reset();
+        //     m_model = std::make_shared<Model>("asset/scene/"+std::to_string(scene_id+1)+".obj");
+        // }
 
         // swap buffers and poll IO events
         glfwSwapBuffers(m_window);
