@@ -7,6 +7,7 @@
 #include <memory>
 #include <vector>
 #include <cstdlib>
+#include <iostream>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/random.hpp>
