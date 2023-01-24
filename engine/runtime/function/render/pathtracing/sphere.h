@@ -9,10 +9,11 @@ namespace MiniEngine
     public:
         vec3 center;
         float radius;
+        shared_ptr<Material> mat_ptr;
 
     public:
         Sphere() {}
-        Sphere(vec3 cen, float r) : center(cen), radius(r){};
+        Sphere(vec3 cen, float r, shared_ptr<Material> m) : center(cen), radius(r), mat_ptr(m){};
 
         virtual bool hit(const Ray &r, float t_min, float t_max, HitRecord &rec) const override;
     };
@@ -20,9 +21,9 @@ namespace MiniEngine
     bool Sphere::hit(const Ray &r, float t_min, float t_max, HitRecord &rec) const
     {
         vec3 oc = r.origin - center;
-        auto a = dot(r.direction,r.direction);
+        auto a = dot(r.direction, r.direction);
         auto half_b = dot(oc, r.direction);
-        auto c = dot(oc,oc) - radius * radius;
+        auto c = dot(oc, oc) - radius * radius;
 
         auto discriminant = half_b * half_b - a * c;
         if (discriminant < 0)
@@ -42,7 +43,7 @@ namespace MiniEngine
         rec.p = r.cast(rec.t);
         vec3 outward_normal = (rec.p - center) / radius;
         rec.setFaceNormal(r, outward_normal);
-
+        rec.mat_ptr = mat_ptr;
 
         return true;
     }

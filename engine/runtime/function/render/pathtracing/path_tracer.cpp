@@ -2,6 +2,7 @@
 #include "runtime/function/render/pathtracing/util.h"
 #include "runtime/function/render/pathtracing/sphere.h"
 #include "runtime/function/render/pathtracing/camera.h"
+#include "runtime/function/render/pathtracing/material.h"
 
 namespace MiniEngine
 {
@@ -15,8 +16,11 @@ namespace MiniEngine
 
         if (model.hit(r, 0.001, INF, rec))
         {
-            vec3 target = rec.p + rec.normal + sphericalRand(1.f);
-            return f32(0.5) * getColor(Ray(rec.p, target - rec.p), model, depth - 1);
+            Ray scattered;
+            vec3 attenuation;
+            if (rec.mat_ptr->scatter(r, rec, attenuation, scattered))
+                return attenuation * getColor(scattered, model, depth - 1);
+            return vec3(0, 0, 0);
         }
         vec3 unit_direction = r.direction;
         normalize(unit_direction);
@@ -37,10 +41,18 @@ namespace MiniEngine
         // Camera
         Camera cam;
 
-        // World
+        // Model
         HittableList model;
-        model.add(make_shared<Sphere>(vec3(0, 0, -1), 0.5));
-        model.add(make_shared<Sphere>(vec3(0, -100.5, -1), 100));
+
+        auto material_ground = make_shared<Diffuse>(vec3(0.8, 0.8, 0.0));
+        auto material_center = make_shared<Diffuse>(vec3(0.7, 0.3, 0.3));
+        auto material_left   = make_shared<Metal>(vec3(0.8, 0.8, 0.8), 0.3);
+        auto material_right  = make_shared<Metal>(vec3(0.8, 0.6, 0.2), 1.0);
+
+        model.add(make_shared<Sphere>(vec3(0.0, -100.5, -1.0), 100.0, material_ground));
+        model.add(make_shared<Sphere>(vec3(0.0, 0.0, -1.0), 0.5, material_center));
+        model.add(make_shared<Sphere>(vec3(-1.0, 0.0, -1.0), 0.5, material_left));
+        model.add(make_shared<Sphere>(vec3(1.0, 0.0, -1.0), 0.5, material_right));
 
         // Render
         for (int j = image_height - 1; j >= 0; --j)

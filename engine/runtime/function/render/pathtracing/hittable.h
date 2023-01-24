@@ -4,10 +4,13 @@
 
 namespace MiniEngine
 {
+    class Material;
+
     struct HitRecord
     {
         glm::vec3 p;
         glm::vec3 normal;
+        shared_ptr<Material> mat_ptr;
         float t;
 
         bool front_face;

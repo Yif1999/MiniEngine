@@ -23,5 +23,11 @@ using namespace glm;
 
 const float INF = numeric_limits<float>::infinity();
 const float PI = 3.1415926535897932385;
+const float Eps = 1e-8;
 
 // Utility Functions
+
+bool isNearZero(vec3 v)
+{
+    return (fabs(v.x) < Eps) && (fabs(v.y) < Eps) && (fabs(v.z) < Eps);
+}
