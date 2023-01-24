@@ -13,6 +13,6 @@ namespace MiniEngine
         void startRender(unsigned char *pixels);
 
     private:
-        void writeColor(unsigned char *pixels, glm::ivec2 tex_size, glm::ivec2 tex_coord, glm::vec3 color);
+        void writeColor(unsigned char *pixels, glm::ivec2 tex_size, glm::ivec2 tex_coord, glm::vec3 color, int samples);
     };
 }

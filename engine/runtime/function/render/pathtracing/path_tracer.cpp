@@ -1,40 +1,27 @@
 #include "runtime/function/render/pathtracing/path_tracer.h"
-
-#include <iostream>
-#include <unistd.h>
+#include "runtime/function/render/pathtracing/util.h"
+#include "runtime/function/render/pathtracing/sphere.h"
+#include "runtime/function/render/pathtracing/camera.h"
 
 namespace MiniEngine
 {
 
-    float hit_sphere(const glm::vec3 &center, double radius, const Ray &r)
+    vec3 getColor(const Ray &r, const Hittable &model, int depth)
     {
-        glm::vec3 oc = r.origin - center;
-        auto a = glm::dot(r.direction, r.direction);
-        auto b = 2.0 * glm::dot(oc, r.direction);
-        auto c = dot(oc, oc) - radius * radius;
-        auto discriminant = b * b - 4 * a * c;
-        if (discriminant < 0)
-        {
-            return -1.0;
-        }
-        else
-        {
-            return (-b - sqrt(discriminant)) / (2.0 * a);
-        }
-    }
+        HitRecord rec;
 
-    glm::vec3 get_color(const Ray &r)
-    {
-        auto t = hit_sphere(glm::vec3(0, 0, -1), 0.5, r);
-        if (t > 0.0)
+        if (depth <= 0)
+            return vec3(0, 0, 0);
+
+        if (model.hit(r, 0.001, INF, rec))
         {
-            glm::vec3 N = glm::normalize(r.cast(t) - glm::vec3(0, 0, -1));
-            return glm::f32(0.5) * glm::vec3(N.x + 1, N.y + 1, N.z + 1);
+            vec3 target = rec.p + rec.normal + sphericalRand(1.f);
+            return f32(0.5) * getColor(Ray(rec.p, target - rec.p), model, depth - 1);
         }
-        glm::vec3 unit_direction = r.direction;
-        glm::normalize(unit_direction);
-        t = 0.5*(unit_direction.y + 1.0);
-        return (glm::vec1(1.0 - t) * glm::vec3(1.0, 1.0, 1.0) + glm::vec1(t) * glm::vec3(0.5, 0.7, 1.0));
+        vec3 unit_direction = r.direction;
+        normalize(unit_direction);
+        auto t = 0.5 * (unit_direction.y + 1.0);
+        return f32(1.0 - t) * vec3(1.0, 1.0, 1.0) + f32(t) * vec3(0.5, 0.7, 1.0);
     }
 
     void PathTracer::startRender(unsigned char *pixels)
@@ -44,35 +31,48 @@ namespace MiniEngine
         // Image
         const int image_width = window_size;
         const int image_height = window_size;
+        const int samples = 100;
+        const int max_depth = 50;
 
         // Camera
-        auto viewport_height = 2.0;
-        auto viewport_width = viewport_height;
-        auto focal_length = 1.0;
+        Camera cam;
 
-        auto origin = glm::vec3(0, 0, 0);
-        auto horizontal = glm::vec3(viewport_width, 0, 0);
-        auto vertical = glm::vec3(0, viewport_height, 0);
-        auto lower_left_corner = origin - horizontal / glm::vec1(2) - vertical / glm::vec1(2) - glm::vec3(0, 0, focal_length);
+        // World
+        HittableList model;
+        model.add(make_shared<Sphere>(vec3(0, 0, -1), 0.5));
+        model.add(make_shared<Sphere>(vec3(0, -100.5, -1), 100));
 
         // Render
         for (int j = image_height - 1; j >= 0; --j)
         {
             for (int i = 0; i < image_width; ++i)
             {
-                glm::f32 u = double(i) / (image_width - 1);
-                glm::f32 v = double(j) / (image_height - 1);
-                Ray r(origin, lower_left_corner + u * horizontal + v * vertical - origin);
-                glm::vec3 pixel_color = get_color(r);
-                writeColor(pixels, glm::vec2(image_width, image_height), glm::vec2(i, j), pixel_color);
+                vec3 pixel_color(0, 0, 0);
+                for (int s = 0; s < samples; ++s)
+                {
+                    f32 u = (i + linearRand(0.f, 1.f)) / (image_width - 1);
+                    f32 v = (j + linearRand(0.f, 1.f)) / (image_height - 1);
+                    Ray r = cam.getRay(u, v);
+                    pixel_color += getColor(r, model, max_depth);
+                }
+                writeColor(pixels, ivec2(image_width, image_height), ivec2(i, j), pixel_color, samples);
             }
         }
     }
 
-    void PathTracer::writeColor(unsigned char *pixels, glm::ivec2 tex_size, glm::ivec2 tex_coord, glm::vec3 color)
+    void PathTracer::writeColor(unsigned char *pixels, ivec2 tex_size, ivec2 tex_coord, vec3 color, int samples)
     {
-        pixels[3 * (tex_size.x * tex_coord.y + tex_coord.x) + 0] = static_cast<int>(color.r * 255.999);
-        pixels[3 * (tex_size.x * tex_coord.y + tex_coord.x) + 1] = static_cast<int>(color.g * 255.999);
-        pixels[3 * (tex_size.x * tex_coord.y + tex_coord.x) + 2] = static_cast<int>(color.b * 255.999);
+        auto r = color.x;
+        auto g = color.y;
+        auto b = color.z;
+
+        auto scale = 1.0 / samples;
+        r = sqrt(scale * r);
+        g = sqrt(scale * g);
+        b = sqrt(scale * b);
+
+        pixels[3 * (tex_size.x * tex_coord.y + tex_coord.x) + 0] = static_cast<int>(256 * Math::clamp(r, 0.0, 0.999));
+        pixels[3 * (tex_size.x * tex_coord.y + tex_coord.x) + 1] = static_cast<int>(256 * Math::clamp(g, 0.0, 0.999));
+        pixels[3 * (tex_size.x * tex_coord.y + tex_coord.x) + 2] = static_cast<int>(256 * Math::clamp(b, 0.0, 0.999));
     }
 }
