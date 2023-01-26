@@ -9,8 +9,15 @@ namespace MiniEngine
     class Material
     {
     public:
-        virtual bool scatter(
-            const Ray &r_in, const HitRecord &rec, vec3 &attenuation, Ray &scattered) const = 0;
+        virtual bool scatter(const Ray &r_in, const HitRecord &rec, vec3 &attenuation, Ray &scattered) const
+        {
+            return 0;
+        }
+        
+        virtual vec3 emitted(const vec3& p) const {
+            return vec3(0,0,0);
+        }
+
     };
 
     class Lambertian : public Material
@@ -39,7 +46,7 @@ namespace MiniEngine
         vec3 albedo;
         float fuzz;
 
-        Metal(const vec3 &a, double f) : albedo(a), fuzz(f < 1 ? f : 1) {}
+        Metal(const vec3 &a, float f) : albedo(a), fuzz(f < 1 ? f : 1) {}
 
         virtual bool scatter(
             const Ray &r_in, const HitRecord &rec, vec3 &attenuation, Ray &scattered) const override
@@ -57,7 +64,7 @@ namespace MiniEngine
     public:
         float ir;
 
-        Dielectric(double index_of_refraction) : ir(index_of_refraction) {}
+        Dielectric(float index_of_refraction) : ir(index_of_refraction) {}
 
         virtual bool scatter(
             const Ray &r_in, const HitRecord &rec, vec3 &attenuation, Ray &scattered) const override
@@ -66,13 +73,13 @@ namespace MiniEngine
             float refraction_ratio = rec.front_face ? (1.0 / ir) : ir;
 
             vec3 unit_direction = normalize(r_in.direction);
-            double cos_theta = fmin(dot(-unit_direction, rec.normal), 1.0);
-            double sin_theta = sqrt(1.0 - cos_theta * cos_theta);
+            float cos_theta = fmin(dot(-unit_direction, rec.normal), 1.0);
+            float sin_theta = sqrt(1.0 - cos_theta * cos_theta);
 
             bool cannot_refract = refraction_ratio * sin_theta > 1.0;
             vec3 direction;
 
-            if (cannot_refract || reflectance(cos_theta, refraction_ratio) > linearRand(0.f,1.f))
+            if (cannot_refract || reflectance(cos_theta, refraction_ratio) > linearRand(0.f, 1.f))
                 direction = reflect(unit_direction, rec.normal);
             else
                 direction = refract(unit_direction, rec.normal, refraction_ratio);
@@ -83,13 +90,32 @@ namespace MiniEngine
         }
 
     private:
-        static double reflectance(double cosine, double ref_idx)
+        static float reflectance(float cosine, float ref_idx)
         {
             // Use Schlick's approximation for reflectance.
             auto r0 = (1 - ref_idx) / (1 + ref_idx);
             r0 = r0 * r0;
             return r0 + (1 - r0) * pow((1 - cosine), 5);
         }
+    };
+
+    class Emission : public Material
+    {
+    public:
+        vec3 emit;
+
+        Emission(vec3 c) : emit(c) {}
+
+        virtual bool scatter(const Ray &r_in, const HitRecord &rec, vec3 &attenuation, Ray &scattered) const override
+        {
+            return false;
+        }
+
+        virtual vec3 emitted(const vec3 &p) const override
+        {
+            return emit;
+        }
+
     };
 
 }
