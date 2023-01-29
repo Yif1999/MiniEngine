@@ -10,40 +10,35 @@
 namespace MiniEngine
 {
 
-    vec3 getColor(const Ray &r, const Hittable &model, shared_ptr<Hittable> &lights, int depth)
+    vec3 getColor(const Ray &r, const Hittable &model, shared_ptr<HittableList> &lights, int depth)
     {
         HitRecord rec;
 
         if (depth <= 0)
             return vec3(0, 0, 0);
 
-        // If the ray hits nothing, return the background color.
         if (!model.hit(r, 0.001, INF, rec))
         {
             return vec3(0, 0, 0);
-            // vec3 unit_direction = normalize(r.direction);
-            // auto t = 0.5 * (unit_direction.y + 1.0);
-            // return f32(1.0 - t) * vec3(1.0, 1.0, 1.0) + f32(t) * vec3(0.5, 0.7, 1.0);
         }
 
-        Ray scattered;
-        vec3 attenuation;
-        vec3 emitted = rec.mat_ptr->emitted(rec);
-
-        float pdf;
-        vec3 albedo;
-
-        if (!rec.mat_ptr->scatter(r, rec, albedo, scattered, pdf))
+        ScatterRecord srec;
+        vec3 emitted = rec.mat_ptr->emitted(r, rec);
+        if (!rec.mat_ptr->scatter(r, rec, srec))
             return emitted;
 
-        auto p0 = make_shared<HittablePDF>(lights, rec.p);
-        auto p1 = make_shared<CosinePDF>(rec.normal);
-        MixturePDF mixed_pdf(p0, p1);
+        if (srec.is_specular)
+        {
+            return srec.attenuation * getColor(srec.specular_ray, model, lights, depth - 1);
+        }
 
-        scattered = Ray(rec.p, mixed_pdf.generate());
-        pdf = mixed_pdf.value(scattered.direction);
+        auto light_ptr = make_shared<HittablePDF>(lights, rec.p);
+        MixturePDF p(light_ptr, srec.pdf_ptr);
 
-        return emitted + albedo * rec.mat_ptr->scatterPDF(r, rec, scattered) * getColor(scattered, model, lights, depth - 1) / pdf;
+        Ray scattered = Ray(rec.p, p.generate());
+        auto pdf = p.value(scattered.direction);
+
+        return emitted + srec.attenuation * rec.mat_ptr->scatterPDF(r, rec, scattered) * getColor(scattered, model, lights, depth - 1) / pdf;
     }
 
     HittableList random_ball()
@@ -117,15 +112,14 @@ namespace MiniEngine
         objects.add(make_shared<RectangleXZ>(0, 555, 0, 555, 555, white));
         objects.add(make_shared<RectangleXY>(0, 555, 0, 555, 555, white));
 
-        shared_ptr<Hittable> box1 = make_shared<Box>(vec3(0, 0, 0), vec3(165, 330, 165), white);
+        shared_ptr<Material> aluminum = make_shared<Metal>(vec3(0.8, 0.85, 0.88), 0.0);
+        shared_ptr<Hittable> box1 = make_shared<Box>(vec3(0, 0, 0), vec3(165, 330, 165), aluminum);
         box1 = make_shared<RotateY>(box1, 15);
         box1 = make_shared<Translate>(box1, vec3(265, 0, 295));
         objects.add(box1);
 
-        shared_ptr<Hittable> box2 = make_shared<Box>(vec3(0, 0, 0), vec3(165, 165, 165), white);
-        box2 = make_shared<RotateY>(box2, -18);
-        box2 = make_shared<Translate>(box2, vec3(130, 0, 65));
-        objects.add(box2);
+        auto glass = make_shared<Dielectric>(1.5);
+        objects.add(make_shared<Sphere>(vec3(190, 90, 190), 90, glass));
 
         return objects;
     }
@@ -139,7 +133,7 @@ namespace MiniEngine
         // Image
         const int image_width = window_size;
         const int image_height = window_size;
-        const int samples = 100;
+        const int samples = 1000;
         const int max_depth = 10;
 
         // Camera
@@ -153,7 +147,8 @@ namespace MiniEngine
 
         // Model
         auto model = cornell_box();
-        shared_ptr<Hittable> lights = make_shared<RectangleXZ>(213, 343, 227, 332, 554, shared_ptr<Material>());
+        auto lights = make_shared<HittableList>();
+        lights->add(make_shared<RectangleXZ>(213, 343, 227, 332, 554, shared_ptr<Material>()));
 
         // Render
         startTime = clock();
@@ -182,6 +177,13 @@ namespace MiniEngine
         auto r = color.x;
         auto g = color.y;
         auto b = color.z;
+
+        if (r != r)
+            r = 0.0;
+        if (g != g)
+            g = 0.0;
+        if (b != b)
+            b = 0.0;
 
         auto scale = 1.0 / samples;
         r = sqrt(scale * r);

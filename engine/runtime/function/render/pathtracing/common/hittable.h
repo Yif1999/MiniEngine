@@ -41,17 +41,17 @@ namespace MiniEngine
     class HittableList : public Hittable
     {
     public:
+        vector<shared_ptr<Hittable>> objects;
+
         HittableList() {}
         HittableList(shared_ptr<Hittable> object) { add(object); }
 
         void clear() { objects.clear(); }
         void add(shared_ptr<Hittable> object) { objects.push_back(object); }
 
-        virtual bool hit(
-            const Ray &r, float t_min, float t_max, HitRecord &rec) const override;
-
-    public:
-        vector<shared_ptr<Hittable>> objects;
+        virtual bool hit(const Ray &r, float t_min, float t_max, HitRecord &rec) const override;
+        virtual float getPDF(const vec3 &o, const vec3 &v) const override;
+        virtual vec3 random(const vec3 &o) const override;
     };
 
     bool HittableList::hit(const Ray &r, float t_min, float t_max, HitRecord &rec) const
@@ -71,6 +71,23 @@ namespace MiniEngine
         }
 
         return hit_anything;
+    }
+
+    float HittableList::getPDF(const vec3 &o, const vec3 &v) const
+    {
+        auto weight = 1.0 / objects.size();
+        auto sum = 0.0;
+
+        for (const auto &object : objects)
+            sum += weight * object->getPDF(o, v);
+
+        return sum;
+    }
+
+    vec3 HittableList::random(const vec3 &o) const
+    {
+        auto int_size = static_cast<int>(objects.size());
+        return objects[int(linearRand(0, int_size - 1) + 0.5)]->random(o);
     }
 
     class Translate : public Hittable

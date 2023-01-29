@@ -19,12 +19,7 @@ namespace MiniEngine
     class Material
     {
     public:
-        virtual bool scatter(const Ray &r_in, const HitRecord &rec, vec3 &attenuation, Ray &scattered) const
-        {
-            return false;
-        }
-
-        virtual bool scatter(const Ray &r_in, const HitRecord &rec, vec3 &attenuation, Ray &scattered, float &pdf) const
+        virtual bool scatter(const Ray &r_in, const HitRecord &rec, ScatterRecord &srec) const
         {
             return false;
         }
@@ -34,7 +29,7 @@ namespace MiniEngine
             return 0;
         }
 
-        virtual vec3 emitted(const HitRecord &rec) const
+        virtual vec3 emitted(const Ray &r_in, const HitRecord &rec) const
         {
             return vec3(0, 0, 0);
         }
@@ -47,14 +42,11 @@ namespace MiniEngine
 
         Lambertian(const vec3 &a) : albedo(a) {}
 
-        virtual bool scatter(const Ray &r_in, const HitRecord &rec, vec3 &attenuation, Ray &scattered, float &pdf) const override
+        virtual bool scatter(const Ray &r_in, const HitRecord &rec, ScatterRecord &srec) const override
         {
-            ONB onb;
-            onb.buildONB(rec.normal);
-            auto direction = onb.local(cosineRand());
-            scattered = Ray(rec.p, normalize(direction));
-            attenuation = albedo;
-            pdf = dot(onb.axis[2], scattered.direction) / PI;
+            srec.is_specular = false;
+            srec.attenuation = albedo;
+            srec.pdf_ptr = make_shared<CosinePDF>(rec.normal);
             return true;
         }
 
@@ -73,14 +65,14 @@ namespace MiniEngine
 
         Metal(const vec3 &a, float f) : albedo(a), fuzz(f < 1 ? f : 1) {}
 
-        virtual bool scatter(
-            const Ray &r_in, const HitRecord &rec, vec3 &attenuation, Ray &scattered) const override
+        virtual bool scatter(const Ray &r_in, const HitRecord &rec, ScatterRecord &srec) const override
         {
-            vec3 unit_direction = normalize(r_in.direction);
-            vec3 reflected = reflect(unit_direction, rec.normal);
-            scattered = Ray(rec.p, reflected + fuzz * sphericalRand(1.f));
-            attenuation = albedo;
-            return (dot(scattered.direction, rec.normal) > 0);
+            vec3 reflected = reflect(normalize(r_in.direction), rec.normal);
+            srec.specular_ray = Ray(rec.p, reflected + fuzz * sphericalRand(1.f));
+            srec.attenuation = albedo;
+            srec.is_specular = true;
+            srec.pdf_ptr = 0;
+            return true;
         }
     };
 
@@ -91,10 +83,11 @@ namespace MiniEngine
 
         Dielectric(float index_of_refraction) : ir(index_of_refraction) {}
 
-        virtual bool scatter(
-            const Ray &r_in, const HitRecord &rec, vec3 &attenuation, Ray &scattered) const override
+        virtual bool scatter(const Ray &r_in, const HitRecord &rec, ScatterRecord &srec) const override
         {
-            attenuation = vec3(1.0, 1.0, 1.0);
+            srec.is_specular = true;
+            srec.pdf_ptr = nullptr;
+            srec.attenuation = vec3(1.0, 1.0, 1.0);
             float refraction_ratio = rec.front_face ? (1.0 / ir) : ir;
 
             vec3 unit_direction = normalize(r_in.direction);
@@ -109,7 +102,7 @@ namespace MiniEngine
             else
                 direction = refract(unit_direction, rec.normal, refraction_ratio);
 
-            scattered = Ray(rec.p, direction);
+            srec.specular_ray = Ray(rec.p, direction);
 
             return true;
         }
@@ -131,12 +124,12 @@ namespace MiniEngine
 
         Emission(vec3 c) : emit(c) {}
 
-        virtual bool scatter(const Ray &r_in, const HitRecord &rec, vec3 &attenuation, Ray &scattered) const override
+        virtual bool scatter(const Ray &r_in, const HitRecord &rec, ScatterRecord &srec) const override
         {
             return false;
         }
 
-        virtual vec3 emitted(const HitRecord &rec) const override
+        virtual vec3 emitted(const Ray &r_in, const HitRecord &rec) const override
         {
             if (!rec.front_face)
                 return emit;
