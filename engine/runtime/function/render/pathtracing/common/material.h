@@ -2,10 +2,19 @@
 
 #include "runtime/function/render/pathtracing/common/util.h"
 #include "runtime/function/render/pathtracing/common/onb.h"
+#include "runtime/function/render/pathtracing/common/pdf.h"
 
 namespace MiniEngine
 {
     struct HitRecord;
+
+    struct ScatterRecord
+    {
+        Ray specular_ray;
+        bool is_specular;
+        vec3 attenuation;
+        shared_ptr<PDF> pdf_ptr;
+    };
 
     class Material
     {
@@ -132,7 +141,7 @@ namespace MiniEngine
             if (!rec.front_face)
                 return emit;
             else
-                return vec3(0,0,0);
+                return vec3(0, 0, 0);
         }
     };
 

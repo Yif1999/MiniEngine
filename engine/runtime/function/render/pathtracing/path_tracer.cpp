@@ -36,9 +36,12 @@ namespace MiniEngine
         if (!rec.mat_ptr->scatter(r, rec, albedo, scattered, pdf))
             return emitted;
 
-        HittablePDF light_pdf(lights, rec.p);
-        scattered = Ray(rec.p, light_pdf.generate());
-        pdf = light_pdf.value(scattered.direction);
+        auto p0 = make_shared<HittablePDF>(lights, rec.p);
+        auto p1 = make_shared<CosinePDF>(rec.normal);
+        MixturePDF mixed_pdf(p0, p1);
+
+        scattered = Ray(rec.p, mixed_pdf.generate());
+        pdf = mixed_pdf.value(scattered.direction);
 
         return emitted + albedo * rec.mat_ptr->scatterPDF(r, rec, scattered) * getColor(scattered, model, lights, depth - 1) / pdf;
     }
