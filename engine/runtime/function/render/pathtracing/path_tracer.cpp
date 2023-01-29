@@ -1,15 +1,16 @@
 #include "runtime/function/render/pathtracing/path_tracer.h"
-#include "runtime/function/render/pathtracing/util.h"
-#include "runtime/function/render/pathtracing/sphere.h"
-#include "runtime/function/render/pathtracing/rectangle.h"
-#include "runtime/function/render/pathtracing/box.h"
-#include "runtime/function/render/pathtracing/camera.h"
-#include "runtime/function/render/pathtracing/material.h"
+#include "runtime/function/render/pathtracing/common/util.h"
+#include "runtime/function/render/pathtracing/common/sphere.h"
+#include "runtime/function/render/pathtracing/common/rectangle.h"
+#include "runtime/function/render/pathtracing/common/box.h"
+#include "runtime/function/render/pathtracing/common/camera.h"
+#include "runtime/function/render/pathtracing/common/material.h"
+#include "runtime/function/render/pathtracing/common/pdf.h"
 
 namespace MiniEngine
 {
 
-    vec3 getColor(const Ray &r, const Hittable &model, int depth)
+    vec3 getColor(const Ray &r, const Hittable &model, shared_ptr<Hittable> &lights, int depth)
     {
         HitRecord rec;
 
@@ -27,12 +28,19 @@ namespace MiniEngine
 
         Ray scattered;
         vec3 attenuation;
-        vec3 emitted = rec.mat_ptr->emitted(rec.p);
+        vec3 emitted = rec.mat_ptr->emitted(rec);
 
-        if (!rec.mat_ptr->scatter(r, rec, attenuation, scattered))
+        float pdf;
+        vec3 albedo;
+
+        if (!rec.mat_ptr->scatter(r, rec, albedo, scattered, pdf))
             return emitted;
 
-        return emitted + attenuation * getColor(scattered, model, depth - 1);
+        HittablePDF light_pdf(lights, rec.p);
+        scattered = Ray(rec.p, light_pdf.generate());
+        pdf = light_pdf.value(scattered.direction);
+
+        return emitted + albedo * rec.mat_ptr->scatterPDF(r, rec, scattered) * getColor(scattered, model, lights, depth - 1) / pdf;
     }
 
     HittableList random_ball()
@@ -121,7 +129,7 @@ namespace MiniEngine
 
     void PathTracer::startRender(unsigned char *pixels)
     {
-        clock_t startTime,endTime;
+        clock_t startTime, endTime;
 
         int window_size = 512;
 
@@ -129,7 +137,7 @@ namespace MiniEngine
         const int image_width = window_size;
         const int image_height = window_size;
         const int samples = 100;
-        const int max_depth = 50;
+        const int max_depth = 10;
 
         // Camera
         vec3 lookfrom(278, 278, -800);
@@ -142,9 +150,10 @@ namespace MiniEngine
 
         // Model
         auto model = cornell_box();
+        shared_ptr<Hittable> lights = make_shared<RectangleXZ>(213, 343, 227, 332, 554, shared_ptr<Material>());
 
         // Render
-        startTime=clock();
+        startTime = clock();
         for (int j = image_height - 1; j >= 0; --j)
         {
             for (int i = 0; i < image_width; ++i)
@@ -155,14 +164,14 @@ namespace MiniEngine
                     f32 u = (i + linearRand(0.f, 1.f)) / (image_width - 1);
                     f32 v = (j + linearRand(0.f, 1.f)) / (image_height - 1);
                     Ray r = cam.getRay(u, v);
-                    pixel_color += getColor(r, model, max_depth);
+                    pixel_color += getColor(r, model, lights, max_depth);
                 }
                 writeColor(pixels, ivec2(image_width, image_height), ivec2(i, j), pixel_color, samples);
             }
         }
-        endTime=clock();
+        endTime = clock();
 
-        LOG_INFO("ray tracing is done in "+to_string((float)(endTime-startTime)/CLOCKS_PER_SEC)+"s");
+        LOG_INFO("ray tracing is done in " + to_string((float)(endTime - startTime) / CLOCKS_PER_SEC) + "s");
     }
 
     void PathTracer::writeColor(unsigned char *pixels, ivec2 tex_size, ivec2 tex_coord, vec3 color, int samples)

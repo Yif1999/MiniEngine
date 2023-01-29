@@ -1,8 +1,8 @@
 #pragma once
 
-#include "runtime/function/render/pathtracing/util.h"
+#include "runtime/function/render/pathtracing/common/util.h"
 
-#include "runtime/function/render/pathtracing/hittable.h"
+#include "runtime/function/render/pathtracing/common/hittable.h"
 
 namespace MiniEngine
 {
@@ -29,6 +29,23 @@ namespace MiniEngine
         RectangleXZ(float _x0, float _x1, float _z0, float _z1, float _k, shared_ptr<Material> mat) : x0(_x0), x1(_x1), z0(_z0), z1(_z1), k(_k), m(mat){};
 
         virtual bool hit(const Ray &r, float t_min, float t_max, HitRecord &rec) const override;
+
+        virtual float getPDF(const vec3& origin, const vec3& v) const override {
+            HitRecord rec;
+            if (!this->hit(Ray(origin, v), 0.001, INF, rec))
+                return 0;
+
+            auto area = (x1-x0)*(z1-z0);
+            auto distance_squared = rec.t * rec.t * pow(length(v),2);
+            auto cosine = fabs(dot(v, rec.normal) / length(v));
+
+            return distance_squared / (cosine * area);
+        }
+
+        virtual vec3 random(const vec3& origin) const override {
+            auto random_point = vec3(linearRand(x0,x1), k, linearRand(z0,z1));
+            return random_point - origin;
+        }
     };
 
     class RectangleYZ : public Hittable

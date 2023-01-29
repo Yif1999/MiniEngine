@@ -1,6 +1,6 @@
 #pragma once
 
-#include "runtime/function/render/pathtracing/hittable.h"
+#include "runtime/function/render/pathtracing/common/hittable.h"
 
 namespace MiniEngine
 {

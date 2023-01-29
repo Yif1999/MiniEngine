@@ -1,7 +1,7 @@
 #pragma once
 
 #include "runtime/core/base/macro.h"
-#include "runtime/function/render/pathtracing/ray.h"
+#include "runtime/function/render/pathtracing/common/ray.h"
 
 #include <glm/glm.hpp>
 

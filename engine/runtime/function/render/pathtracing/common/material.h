@@ -1,6 +1,7 @@
 #pragma once
 
-#include "runtime/function/render/pathtracing/util.h"
+#include "runtime/function/render/pathtracing/common/util.h"
+#include "runtime/function/render/pathtracing/common/onb.h"
 
 namespace MiniEngine
 {
@@ -11,13 +12,23 @@ namespace MiniEngine
     public:
         virtual bool scatter(const Ray &r_in, const HitRecord &rec, vec3 &attenuation, Ray &scattered) const
         {
-            return 0;
-        }
-        
-        virtual vec3 emitted(const vec3& p) const {
-            return vec3(0,0,0);
+            return false;
         }
 
+        virtual bool scatter(const Ray &r_in, const HitRecord &rec, vec3 &attenuation, Ray &scattered, float &pdf) const
+        {
+            return false;
+        }
+
+        virtual float scatterPDF(const Ray &r_in, const HitRecord &rec, const Ray &scattered) const
+        {
+            return 0;
+        }
+
+        virtual vec3 emitted(const HitRecord &rec) const
+        {
+            return vec3(0, 0, 0);
+        }
     };
 
     class Lambertian : public Material
@@ -27,16 +38,21 @@ namespace MiniEngine
 
         Lambertian(const vec3 &a) : albedo(a) {}
 
-        virtual bool scatter(const Ray &r_in, const HitRecord &rec, vec3 &attenuation, Ray &scattered) const override
+        virtual bool scatter(const Ray &r_in, const HitRecord &rec, vec3 &attenuation, Ray &scattered, float &pdf) const override
         {
-            auto scatter_direction = rec.normal + sphericalRand(1.f);
-
-            if (isNearZero(scatter_direction))
-                scatter_direction = rec.normal;
-
-            scattered = Ray(rec.p, scatter_direction);
+            ONB onb;
+            onb.buildONB(rec.normal);
+            auto direction = onb.local(cosineRand());
+            scattered = Ray(rec.p, normalize(direction));
             attenuation = albedo;
+            pdf = dot(onb.axis[2], scattered.direction) / PI;
             return true;
+        }
+
+        float scatterPDF(const Ray &r_in, const HitRecord &rec, const Ray &scattered) const override
+        {
+            auto cosine = dot(rec.normal, normalize(scattered.direction));
+            return cosine < 0 ? 0 : cosine / PI;
         }
     };
 
@@ -111,11 +127,13 @@ namespace MiniEngine
             return false;
         }
 
-        virtual vec3 emitted(const vec3 &p) const override
+        virtual vec3 emitted(const HitRecord &rec) const override
         {
-            return emit;
+            if (!rec.front_face)
+                return emit;
+            else
+                return vec3(0,0,0);
         }
-
     };
 
 }

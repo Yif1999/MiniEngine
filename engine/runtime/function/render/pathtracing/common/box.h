@@ -1,8 +1,8 @@
 #pragma once
 
-#include "runtime/function/render/pathtracing/rectangle.h"
-#include "runtime/function/render/pathtracing/util.h"
-#include "runtime/function/render/pathtracing/hittable.h"
+#include "runtime/function/render/pathtracing/common/rectangle.h"
+#include "runtime/function/render/pathtracing/common/util.h"
+#include "runtime/function/render/pathtracing/common/hittable.h"
 
 namespace MiniEngine
 {

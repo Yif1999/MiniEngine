@@ -1,6 +1,6 @@
 #pragma once
 
-#include "runtime/function/render/pathtracing/util.h"
+#include "runtime/function/render/pathtracing/common/util.h"
 
 namespace MiniEngine
 {
@@ -26,6 +26,16 @@ namespace MiniEngine
     {
     public:
         virtual bool hit(const Ray &r, float t_min, float t_max, HitRecord &rec) const = 0;
+
+        virtual float getPDF(const vec3 &o, const vec3 &v) const
+        {
+            return 0.0;
+        }
+
+        virtual vec3 random(const vec3 &o) const
+        {
+            return vec3(1, 0, 0);
+        }
     };
 
     class HittableList : public Hittable
