@@ -22,7 +22,7 @@ target_include_directories(common
 
 target_include_directories(common
   PUBLIC
-    ../../tbb/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../tbb/include
 )
 
 target_link_libraries(common
