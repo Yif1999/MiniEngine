@@ -46,6 +46,7 @@ target_link_libraries(${TARGET_NAME} glad)
 target_link_libraries(${TARGET_NAME} spdlog::spdlog)
 target_link_libraries(${TARGET_NAME} json11)
 target_link_libraries(${TARGET_NAME} imgui)
+target_link_libraries(${TARGET_NAME} OpenImageDenoise)
 
 set_target_properties(${TARGET_NAME} PROPERTIES CXX_STANDARD 17)
 set_target_properties(${TARGET_NAME} PROPERTIES FOLDER ${engine_folder})

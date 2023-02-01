@@ -6,6 +6,7 @@
 #include "runtime/function/render/pathtracing/common/camera.h"
 #include "runtime/function/render/pathtracing/common/material.h"
 #include "runtime/function/render/pathtracing/common/pdf.h"
+#include "thirdparty/oidn/include/OpenImageDenoise/oidn.hpp"
 
 namespace MiniEngine
 {
@@ -126,6 +127,7 @@ namespace MiniEngine
 
     void PathTracer::startRender(unsigned char *pixels)
     {
+
         clock_t startTime, endTime;
 
         int window_size = 512;
@@ -133,7 +135,7 @@ namespace MiniEngine
         // Image
         const int image_width = window_size;
         const int image_height = window_size;
-        const int samples = 1000;
+        const int samples = 100;
         const int max_depth = 10;
 
         // Camera
@@ -170,6 +172,51 @@ namespace MiniEngine
         endTime = clock();
 
         LOG_INFO("ray tracing is done in " + to_string((float)(endTime - startTime) / CLOCKS_PER_SEC) + "s");
+
+        // Denoise
+        float *denoise_buffer = new float[3*512*512];
+
+        for (int j = image_height - 1; j >= 0; --j)
+        {
+            for (int i = 0; i < image_width; ++i)
+            {
+                vec3 swap_color=readColor(pixels,ivec2(image_width, image_height), ivec2(i, j));
+                denoise_buffer[3 * (image_width * j + i) + 0] = swap_color.x;
+                denoise_buffer[3 * (image_width * j + i) + 1] = swap_color.y;
+                denoise_buffer[3 * (image_width * j + i) + 2] = swap_color.z;
+            }
+        }
+
+        // Create an Intel Open Image Denoise device
+        oidn::DeviceRef device = oidn::newDevice();
+        device.commit();
+
+        // Create a filter for denoising a beauty (color) image using optional auxiliary images too
+        oidn::FilterRef filter = device.newFilter("RT");                     // generic ray tracing filter
+        filter.setImage("color", denoise_buffer, oidn::Format::Float3, 512, 512);   // beauty
+        filter.setImage("output", denoise_buffer, oidn::Format::Float3, 512, 512); // denoised beauty
+        filter.commit();
+
+        // Filter the image
+        filter.execute();
+
+        // Check for errors
+        const char *errorMessage;
+        if (device.getError(errorMessage) != oidn::Error::None)
+            std::cout << "Error: " << errorMessage << std::endl;
+
+        for (int j = image_height - 1; j >= 0; --j)
+        {
+            for (int i = 0; i < image_width; ++i)
+            {
+                vec3 swap_color;
+                swap_color.x = denoise_buffer[3 * (image_width * j + i) + 0];
+                swap_color.y = denoise_buffer[3 * (image_width * j + i) + 1];
+                swap_color.z = denoise_buffer[3 * (image_width * j + i) + 2];
+                writeColor(pixels, ivec2(image_width, image_height), ivec2(i, j), swap_color, 1);
+            }
+        }
+
     }
 
     void PathTracer::writeColor(unsigned char *pixels, ivec2 tex_size, ivec2 tex_coord, vec3 color, int samples)
@@ -186,12 +233,23 @@ namespace MiniEngine
             b = 0.0;
 
         auto scale = 1.0 / samples;
-        r = sqrt(scale * r);
-        g = sqrt(scale * g);
-        b = sqrt(scale * b);
+        r = pow(scale * r, 1/2.2);
+        g = pow(scale * g, 1/2.2);
+        b = pow(scale * b, 1/2.2);
 
         pixels[3 * (tex_size.x * tex_coord.y + tex_coord.x) + 0] = static_cast<int>(256 * Math::clamp(r, 0.0, 0.999));
         pixels[3 * (tex_size.x * tex_coord.y + tex_coord.x) + 1] = static_cast<int>(256 * Math::clamp(g, 0.0, 0.999));
         pixels[3 * (tex_size.x * tex_coord.y + tex_coord.x) + 2] = static_cast<int>(256 * Math::clamp(b, 0.0, 0.999));
+    }
+
+    vec3 PathTracer::readColor(unsigned char *pixels, ivec2 tex_size, ivec2 tex_coord)
+    {
+        vec3 color;
+
+        color.x = pow(pixels[3 * (tex_size.x * tex_coord.y + tex_coord.x) + 0]/255.f, 2.2) ;
+        color.y = pow(pixels[3 * (tex_size.x * tex_coord.y + tex_coord.x) + 1]/255.f, 2.2) ;
+        color.z = pow(pixels[3 * (tex_size.x * tex_coord.y + tex_coord.x) + 2]/255.f, 2.2) ;
+
+        return color;
     }
 }
