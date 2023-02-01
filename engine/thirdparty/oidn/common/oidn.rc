@@ -1,0 +1,36 @@
+// Copyright 2009-2022 Intel Corporation
+// SPDX-License-Identifier: Apache-2.0
+
+#include "include/OpenImageDenoise/config.h"
+
+1 VERSIONINFO
+FILEVERSION OIDN_VERSION_MAJOR,OIDN_VERSION_MINOR,OIDN_VERSION_PATCH,0
+PRODUCTVERSION OIDN_VERSION_MAJOR,OIDN_VERSION_MINOR,OIDN_VERSION_PATCH,0
+FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+FILEFLAGS 0x1L
+#else
+FILEFLAGS 0x0L
+#endif
+FILEOS 0x40004L
+FILETYPE 0x2L
+FILESUBTYPE 0x0L
+{
+  BLOCK "StringFileInfo"
+  {
+    BLOCK "040904b0"
+    {
+      VALUE "CompanyName", "Intel"
+      VALUE "FileDescription", "Intel Open Image Denoise Library"
+      VALUE "FileVersion", OIDN_VERSION_STRING
+      VALUE "ProductVersion", OIDN_VERSION_STRING
+      VALUE "LegalCopyright", "Copyright 2009-2022 Intel Corporation"
+      VALUE "InternalName", "Intel Open Image Denoise"
+      VALUE "ProductName", "Intel(R) Open Image Denoise"
+    }
+  }
+  BLOCK "VarFileInfo"
+  {
+    VALUE "Translation", 0x409, 1200
+  }
+}

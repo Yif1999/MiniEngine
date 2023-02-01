@@ -1,0 +1,92 @@
+*~
+*.autosave
+*.a
+*.core
+*.moc
+*.o
+*.obj
+*.orig
+*.rej
+*.so
+*.so.*
+*_pch.h.cpp
+*.qm
+.#*
+*.*#
+core
+!core/
+tags
+.DS_Store
+.directory
+*.debug
+*.prl
+*.app
+moc_*.cpp
+ui_*.h
+qrc_*.cpp
+Thumbs.db
+*.res
+/.qmake.cache
+/.qmake.stash
+.bash_history
+.python_history
+
+# Qt Creator generated files
+*.txt.user*
+*.pro.user*
+
+# xemacs temporary files
+*.flc
+
+# Vim temporary files
+.*.swp
+
+# Visual Studio generated files
+*.ib_pdb_index
+*.idb
+*.ilk
+*.pdb
+*.sln
+*.suo
+*.vcproj
+*vcproj.*.*.user
+*.ncb
+*.sdf
+*.opensdf
+*.vcxproj
+*vcxproj.*
+*.log
+
+# Visual Studio Code generated files
+.vscode
+
+# MinGW generated files
+*.Debug
+*.Release
+
+# Python byte code
+*.pyc
+
+# Binaries
+*.dll
+*.exe
+
+# Images
+/images*
+*.exr
+*.pfm
+*.phm
+*.png
+*.bmp
+*.ppm
+
+# Build directories
+/build*
+
+# Dependencies
+/deps
+
+# Generated files
+include/OpenImageDenoise/config.h
+core/export.linux.map
+core/export.macos.map
