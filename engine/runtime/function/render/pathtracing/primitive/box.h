@@ -1,6 +1,6 @@
 #pragma once
 
-#include "runtime/function/render/pathtracing/common/rectangle.h"
+#include "runtime/function/render/pathtracing/primitive/rectangle.h"
 #include "runtime/function/render/pathtracing/common/util.h"
 #include "runtime/function/render/pathtracing/common/hittable.h"
 

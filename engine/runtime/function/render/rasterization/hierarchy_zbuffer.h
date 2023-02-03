@@ -1,8 +1,8 @@
 #pragma once
 
 #include "runtime/function/render/render_model.h"
-#include "runtime/function/transform/transform.h"
-#include "runtime/resource/acc_struct/octree.h"
+#include "runtime/function/render/rasterization/transform/transform.h"
+#include "runtime/function/render/rasterization/acc_struct/octree.h"
 
 #define window_size 512
 

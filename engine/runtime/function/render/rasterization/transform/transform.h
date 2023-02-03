@@ -1,7 +1,7 @@
 #pragma once
 
 #include "runtime/function/render/render_model.h"
-#include "runtime/resource/acc_struct/octree.h"
+#include "runtime/function/render/rasterization/acc_struct/octree.h"
 
 #include <glm/glm.hpp>
 
