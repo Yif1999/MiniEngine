@@ -52,7 +52,7 @@ namespace MiniEngine
 
         float scatterPDF(const Ray &r_in, const HitRecord &rec, const Ray &scattered) const override
         {
-            auto cosine = dot(rec.normal, normalize(scattered.direction));
+            auto cosine = dot(rec.normal, scattered.direction);
             return cosine < 0 ? 0 : cosine / PI;
         }
     };
@@ -67,7 +67,7 @@ namespace MiniEngine
 
         virtual bool scatter(const Ray &r_in, const HitRecord &rec, ScatterRecord &srec) const override
         {
-            vec3 reflected = reflect(normalize(r_in.direction), rec.normal);
+            vec3 reflected = reflect(r_in.direction, rec.normal);
             srec.specular_ray = Ray(rec.p, reflected + fuzz * sphericalRand(1.f));
             srec.attenuation = albedo;
             srec.is_specular = true;

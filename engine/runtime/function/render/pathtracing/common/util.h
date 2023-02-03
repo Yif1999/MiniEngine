@@ -24,13 +24,13 @@ using namespace glm;
 
 const float INF = numeric_limits<float>::infinity();
 const float PI = 3.1415926535897932385;
-const float Eps = 1e-8;
+const float EPS = 1e-5;
 
 // Utility Functions
 
 bool isNearZero(vec3 v)
 {
-    return (fabs(v.x) < Eps) && (fabs(v.y) < Eps) && (fabs(v.z) < Eps);
+    return (fabs(v.x) < EPS) && (fabs(v.y) < EPS) && (fabs(v.z) < EPS);
 }
 
 inline vec3 cosineRand() {

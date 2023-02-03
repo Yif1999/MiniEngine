@@ -15,12 +15,12 @@ namespace MiniEngine
         Ray(const glm::vec3 &origin, const glm::vec3 &direction)
         {
             this->origin=origin;
-            this->direction=direction;
+            this->direction=glm::normalize(direction);
         }
 
-        glm::vec3 cast(double t) const
+        glm::vec3 cast(float t) const
         {
-            return origin + glm::vec1(t) * direction;
+            return origin + glm::f32(t) * direction;
         }
 
     };

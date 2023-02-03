@@ -1,8 +1,8 @@
-# Tiny Software Rasterizer
+# MiniEngine
 
-**Tiny Software Rasterizer** is a implementation of the hierarchy z-buffer algorithm.
+**MiniEngine** is my personal render engine playground.
 
-<img src="./image/screenshot.png" alt="screenshot" style="zoom: 50%;" />
+<!-- <img src="./image/screenshot.png" alt="screenshot" style="zoom: 50%;" /> -->
 
 ## Prerequisites
 
@@ -10,11 +10,13 @@ To build the project, you must first install the following tools.
 
 ### Windows 10/11
 - Visual Studio 2019 (or more recent)
-- CMake 3.19 (or more recent)
+- CMake 3.21 (or more recent)
+- Python 3.6 (or more recent)
 
 ### macOS >= 10.15 (Intel or Apple Silicon)
 - Xcode 12.3 (or more recent)
-- CMake 3.19 (or more recent)
+- CMake 3.21 (or more recent)
+- Python 3.6 (or more recent)
 
 ## Build and Run
 

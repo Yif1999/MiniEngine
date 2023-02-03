@@ -3,6 +3,7 @@
 #include "runtime/function/render/pathtracing/common/sphere.h"
 #include "runtime/function/render/pathtracing/common/rectangle.h"
 #include "runtime/function/render/pathtracing/common/box.h"
+#include "runtime/function/render/pathtracing/common/triangle.h"
 #include "runtime/function/render/pathtracing/common/camera.h"
 #include "runtime/function/render/pathtracing/common/material.h"
 #include "runtime/function/render/pathtracing/common/pdf.h"
@@ -18,7 +19,7 @@ namespace MiniEngine
         if (depth <= 0)
             return vec3(0, 0, 0);
 
-        if (!model.hit(r, 0.001, INF, rec))
+        if (!model.hit(r, EPS, INF, rec))
         {
             return vec3(0, 0, 0);
         }
@@ -26,7 +27,9 @@ namespace MiniEngine
         ScatterRecord srec;
         vec3 emitted = rec.mat_ptr->emitted(r, rec);
         if (!rec.mat_ptr->scatter(r, rec, srec))
+        {
             return emitted;
+        }
 
         if (srec.is_specular)
         {
@@ -112,6 +115,8 @@ namespace MiniEngine
         objects.add(make_shared<RectangleXZ>(0, 555, 0, 555, 0, white));
         objects.add(make_shared<RectangleXZ>(0, 555, 0, 555, 555, white));
         objects.add(make_shared<RectangleXY>(0, 555, 0, 555, 555, white));
+        vector<vec3> triangle = {vec3(80, 190, 110),vec3(34, 22, 200),vec3(170, 10, 190)};
+        objects.add(make_shared<Triangle>(triangle,white));
 
         shared_ptr<Material> aluminum = make_shared<Metal>(vec3(0.8, 0.85, 0.88), 0.0);
         shared_ptr<Hittable> box1 = make_shared<Box>(vec3(0, 0, 0), vec3(165, 330, 165), aluminum);
@@ -119,8 +124,8 @@ namespace MiniEngine
         box1 = make_shared<Translate>(box1, vec3(265, 0, 295));
         objects.add(box1);
 
-        auto glass = make_shared<Dielectric>(1.5);
-        objects.add(make_shared<Sphere>(vec3(190, 90, 190), 90, glass));
+        // auto glass = make_shared<Dielectric>(1.5);
+        // objects.add(make_shared<Sphere>(vec3(190, 90, 190), 90, glass));
 
         return objects;
     }
@@ -135,7 +140,7 @@ namespace MiniEngine
         // Image
         const int image_width = window_size;
         const int image_height = window_size;
-        const int samples = 100;
+        const int samples = 10;
         const int max_depth = 10;
 
         // Camera
@@ -159,6 +164,9 @@ namespace MiniEngine
             for (int i = 0; i < image_width; ++i)
             {
                 vec3 pixel_color(0, 0, 0);
+
+                // if (i>320 && i<380 && j>150 && j<180)
+                {
                 for (int s = 0; s < samples; ++s)
                 {
                     f32 u = (i + linearRand(0.f, 1.f)) / (image_width - 1);
@@ -167,6 +175,8 @@ namespace MiniEngine
                     pixel_color += getColor(r, model, lights, max_depth);
                 }
                 writeColor(pixels, ivec2(image_width, image_height), ivec2(i, j), pixel_color, samples);
+
+                }
             }
         }
         endTime = clock();
