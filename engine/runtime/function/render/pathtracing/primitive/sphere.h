@@ -2,7 +2,7 @@
 
 #include "runtime/function/render/pathtracing/common/hittable.h"
 
-namespace MiniEngine
+namespace MiniEngine::PathTracing
 {
     class Sphere : public Hittable
     {

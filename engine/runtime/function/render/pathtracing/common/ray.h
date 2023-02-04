@@ -3,7 +3,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtx/string_cast.hpp>
 
-namespace MiniEngine
+namespace MiniEngine::PathTracing
 {
     class Ray
     {

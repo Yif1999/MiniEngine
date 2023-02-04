@@ -2,7 +2,7 @@
 
 #include "runtime/function/render/pathtracing/common/util.h"
 
-namespace MiniEngine
+namespace MiniEngine::PathTracing
 {
     class ONB
     {

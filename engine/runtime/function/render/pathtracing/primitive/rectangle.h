@@ -4,7 +4,7 @@
 
 #include "runtime/function/render/pathtracing/common/hittable.h"
 
-namespace MiniEngine
+namespace MiniEngine::PathTracing
 {
     class RectangleXY : public Hittable
     {

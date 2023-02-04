@@ -10,13 +10,7 @@
 #include "runtime/function/render/render_camera.h"
 #include "runtime/function/render/render_system.h"
 
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-
-#include <imgui.h>
-#include <imgui_impl_glfw.h>
-#include <imgui_impl_opengl3.h>
+#include "runtime/function/render/pathtracing/path_tracer.h"
 
 #define window_size 512
 
@@ -45,10 +39,10 @@ namespace MiniEngine
         // setup render camera
         m_camera = std::make_shared<Camera>(glm::vec3(0.0f, 1.0f, -12.0f),glm::vec3(0.0f, 1.0f, 0.0f),90.0f,-2.0f);
         // load render model
-        m_model = std::make_shared<Model>("asset/scene/1.obj");
+        m_model = std::make_shared<Model>("/Volumes/T7/Dev/MiniEngine/scene/veach-mis/veach-mis.obj");
         // load material texture
-        stbi_set_flip_vertically_on_load(true);
-        texture=stbi_load(("asset/scene/"+m_model->meshes[0].material.map_Kd).c_str(), &width, &height, &nChannels, 3);
+        // stbi_set_flip_vertically_on_load(true);
+        // texture=stbi_load(("asset/scene/"+m_model->meshes[0].material.map_Kd).c_str(), &width, &height, &nChannels, 3);
 
         //setup imgui
         IMGUI_CHECKVERSION();
@@ -79,8 +73,9 @@ namespace MiniEngine
         m_shader->setMat4("model", model);
 
         // pathtracer initialize
-        MiniEngine::PathTracer* tracer = new MiniEngine::PathTracer();
-        std::thread pt(&PathTracer::startRender,tracer,pixels);
+        PathTracing::PathTracer* tracer = new PathTracing::PathTracer();
+        tracer->transferMeshData(m_model);
+        std::thread pt(&PathTracing::PathTracer::startRender,tracer,pixels);
         pt.detach();
 
     }

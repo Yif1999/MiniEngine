@@ -4,7 +4,7 @@
 #include "runtime/function/render/pathtracing/common/onb.h"
 #include "runtime/function/render/pathtracing/common/pdf.h"
 
-namespace MiniEngine
+namespace MiniEngine::PathTracing
 {
     struct HitRecord;
 

@@ -2,7 +2,7 @@
 
 #include "runtime/function/render/pathtracing/common/hittable.h"
 
-namespace MiniEngine
+namespace MiniEngine::PathTracing
 {
     class Triangle : public Hittable
     {
@@ -20,9 +20,9 @@ namespace MiniEngine
     {
         // ray intersection
         vec3 edge1 = vertices[1] - vertices[0];
-        vec3 edge2 = vertices[2] - vertices[1];
+        vec3 edge2 = vertices[2] - vertices[0];
 
-        auto q = cross(normalize(r.direction), edge2);
+        auto q = cross(r.direction, edge2);
         auto a = dot(edge1, q);
 
         if (fabs(a) < EPS)

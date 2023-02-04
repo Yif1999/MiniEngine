@@ -3,7 +3,7 @@
 #include "runtime/function/render/pathtracing/common/util.h"
 #include "runtime/function/render/pathtracing/common/hittable.h"
 
-namespace MiniEngine
+namespace MiniEngine::PathTracing
 {
     class PDF
     {

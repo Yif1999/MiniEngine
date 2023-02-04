@@ -9,7 +9,7 @@
 #include "runtime/function/render/pathtracing/common/pdf.h"
 #include "thirdparty/oidn/include/OpenImageDenoise/oidn.hpp"
 
-namespace MiniEngine
+namespace MiniEngine::PathTracing
 {
 
     vec3 getColor(const Ray &r, const Hittable &model, shared_ptr<HittableList> &lights, int depth)
@@ -115,8 +115,8 @@ namespace MiniEngine
         objects.add(make_shared<RectangleXZ>(0, 555, 0, 555, 0, white));
         objects.add(make_shared<RectangleXZ>(0, 555, 0, 555, 555, white));
         objects.add(make_shared<RectangleXY>(0, 555, 0, 555, 555, white));
-        vector<vec3> triangle = {vec3(80, 190, 110),vec3(34, 22, 200),vec3(170, 10, 190)};
-        objects.add(make_shared<Triangle>(triangle,white));
+        vector<vec3> triangle = {vec3(80, 190, 110), vec3(34, 22, 200), vec3(170, 10, 190)};
+        objects.add(make_shared<Triangle>(triangle, white));
 
         shared_ptr<Material> aluminum = make_shared<Metal>(vec3(0.8, 0.85, 0.88), 0.0);
         shared_ptr<Hittable> box1 = make_shared<Box>(vec3(0, 0, 0), vec3(165, 330, 165), aluminum);
@@ -144,8 +144,8 @@ namespace MiniEngine
         const int max_depth = 10;
 
         // Camera
-        vec3 lookfrom(278, 278, -800);
-        vec3 lookat(278, 278, 0);
+        vec3 lookfrom(20, 20, 20);
+        vec3 lookat(0, 0, 0);
         vec3 vup(0, 1, 0);
         auto dist_to_focus = 10.0;
         auto aperture = 0;
@@ -153,9 +153,11 @@ namespace MiniEngine
         Camera cam(lookfrom, lookat, vup, 40, aperture, dist_to_focus);
 
         // Model
-        auto model = cornell_box();
+        auto model = mesh_data;
+        auto light = make_shared<Emission>(vec3(10, 10, 10));
+        model.add(make_shared<RectangleXZ>(-10, 10, -10, 10, 50, light));
         auto lights = make_shared<HittableList>();
-        lights->add(make_shared<RectangleXZ>(213, 343, 227, 332, 554, shared_ptr<Material>()));
+        lights->add(make_shared<RectangleXZ>(-10, 10, -10, 10, 50, shared_ptr<Material>()));
 
         // Render
         startTime = clock();
@@ -165,18 +167,14 @@ namespace MiniEngine
             {
                 vec3 pixel_color(0, 0, 0);
 
-                // if (i>320 && i<380 && j>150 && j<180)
-                {
-                for (int s = 0; s < samples; ++s)
-                {
-                    f32 u = (i + linearRand(0.f, 1.f)) / (image_width - 1);
-                    f32 v = (j + linearRand(0.f, 1.f)) / (image_height - 1);
-                    Ray r = cam.getRay(u, v);
-                    pixel_color += getColor(r, model, lights, max_depth);
-                }
-                writeColor(pixels, ivec2(image_width, image_height), ivec2(i, j), pixel_color, samples);
-
-                }
+                    for (int s = 0; s < samples; ++s)
+                    {
+                        f32 u = (i + linearRand(0.f, 1.f)) / (image_width - 1);
+                        f32 v = (j + linearRand(0.f, 1.f)) / (image_height - 1);
+                        Ray r = cam.getRay(u, v);
+                        pixel_color += getColor(r, model, lights, max_depth);
+                    }
+                    writeColor(pixels, ivec2(image_width, image_height), ivec2(i, j), pixel_color, samples);
             }
         }
         endTime = clock();
@@ -184,13 +182,13 @@ namespace MiniEngine
         LOG_INFO("ray tracing is done in " + to_string((float)(endTime - startTime) / CLOCKS_PER_SEC) + "s");
 
         // Denoise
-        float *denoise_buffer = new float[3*512*512];
+        float *denoise_buffer = new float[3 * 512 * 512];
 
         for (int j = image_height - 1; j >= 0; --j)
         {
             for (int i = 0; i < image_width; ++i)
             {
-                vec3 swap_color=readColor(pixels,ivec2(image_width, image_height), ivec2(i, j));
+                vec3 swap_color = readColor(pixels, ivec2(image_width, image_height), ivec2(i, j));
                 denoise_buffer[3 * (image_width * j + i) + 0] = swap_color.x;
                 denoise_buffer[3 * (image_width * j + i) + 1] = swap_color.y;
                 denoise_buffer[3 * (image_width * j + i) + 2] = swap_color.z;
@@ -202,8 +200,8 @@ namespace MiniEngine
         device.commit();
 
         // Create a filter for denoising a beauty (color) image using optional auxiliary images too
-        oidn::FilterRef filter = device.newFilter("RT");                     // generic ray tracing filter
-        filter.setImage("color", denoise_buffer, oidn::Format::Float3, 512, 512);   // beauty
+        oidn::FilterRef filter = device.newFilter("RT");                           // generic ray tracing filter
+        filter.setImage("color", denoise_buffer, oidn::Format::Float3, 512, 512);  // beauty
         filter.setImage("output", denoise_buffer, oidn::Format::Float3, 512, 512); // denoised beauty
         filter.commit();
 
@@ -226,7 +224,6 @@ namespace MiniEngine
                 writeColor(pixels, ivec2(image_width, image_height), ivec2(i, j), swap_color, 1);
             }
         }
-
     }
 
     void PathTracer::writeColor(unsigned char *pixels, ivec2 tex_size, ivec2 tex_coord, vec3 color, int samples)
@@ -243,9 +240,9 @@ namespace MiniEngine
             b = 0.0;
 
         auto scale = 1.0 / samples;
-        r = pow(scale * r, 1/2.2);
-        g = pow(scale * g, 1/2.2);
-        b = pow(scale * b, 1/2.2);
+        r = pow(scale * r, 1 / 2.2);
+        g = pow(scale * g, 1 / 2.2);
+        b = pow(scale * b, 1 / 2.2);
 
         pixels[3 * (tex_size.x * tex_coord.y + tex_coord.x) + 0] = static_cast<int>(256 * Math::clamp(r, 0.0, 0.999));
         pixels[3 * (tex_size.x * tex_coord.y + tex_coord.x) + 1] = static_cast<int>(256 * Math::clamp(g, 0.0, 0.999));
@@ -256,10 +253,34 @@ namespace MiniEngine
     {
         vec3 color;
 
-        color.x = pow(pixels[3 * (tex_size.x * tex_coord.y + tex_coord.x) + 0]/255.f, 2.2) ;
-        color.y = pow(pixels[3 * (tex_size.x * tex_coord.y + tex_coord.x) + 1]/255.f, 2.2) ;
-        color.z = pow(pixels[3 * (tex_size.x * tex_coord.y + tex_coord.x) + 2]/255.f, 2.2) ;
+        color.x = pow(pixels[3 * (tex_size.x * tex_coord.y + tex_coord.x) + 0] / 255.f, 2.2);
+        color.y = pow(pixels[3 * (tex_size.x * tex_coord.y + tex_coord.x) + 1] / 255.f, 2.2);
+        color.z = pow(pixels[3 * (tex_size.x * tex_coord.y + tex_coord.x) + 2] / 255.f, 2.2);
 
         return color;
+    }
+
+    void PathTracer::transferMeshData(shared_ptr<Model> m_model)
+    {
+        // loop meshes
+        for (const auto &mesh : m_model->meshes)
+        {
+            // loop faces
+            for (int id = 0; id < mesh.indices.size(); id += 3)
+            {
+                vector<Vertex> vertices(3);
+                vertices[0] = mesh.vertices[mesh.indices[id]];
+                vertices[1] = mesh.vertices[mesh.indices[id + 1]];
+                vertices[2] = mesh.vertices[mesh.indices[id + 2]];
+
+                vector<vec3> vt(3);
+                vt[0]=vertices[0].Position;
+                vt[1]=vertices[1].Position;
+                vt[2]=vertices[2].Position;
+                auto white = make_shared<Lambertian>(vec3(.73, .73, .73));
+                mesh_data.add(make_shared<Triangle>(vt,white));
+            }
+        }
+
     }
 }
