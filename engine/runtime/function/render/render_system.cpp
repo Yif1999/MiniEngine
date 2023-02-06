@@ -74,7 +74,7 @@ namespace MiniEngine
 
         // pathtracer initialize
         PathTracing::PathTracer* tracer = new PathTracing::PathTracer();
-        tracer->transferMeshData(m_model);
+        tracer->transferModelData(m_model);
         std::thread pt(&PathTracing::PathTracer::startRender,tracer,pixels);
         pt.detach();
 

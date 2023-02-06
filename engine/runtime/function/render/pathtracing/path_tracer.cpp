@@ -46,91 +46,6 @@ namespace MiniEngine::PathTracing
         return emitted + srec.attenuation * rec.mat_ptr->scatterPDF(r, rec, scattered) * getColor(scattered, model, lights, depth - 1) / pdf;
     }
 
-    // HittableList random_ball()
-    // {
-    //     HittableList world;
-
-    //     auto ground_material = make_shared<Lambertian>(vec3(0.5, 0.5, 0.5));
-    //     world.add(make_shared<Sphere>(vec3(0, -1000, 0), 1000, ground_material));
-
-    //     for (int a = -11; a < 11; a++)
-    //     {
-    //         for (int b = -11; b < 11; b++)
-    //         {
-    //             auto choose_mat = linearRand(0.f, 1.f);
-    //             vec3 center(a + 0.9 * linearRand(0.f, 1.f), 0.2, b + 0.9 * linearRand(0.f, 1.f));
-
-    //             if (length(center - vec3(4, 0.2, 0)) > 0.9)
-    //             {
-    //                 shared_ptr<Material> sphere_material;
-
-    //                 if (choose_mat < 0.5)
-    //                 {
-    //                     // diffuse
-    //                     auto albedo = vec3(0.5, 0.5, 0.5);
-    //                     sphere_material = make_shared<Lambertian>(albedo);
-    //                     world.add(make_shared<Sphere>(center, 0.2, sphere_material));
-    //                 }
-    //                 else if (choose_mat < 0.75)
-    //                 {
-    //                     // metal
-    //                     auto albedo = vec3(0.5, 0.5, 0.5);
-    //                     auto fuzz = linearRand(0.f, 0.2f);
-    //                     sphere_material = make_shared<Metal>(albedo, fuzz);
-    //                     world.add(make_shared<Sphere>(center, 0.2, sphere_material));
-    //                 }
-    //                 else
-    //                 {
-    //                     // glass
-    //                     sphere_material = make_shared<Dielectric>(1.5);
-    //                     world.add(make_shared<Sphere>(center, 0.2, sphere_material));
-    //                 }
-    //             }
-    //         }
-    //     }
-
-    //     auto material1 = make_shared<Dielectric>(1.5);
-    //     world.add(make_shared<Sphere>(vec3(0, 1, 0), 1.0, material1));
-
-    //     auto material2 = make_shared<Emission>(vec3(4, 4, 4));
-    //     world.add(make_shared<Sphere>(vec3(-4, 1, 0), 1.0, material2));
-
-    //     auto material3 = make_shared<Metal>(vec3(0.7, 0.6, 0.5), 0.0);
-    //     world.add(make_shared<Sphere>(vec3(4, 1, 0), 1.0, material3));
-
-    //     return world;
-    // }
-
-    // HittableList cornell_box()
-    // {
-    //     HittableList objects;
-
-    //     auto red = make_shared<Lambertian>(vec3(.65, .05, .05));
-    //     auto white = make_shared<Lambertian>(vec3(.73, .73, .73));
-    //     auto green = make_shared<Lambertian>(vec3(.12, .45, .15));
-    //     auto light = make_shared<Emission>(vec3(15, 15, 15));
-
-    //     objects.add(make_shared<RectangleYZ>(0, 555, 0, 555, 555, green));
-    //     objects.add(make_shared<RectangleYZ>(0, 555, 0, 555, 0, red));
-    //     objects.add(make_shared<RectangleXZ>(213, 343, 227, 332, 554, light));
-    //     objects.add(make_shared<RectangleXZ>(0, 555, 0, 555, 0, white));
-    //     objects.add(make_shared<RectangleXZ>(0, 555, 0, 555, 555, white));
-    //     objects.add(make_shared<RectangleXY>(0, 555, 0, 555, 555, white));
-    //     vector<vec3> triangle = {vec3(80, 190, 110), vec3(34, 22, 200), vec3(170, 10, 190)};
-    //     objects.add(make_shared<Triangle>(triangle, white));
-
-    //     shared_ptr<Material> aluminum = make_shared<Metal>(vec3(0.8, 0.85, 0.88), 0.0);
-    //     shared_ptr<Hittable> box1 = make_shared<Box>(vec3(0, 0, 0), vec3(165, 330, 165), aluminum);
-    //     box1 = make_shared<RotateY>(box1, 15);
-    //     box1 = make_shared<Translate>(box1, vec3(265, 0, 295));
-    //     objects.add(box1);
-
-    //     // auto glass = make_shared<Dielectric>(1.5);
-    //     // objects.add(make_shared<Sphere>(vec3(190, 90, 190), 90, glass));
-
-    //     return objects;
-    // }
-
     void PathTracer::startRender(unsigned char *pixels)
     {
         clock_t startTime, endTime;
@@ -261,8 +176,14 @@ namespace MiniEngine::PathTracing
         return color;
     }
 
-    void PathTracer::transferMeshData(shared_ptr<Model> m_model)
+    void PathTracer::transferModelData(shared_ptr<Model> m_model)
     {
+        // loop mats
+        for (const auto &mat : m_model->mats)
+        {
+            mat_data.add(make_shared<Phong>(mat));
+        }
+        
         // loop meshes
         for (const auto &mesh : m_model->meshes)
         {
@@ -282,6 +203,5 @@ namespace MiniEngine::PathTracing
                 mesh_data.add(make_shared<Triangle>(vt,white));
             }
         }
-
     }
 }

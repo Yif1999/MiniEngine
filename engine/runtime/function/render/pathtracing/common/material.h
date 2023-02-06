@@ -3,6 +3,7 @@
 #include "runtime/function/render/pathtracing/common/util.h"
 #include "runtime/function/render/pathtracing/common/onb.h"
 #include "runtime/function/render/pathtracing/common/pdf.h"
+#include "runtime/function/render/render_mesh.h"
 
 namespace MiniEngine::PathTracing
 {
@@ -33,6 +34,18 @@ namespace MiniEngine::PathTracing
         {
             return vec3(0, 0, 0);
         }
+    };
+
+    class MaterialList : public Material
+    {
+    public:
+        vector<shared_ptr<Material>> mats;
+
+        MaterialList() {}
+        MaterialList(shared_ptr<Material> mat) { add(mat); }
+
+        void clear() { mats.clear(); }
+        void add(shared_ptr<Material> mat) { mats.push_back(mat); }
     };
 
     class Lambertian : public Material
@@ -133,6 +146,27 @@ namespace MiniEngine::PathTracing
         {
             if (!rec.front_face)
                 return emit;
+            else
+                return vec3(0, 0, 0);
+        }
+    };
+
+    class Phong : public Material
+    {
+    public:
+        MiniEngine::Material mat;
+
+        Phong(MiniEngine::Material m) : mat(m) {}
+
+        virtual bool scatter(const Ray &r_in, const HitRecord &rec, ScatterRecord &srec) const override
+        {
+            return false;
+        }
+
+        virtual vec3 emitted(const Ray &r_in, const HitRecord &rec) const override
+        {
+            if (!rec.front_face)
+                return vec3(1,1,1);
             else
                 return vec3(0, 0, 0);
         }
