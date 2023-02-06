@@ -14,6 +14,7 @@ namespace MiniEngine::PathTracing
         Triangle(vector<vec3> vt, shared_ptr<Material> m) : vertices(vt), mat_ptr(m){};
 
         virtual bool hit(const Ray &r, float t_min, float t_max, HitRecord &rec) const override;
+         virtual bool aabb(AABB &output_box) const override;
     };
 
     bool Triangle::hit(const Ray &r, float t_min, float t_max, HitRecord &rec) const
@@ -51,6 +52,21 @@ namespace MiniEngine::PathTracing
         rec.setFaceNormal(r, outward_normal);
         rec.mat_ptr = mat_ptr;
 
+        return true;
+    }
+
+    bool Triangle::aabb(AABB &bounding_box) const
+    {
+        auto x_min=min({vertices[0].x,vertices[1].x,vertices[2].x})-EPS;
+        auto y_min=min({vertices[0].y,vertices[1].y,vertices[2].y})-EPS;
+        auto z_min=min({vertices[0].z,vertices[1].z,vertices[2].z})-EPS;
+
+        auto x_max=max({vertices[0].x,vertices[1].x,vertices[2].x})+EPS;
+        auto y_max=max({vertices[0].y,vertices[1].y,vertices[2].y})+EPS;
+        auto z_max=max({vertices[0].z,vertices[1].z,vertices[2].z})+EPS;
+
+        bounding_box = AABB(vec3(x_min,y_min,z_min),vec3(x_max,y_max,z_max));
+        
         return true;
     }
 

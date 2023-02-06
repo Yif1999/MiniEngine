@@ -1,6 +1,7 @@
 #pragma once
 
 #include "runtime/function/render/pathtracing/common/util.h"
+#include "runtime/function/render/pathtracing/acc_struct/aabb.h"
 
 namespace MiniEngine::PathTracing
 {
@@ -26,6 +27,7 @@ namespace MiniEngine::PathTracing
     {
     public:
         virtual bool hit(const Ray &r, float t_min, float t_max, HitRecord &rec) const = 0;
+        virtual bool aabb(AABB &bounding_box) const = 0;
 
         virtual float getPDF(const vec3 &o, const vec3 &v) const
         {
@@ -50,10 +52,9 @@ namespace MiniEngine::PathTracing
         void add(shared_ptr<Hittable> object) { objects.push_back(object); }
 
         virtual bool hit(const Ray &r, float t_min, float t_max, HitRecord &rec) const override;
+        virtual bool aabb(AABB &bounding_box) const override;
         virtual float getPDF(const vec3 &o, const vec3 &v) const override;
         virtual vec3 random(const vec3 &o) const override;
     };
-
-
 
 }

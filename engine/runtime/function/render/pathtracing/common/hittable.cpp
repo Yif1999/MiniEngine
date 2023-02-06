@@ -37,4 +37,23 @@ namespace MiniEngine::PathTracing
         auto int_size = static_cast<int>(objects.size());
         return objects[int(linearRand(0, int_size - 1) + 0.5)]->random(o);
     }
+
+    bool HittableList::aabb(AABB &bounding_box) const
+    {
+        if (objects.empty())
+            return false;
+
+        AABB temp_box;
+        bool first_box = true;
+
+        for (const auto &object : objects)
+        {
+            if (!object->aabb(temp_box))
+                return false;
+            bounding_box = first_box ? temp_box : AABB::getSurroundingBox(bounding_box, temp_box);
+            first_box = false;
+        }
+
+        return true;
+    }
 }

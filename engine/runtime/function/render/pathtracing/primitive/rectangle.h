@@ -15,6 +15,14 @@ namespace MiniEngine::PathTracing
         RectangleXY(){};
         RectangleXY(float _x0, float _x1, float _y0, float _y1, float _k, shared_ptr<Material> mat) : x0(_x0), x1(_x1), y0(_y0), y1(_y1), k(_k), m(mat){};
 
+        virtual bool aabb(AABB &bounding_box) const override
+        {
+            // The bounding box must have non-zero width in each dimension, so pad the Z
+            // dimension a small amount.
+            bounding_box = AABB(vec3(x0, y0, k - 0.0001), vec3(x1, y1, k + 0.0001));
+            return true;
+        }
+
         virtual bool hit(const Ray &r, float t_min, float t_max, HitRecord &rec) const override;
     };
 
@@ -28,22 +36,32 @@ namespace MiniEngine::PathTracing
 
         RectangleXZ(float _x0, float _x1, float _z0, float _z1, float _k, shared_ptr<Material> mat) : x0(_x0), x1(_x1), z0(_z0), z1(_z1), k(_k), m(mat){};
 
+        virtual bool aabb(AABB &bounding_box) const override {
+            // The bounding box must have non-zero width in each dimension, so pad the Y
+            // dimension a small amount.
+            bounding_box = AABB(vec3(x0,k-0.0001,z0), vec3(x1, k+0.0001, z1));
+            return true;
+        }
+
+
         virtual bool hit(const Ray &r, float t_min, float t_max, HitRecord &rec) const override;
 
-        virtual float getPDF(const vec3& origin, const vec3& v) const override {
+        virtual float getPDF(const vec3 &origin, const vec3 &v) const override
+        {
             HitRecord rec;
             if (!this->hit(Ray(origin, v), 0.001, INF, rec))
                 return 0;
 
-            auto area = (x1-x0)*(z1-z0);
-            auto distance_squared = rec.t * rec.t * pow(length(v),2);
+            auto area = (x1 - x0) * (z1 - z0);
+            auto distance_squared = rec.t * rec.t * pow(length(v), 2);
             auto cosine = fabs(dot(v, rec.normal) / length(v));
 
             return distance_squared / (cosine * area);
         }
 
-        virtual vec3 random(const vec3& origin) const override {
-            auto random_point = vec3(linearRand(x0,x1), k, linearRand(z0,z1));
+        virtual vec3 random(const vec3 &origin) const override
+        {
+            auto random_point = vec3(linearRand(x0, x1), k, linearRand(z0, z1));
             return random_point - origin;
         }
     };
@@ -57,6 +75,13 @@ namespace MiniEngine::PathTracing
         RectangleYZ() {}
 
         RectangleYZ(float _y0, float _y1, float _z0, float _z1, float _k, shared_ptr<Material> mat) : y0(_y0), y1(_y1), z0(_z0), z1(_z1), k(_k), m(mat){};
+
+         virtual bool aabb(AABB &bounding_box) const override {
+            // The bounding box must have non-zero width in each dimension, so pad the X
+            // dimension a small amount.
+            bounding_box = AABB(vec3(k-0.0001, y0, z0), vec3(k+0.0001, y1, z1));
+            return true;
+        }
 
         virtual bool hit(const Ray &r, float t_min, float t_max, HitRecord &rec) const override;
     };
