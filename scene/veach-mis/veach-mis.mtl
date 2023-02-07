@@ -31,18 +31,21 @@ Ni 1
 newmtl light1
 Kd 0.0 0.0 0.0
 Ks 0 0 0
+Ke 300 300 300
 Tr 1 1 1
 Ns 1
 Ni 1
 newmtl light2
 Kd 0.0 0.0 0.0
 Ks 0 0 0
+Ke 50 50 50 
 Tr 1 1 1
 Ns 1
 Ni 1
 newmtl light3
 Kd 0.0 0.0 0.0
 Ks 0 0 0
+Ke 10 10 10 
 Tr 1 1 1
 Ns 1
 Ni 1

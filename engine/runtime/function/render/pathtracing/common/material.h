@@ -36,18 +36,6 @@ namespace MiniEngine::PathTracing
         }
     };
 
-    class MaterialList : public Material
-    {
-    public:
-        vector<shared_ptr<Material>> mats;
-
-        MaterialList() {}
-        MaterialList(shared_ptr<Material> mat) { add(mat); }
-
-        void clear() { mats.clear(); }
-        void add(shared_ptr<Material> mat) { mats.push_back(mat); }
-    };
-
     class Lambertian : public Material
     {
     public:
@@ -160,15 +148,66 @@ namespace MiniEngine::PathTracing
 
         virtual bool scatter(const Ray &r_in, const HitRecord &rec, ScatterRecord &srec) const override
         {
-            return false;
+            if (is_emitted(mat))
+            {
+                return false;
+            }
+
+            if (is_specular(mat))
+            {
+                vec3 reflected = reflect(r_in.direction, rec.normal);
+                srec.specular_ray = Ray(rec.p, reflected + 1.f/log(mat.Ns) * ballRand(1.f));
+                srec.attenuation = mat.Ks;
+                srec.is_specular = true;
+                srec.pdf_ptr = 0;
+                return true;
+            }
+
+            srec.is_specular = false;
+            srec.attenuation = mat.Kd;
+            srec.pdf_ptr = make_shared<CosinePDF>(rec.normal);
+            return true;
         }
 
         virtual vec3 emitted(const Ray &r_in, const HitRecord &rec) const override
         {
-            if (!rec.front_face)
-                return vec3(1,1,1);
+            if (is_emitted(mat) && rec.front_face)
+                return mat.Ke;
             else
                 return vec3(0, 0, 0);
+        }
+
+        float scatterPDF(const Ray &r_in, const HitRecord &rec, const Ray &scattered) const override
+        {
+            auto cosine = dot(rec.normal, scattered.direction);
+            return cosine < 0 ? 0 : cosine / PI;
+        }
+
+    private:
+        inline bool is_emitted(MiniEngine::Material mat) const
+        {
+            if (mat.Ke[0] > 0 || mat.Ke[1] > 0 || mat.Ke[2] > 0)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        inline bool is_specular(MiniEngine::Material mat) const
+        {
+            if (mat.Ks[0] > 0 || mat.Ks[1] > 0 || mat.Ks[2] > 0)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        static float reflectance(float cosine, float ref_idx)
+        {
+            // Use Schlick's approximation for reflectance.
+            auto r0 = (1 - ref_idx) / (1 + ref_idx);
+            r0 = r0 * r0;
+            return r0 + (1 - r0) * pow((1 - cosine), 5);
         }
     };
 

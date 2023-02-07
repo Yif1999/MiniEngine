@@ -18,7 +18,6 @@ namespace MiniEngine::PathTracing
 
     private:
         HittableList mesh_data;
-        MaterialList mat_data;
 
         void writeColor(unsigned char *pixels, glm::ivec2 tex_size, glm::ivec2 tex_coord, glm::vec3 color, int samples);
         glm::vec3 readColor(unsigned char *pixels, glm::ivec2 tex_size, glm::ivec2 tex_coord);

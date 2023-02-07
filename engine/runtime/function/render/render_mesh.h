@@ -14,13 +14,9 @@ namespace MiniEngine
 {
     struct Vertex
     {
-        // position
         glm::vec3 Position;
-        // normal
         glm::vec3 Normal;
-        // texCoords
         glm::vec2 TexCoords;
-        // tangent
         glm::vec3 Tangent;
 
         bool operator==(const Vertex &other) const
@@ -35,6 +31,7 @@ namespace MiniEngine
 
         glm::vec3 Kd; // diffuse reflectance of material, map_Kd is the texture file path.
         glm::vec3 Ks; // specular reflectance of material.
+        glm::vec3 Ke; // emission intensity of light.
         glm::vec3 Tr; // transmittance of material.
         float Ns;     // shiness, the exponent of phong lobe.
         float Ni;     // Index of Refraction(IOR) of transparent object like glass and water.

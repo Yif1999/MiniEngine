@@ -9,6 +9,8 @@
 #include "runtime/function/render/pathtracing/common/material.h"
 #include "runtime/function/render/pathtracing/common/pdf.h"
 #include "thirdparty/oidn/include/OpenImageDenoise/oidn.hpp"
+#include "thirdparty/tbb/include/tbb/parallel_for.h"
+
 
 namespace MiniEngine::PathTracing
 {
@@ -27,6 +29,7 @@ namespace MiniEngine::PathTracing
 
         ScatterRecord srec;
         vec3 emitted = rec.mat_ptr->emitted(r, rec);
+        
         if (!rec.mat_ptr->scatter(r, rec, srec))
         {
             return emitted;
@@ -38,7 +41,7 @@ namespace MiniEngine::PathTracing
         }
 
         auto light_ptr = make_shared<HittablePDF>(lights, rec.p);
-        MixturePDF p(light_ptr, srec.pdf_ptr);
+        MixturePDF p(srec.pdf_ptr, srec.pdf_ptr);
 
         Ray scattered = Ray(rec.p, p.generate());
         auto pdf = p.value(scattered.direction);
@@ -55,24 +58,22 @@ namespace MiniEngine::PathTracing
         // Image
         const int image_width = window_size;
         const int image_height = window_size;
-        const int samples = 100;
+        const int samples = 1000;
         const int max_depth = 10;
 
         // Camera
-        vec3 lookfrom(20, 20, 20);
-        vec3 lookat(0, 0, 0);
+        vec3 lookfrom(28.2792, 5.2, 0);
+        vec3 lookat(0, 2.8, 0);
         vec3 vup(0, 1, 0);
         auto dist_to_focus = 10.0;
         auto aperture = 0;
 
-        Camera cam(lookfrom, lookat, vup, 40, aperture, dist_to_focus);
+        Camera cam(lookfrom, lookat, vup, 30, aperture, dist_to_focus);
 
         // Model
         HittableList model;
         model.add(make_shared<BVH>(mesh_data));
-        auto light = make_shared<Emission>(vec3(10, 10, 10));
         auto lights = make_shared<HittableList>();
-        model.add(make_shared<RectangleXZ>(-10, 10, -10, 10, 50, light));
         lights->add(make_shared<RectangleXZ>(-10, 10, -10, 10, 50, shared_ptr<Material>()));
 
         // Render
@@ -93,6 +94,23 @@ namespace MiniEngine::PathTracing
                     writeColor(pixels, ivec2(image_width, image_height), ivec2(i, j), pixel_color, samples);
             }
         }
+        // for (int j = image_height - 1; j >= 0; --j)
+        // {
+        //     for (int i = 0; i < image_width; ++i)
+        //     {
+        //         vec3 pixel_color(0, 0, 0);
+
+        //             tbb::parallel_for(0,samples,[](int s){
+        //                 f32 u = (i + linearRand(0.f, 1.f)) / (image_width - 1);
+        //                 f32 v = (j + linearRand(0.f, 1.f)) / (image_height - 1);
+        //                 Ray r = cam.getRay(u, v);
+        //                 pixel_color += getColor(r, model, lights, max_depth);
+        //             });
+
+        //             writeColor(pixels, ivec2(image_width, image_height), ivec2(i, j), pixel_color, samples);
+        //     }
+        // }
+        // tbb::parallel_for(1, 20000000, [](int i){std::cout << i << std::endl; });
         endTime = clock();
 
         LOG_INFO("ray tracing is done in " + to_string((float)(endTime - startTime) / CLOCKS_PER_SEC) + "s");
@@ -178,12 +196,9 @@ namespace MiniEngine::PathTracing
 
     void PathTracer::transferModelData(shared_ptr<Model> m_model)
     {
-        // loop mats
-        for (const auto &mat : m_model->mats)
-        {
-            mat_data.add(make_shared<Phong>(mat));
-        }
-        
+        // clean mesh data buffer
+        mesh_data.clear();
+
         // loop meshes
         for (const auto &mesh : m_model->meshes)
         {
@@ -199,8 +214,8 @@ namespace MiniEngine::PathTracing
                 vt[0]=vertices[0].Position;
                 vt[1]=vertices[1].Position;
                 vt[2]=vertices[2].Position;
-                auto white = make_shared<Lambertian>(vec3(.73, .73, .73));
-                mesh_data.add(make_shared<Triangle>(vt,white));
+
+                mesh_data.add(make_shared<Triangle>(vt,make_shared<Phong>(mesh.material)));
             }
         }
     }
