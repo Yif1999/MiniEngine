@@ -7,6 +7,7 @@
 #include "runtime/function/render/render_model.h"
 
 #include <glm/glm.hpp>
+#include <sys/time.h>
 
 namespace MiniEngine::PathTracing
 {
@@ -19,6 +20,7 @@ namespace MiniEngine::PathTracing
     private:
         HittableList mesh_data;
 
+        glm::vec3 getColor(const Ray &r, const Hittable &model, shared_ptr<HittableList> &lights, int depth);
         void writeColor(unsigned char *pixels, glm::ivec2 tex_size, glm::ivec2 tex_coord, glm::vec3 color, int samples);
         glm::vec3 readColor(unsigned char *pixels, glm::ivec2 tex_size, glm::ivec2 tex_coord);
     };

@@ -11,11 +11,10 @@
 #include "thirdparty/oidn/include/OpenImageDenoise/oidn.hpp"
 #include "thirdparty/tbb/include/tbb/parallel_for.h"
 
-
 namespace MiniEngine::PathTracing
 {
 
-    vec3 getColor(const Ray &r, const Hittable &model, shared_ptr<HittableList> &lights, int depth)
+    vec3 PathTracer::getColor(const Ray &r, const Hittable &model, shared_ptr<HittableList> &lights, int depth)
     {
         HitRecord rec;
 
@@ -29,7 +28,7 @@ namespace MiniEngine::PathTracing
 
         ScatterRecord srec;
         vec3 emitted = rec.mat_ptr->emitted(r, rec);
-        
+
         if (!rec.mat_ptr->scatter(r, rec, srec))
         {
             return emitted;
@@ -51,15 +50,15 @@ namespace MiniEngine::PathTracing
 
     void PathTracer::startRender(unsigned char *pixels)
     {
-        clock_t startTime, endTime;
+        struct timeval startTime, endTime;
 
         int window_size = 512;
 
         // Image
         const int image_width = window_size;
         const int image_height = window_size;
-        const int samples = 1000;
-        const int max_depth = 10;
+        const int samples = 128;
+        const int max_depth = 8;
 
         // Camera
         vec3 lookfrom(28.2792, 5.2, 0);
@@ -77,43 +76,46 @@ namespace MiniEngine::PathTracing
         lights->add(make_shared<RectangleXZ>(-10, 10, -10, 10, 50, shared_ptr<Material>()));
 
         // Render
-        startTime = clock();
-        for (int j = image_height - 1; j >= 0; --j)
-        {
-            for (int i = 0; i < image_width; ++i)
-            {
-                vec3 pixel_color(0, 0, 0);
+        gettimeofday(&startTime,NULL);
 
-                    for (int s = 0; s < samples; ++s)
-                    {
-                        f32 u = (i + linearRand(0.f, 1.f)) / (image_width - 1);
-                        f32 v = (j + linearRand(0.f, 1.f)) / (image_height - 1);
-                        Ray r = cam.getRay(u, v);
-                        pixel_color += getColor(r, model, lights, max_depth);
-                    }
-                    writeColor(pixels, ivec2(image_width, image_height), ivec2(i, j), pixel_color, samples);
-            }
-        }
+        // single thread
         // for (int j = image_height - 1; j >= 0; --j)
         // {
         //     for (int i = 0; i < image_width; ++i)
         //     {
         //         vec3 pixel_color(0, 0, 0);
 
-        //             tbb::parallel_for(0,samples,[](int s){
+        //             for (int s = 0; s < samples; ++s)
+        //             {
         //                 f32 u = (i + linearRand(0.f, 1.f)) / (image_width - 1);
         //                 f32 v = (j + linearRand(0.f, 1.f)) / (image_height - 1);
         //                 Ray r = cam.getRay(u, v);
         //                 pixel_color += getColor(r, model, lights, max_depth);
-        //             });
-
+        //             }
         //             writeColor(pixels, ivec2(image_width, image_height), ivec2(i, j), pixel_color, samples);
         //     }
         // }
-        // tbb::parallel_for(1, 20000000, [](int i){std::cout << i << std::endl; });
-        endTime = clock();
 
-        LOG_INFO("ray tracing is done in " + to_string((float)(endTime - startTime) / CLOCKS_PER_SEC) + "s");
+        // multi thread
+        for (int j = image_height - 1; j >= 0; --j)
+        {
+            tbb::parallel_for(0, image_width, [this, j, image_width, image_height, max_depth, &cam, &model, &lights, &pixels](int i){
+                vec3 pixel_color(0, 0, 0);
+
+                for (int s = 0; s < samples; ++s)
+                {
+                    f32 u = (i + linearRand(0.f, 1.f)) / (image_width - 1);
+                    f32 v = (j + linearRand(0.f, 1.f)) / (image_height - 1);
+                    Ray r = cam.getRay(u, v);
+                    pixel_color += getColor(r, model, lights, max_depth);
+                }
+
+                writeColor(pixels, ivec2(image_width, image_height), ivec2(i, j), pixel_color, samples); });
+        }
+
+        gettimeofday(&endTime,NULL);
+
+        LOG_INFO("ray tracing is done in " + to_string((endTime.tv_sec - startTime.tv_sec) + (float)(endTime.tv_usec - startTime.tv_usec)/1000000.0) + "s");
 
         // Denoise
         float *denoise_buffer = new float[3 * 512 * 512];
@@ -211,11 +213,11 @@ namespace MiniEngine::PathTracing
                 vertices[2] = mesh.vertices[mesh.indices[id + 2]];
 
                 vector<vec3> vt(3);
-                vt[0]=vertices[0].Position;
-                vt[1]=vertices[1].Position;
-                vt[2]=vertices[2].Position;
+                vt[0] = vertices[0].Position;
+                vt[1] = vertices[1].Position;
+                vt[2] = vertices[2].Position;
 
-                mesh_data.add(make_shared<Triangle>(vt,make_shared<Phong>(mesh.material)));
+                mesh_data.add(make_shared<Triangle>(vt, make_shared<Phong>(mesh.material)));
             }
         }
     }
