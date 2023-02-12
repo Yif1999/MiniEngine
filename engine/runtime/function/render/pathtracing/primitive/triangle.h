@@ -2,6 +2,8 @@
 
 #include "runtime/function/render/pathtracing/common/hittable.h"
 
+#include <glm/gtx/string_cast.hpp>
+
 namespace MiniEngine::PathTracing
 {
     class Triangle : public Hittable
@@ -14,7 +16,43 @@ namespace MiniEngine::PathTracing
         Triangle(vector<vec3> vt, shared_ptr<Material> m) : vertices(vt), mat_ptr(m){};
 
         virtual bool hit(const Ray &r, float t_min, float t_max, HitRecord &rec) const override;
-         virtual bool aabb(AABB &output_box) const override;
+        virtual bool aabb(AABB &output_box) const override;
+
+        virtual float getPDF(const vec3 &origin, const vec3 &v) const override
+        {
+            HitRecord rec;
+            if (!this->hit(Ray(origin, v), EPS, INF, rec))
+                return 0;
+
+            vec3 edge1 = vertices[1] - vertices[0];
+            vec3 edge2 = vertices[2] - vertices[0];
+
+            float area = length(cross(edge1, edge2)) / 2.f;
+
+            float distance_squared = rec.t * rec.t * pow(length(v), 2);
+            float cosine = fabs(dot(v, rec.normal) / length(v));
+
+            return distance_squared / (cosine * area);
+        }
+
+        virtual vec3 random(const vec3 &origin) const override
+        {
+
+            vec3 edge1 = vertices[1] - vertices[0];
+            vec3 edge2 = vertices[2] - vertices[0];
+
+            auto u = linearRand(0.f, 1.f);
+            auto v = linearRand(0.f, 1.f);
+
+            vec3 random_point;
+
+            if (u + v > 1)
+                random_point = vertices[0] + (1 - u) * edge1 + (1 - v) * edge2;
+            else
+                random_point = vertices[0] + u * edge1 + v * edge2;
+
+            return random_point - origin;
+        }
     };
 
     bool Triangle::hit(const Ray &r, float t_min, float t_max, HitRecord &rec) const
@@ -57,16 +95,16 @@ namespace MiniEngine::PathTracing
 
     bool Triangle::aabb(AABB &bounding_box) const
     {
-        auto x_min=min({vertices[0].x,vertices[1].x,vertices[2].x})-EPS;
-        auto y_min=min({vertices[0].y,vertices[1].y,vertices[2].y})-EPS;
-        auto z_min=min({vertices[0].z,vertices[1].z,vertices[2].z})-EPS;
+        auto x_min = min({vertices[0].x, vertices[1].x, vertices[2].x}) - EPS;
+        auto y_min = min({vertices[0].y, vertices[1].y, vertices[2].y}) - EPS;
+        auto z_min = min({vertices[0].z, vertices[1].z, vertices[2].z}) - EPS;
 
-        auto x_max=max({vertices[0].x,vertices[1].x,vertices[2].x})+EPS;
-        auto y_max=max({vertices[0].y,vertices[1].y,vertices[2].y})+EPS;
-        auto z_max=max({vertices[0].z,vertices[1].z,vertices[2].z})+EPS;
+        auto x_max = max({vertices[0].x, vertices[1].x, vertices[2].x}) + EPS;
+        auto y_max = max({vertices[0].y, vertices[1].y, vertices[2].y}) + EPS;
+        auto z_max = max({vertices[0].z, vertices[1].z, vertices[2].z}) + EPS;
 
-        bounding_box = AABB(vec3(x_min,y_min,z_min),vec3(x_max,y_max,z_max));
-        
+        bounding_box = AABB(vec3(x_min, y_min, z_min), vec3(x_max, y_max, z_max));
+
         return true;
     }
 

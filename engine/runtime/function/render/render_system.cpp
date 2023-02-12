@@ -39,7 +39,7 @@ namespace MiniEngine
         // setup render camera
         m_camera = std::make_shared<Camera>(glm::vec3(0.0f, 1.0f, -12.0f),glm::vec3(0.0f, 1.0f, 0.0f),90.0f,-2.0f);
         // load render model
-        m_model = std::make_shared<Model>("/Volumes/T7/Dev/MiniEngine/scene/veach-mis/veach-mis.obj");
+        m_model = std::make_shared<Model>("/Volumes/T7/Dev/MiniEngine/scene/staircase/stairscase.obj");
         // load material texture
         // stbi_set_flip_vertically_on_load(true);
         // texture=stbi_load(("asset/scene/"+m_model->meshes[0].material.map_Kd).c_str(), &width, &height, &nChannels, 3);

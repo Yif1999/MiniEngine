@@ -49,13 +49,16 @@ namespace MiniEngine::PathTracing
         virtual float getPDF(const vec3 &origin, const vec3 &v) const override
         {
             HitRecord rec;
-            if (!this->hit(Ray(origin, v), 0.001, INF, rec))
+            if (!this->hit(Ray(origin, v), EPS, INF, rec))
+            {   
+                // cout<<"hit fail"<<endl;
                 return 0;
+            }
 
             auto area = (x1 - x0) * (z1 - z0);
             auto distance_squared = rec.t * rec.t * pow(length(v), 2);
             auto cosine = fabs(dot(v, rec.normal) / length(v));
-
+            // cout<< distance_squared <<endl;
             return distance_squared / (cosine * area);
         }
 

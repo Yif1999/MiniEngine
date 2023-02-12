@@ -35,6 +35,16 @@ namespace MiniEngine::PathTracing
         return (fabs(v.x) < EPS) && (fabs(v.y) < EPS) && (fabs(v.z) < EPS);
     }
 
+    inline bool isInfinity(vec3 v)
+    {
+        return (fabs(v.x) == INF) && (fabs(v.y) == INF) && (fabs(v.z) == INF);
+    }
+
+    inline bool isNan(vec3 v)
+    {
+        return (isnan(v.x)) && (isnan(v.y)) && (isnan(v.z));
+    }
+
     inline vec3 cosineRand()
     {
         auto r1 = linearRand(0.f, 1.f);

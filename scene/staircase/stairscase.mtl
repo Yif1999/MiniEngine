@@ -1,36 +1,42 @@
 newmtl ceilingLight
 Kd 0 0 0
 Ks 0 0 0
+Ke 0.5 0.5 0.5
 Tr 1 1 1
 Ns 1
 Ni 1
 newmtl starisLight
 Kd 0 0 0
 Ks 0 0 0
+Ke 0.5 0.5 0.5
 Tr 1 1 1
 Ns 1
 Ni 1
 newmtl leftTopLight
 Kd 0 0 0
 Ks 0 0 0
+Ke 0.3 0.3 0.3
 Tr 1 1 1
 Ns 1
 Ni 1
 newmtl leftLight
 Kd 0 0 0
 Ks 0 0 0
+Ke 2.742004577636719 2.1547576084136963 0.9237708320617676
 Tr 1 1 1
 Ns 1
 Ni 1
 newmtl backLight
 Kd 0 0 0
 Ks 0 0 0
+Ke 1.595004577636719 1.2507576084136963 0.5497708320617676
 Tr 1 1 1
 Ns 1
 Ni 1
 newmtl bottomLight
 Kd 0 0 0
 Ks 0 0 0
+Ke 1.3 1.3 1.3
 Tr 1 1 1
 Ns 1
 Ni 1
@@ -75,7 +81,7 @@ Ns 1
 Ni 1
 newmtl Metal
 Kd 0.2 0.2 0.2
-Ks 0 0.8 0.8
+Ks 0.6 0.6 0.6
 Tr 1 1 1
 Ns 1000
 Ni 1

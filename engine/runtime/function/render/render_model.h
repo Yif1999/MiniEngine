@@ -105,8 +105,8 @@ namespace MiniEngine
         
                 mat.Kd = {material.diffuse[0], material.diffuse[1], material.diffuse[2]};
                 mat.Ks = {material.specular[0], material.specular[1], material.specular[2]};
-                mat.Ke = {material.emission[0], material.emission[1], material.emission[2]};
                 mat.Tr = {material.transmittance[0], material.transmittance[1], material.transmittance[2]};
+                mat.Ke = {material.emission[0], material.emission[1], material.emission[2]};
                 mat.Ns = material.shininess;
                 mat.Ni = material.ior;
         

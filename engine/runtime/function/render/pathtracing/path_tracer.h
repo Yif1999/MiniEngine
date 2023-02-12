@@ -19,6 +19,7 @@ namespace MiniEngine::PathTracing
 
     private:
         HittableList mesh_data;
+        HittableList light_data;
 
         glm::vec3 getColor(const Ray &r, const Hittable &model, shared_ptr<HittableList> &lights, int depth);
         void writeColor(unsigned char *pixels, glm::ivec2 tex_size, glm::ivec2 tex_coord, glm::vec3 color, int samples);

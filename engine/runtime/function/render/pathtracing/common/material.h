@@ -132,7 +132,7 @@ namespace MiniEngine::PathTracing
 
         virtual vec3 emitted(const Ray &r_in, const HitRecord &rec) const override
         {
-            if (!rec.front_face)
+            if (rec.front_face)
                 return emit;
             else
                 return vec3(0, 0, 0);
@@ -153,13 +153,53 @@ namespace MiniEngine::PathTracing
                 return false;
             }
 
-            if (is_specular(mat))
+            if (is_specular(mat) && linearRand(0.f, 1.f) < 0.5f)
             {
                 vec3 reflected = reflect(r_in.direction, rec.normal);
-                srec.specular_ray = Ray(rec.p, reflected + 1.f/log(mat.Ns) * ballRand(1.f));
+                vec3 noise = 1.f / log(mat.Ns) * ballRand(1.f);
+
+                vec3 normal = normalize(rec.normal);
+                vec3 tangent = normalize(cross(normal, cross(reflected, normal)));
+                vec3 bi_tangent = normalize(cross(normal, tangent));
+
+                f32 noise_n = dot(noise, normal);
+                f32 noise_t = dot(noise, tangent);
+                f32 noise_bt = dot(noise, bi_tangent);
+
+                noise_t = noise_t / dot(normalize(reflected), normal);
+                noise_bt = noise_bt * dot(normalize(reflected), normal);
+
+                noise = normal * noise_n + tangent * noise_t + bi_tangent * noise_bt;
+
+                srec.specular_ray = Ray(rec.p, reflected + noise);
                 srec.attenuation = mat.Ks;
                 srec.is_specular = true;
-                srec.pdf_ptr = 0;
+                srec.pdf_ptr = nullptr;
+
+                return true;
+            }
+
+            if (is_transparent(mat))
+            {
+                float refraction_ratio = rec.front_face ? (1.0 / mat.Ni) : mat.Ni;
+
+                vec3 unit_direction = normalize(r_in.direction);
+                float cos_theta = fmin(dot(-unit_direction, rec.normal), 1.0);
+                float sin_theta = sqrt(1.0 - cos_theta * cos_theta);
+
+                bool cannot_refract = refraction_ratio * sin_theta > 1.0;
+                vec3 direction;
+
+                if (cannot_refract || reflectance(cos_theta, refraction_ratio) > linearRand(0.f, 1.f))
+                    direction = reflect(unit_direction, rec.normal);
+                else
+                    direction = refract(unit_direction, rec.normal, refraction_ratio);
+
+                srec.is_specular = true;
+                srec.pdf_ptr = nullptr;
+                srec.attenuation = mat.Tr;
+                srec.specular_ray = Ray(rec.p, direction);
+
                 return true;
             }
 
@@ -184,6 +224,15 @@ namespace MiniEngine::PathTracing
         }
 
     private:
+        inline bool is_transparent(MiniEngine::Material mat) const
+        {
+            if (mat.Ni > 1)
+            {
+                return true;
+            }
+            return false;
+        }
+
         inline bool is_emitted(MiniEngine::Material mat) const
         {
             if (mat.Ke[0] > 0 || mat.Ke[1] > 0 || mat.Ke[2] > 0)
