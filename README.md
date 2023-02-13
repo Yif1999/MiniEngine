@@ -8,29 +8,11 @@
 
 To build the project, you must first install the following tools.
 
-### Windows 10/11
-- Visual Studio 2019 (or more recent)
-- CMake 3.19 (or more recent)
-
 ### macOS >= 10.15 (Intel or Apple Silicon)
 - Xcode 12.3 (or more recent)
 - CMake 3.19 (or more recent)
 
 ## Build and Run
-
-### Windows
-You can use the following command to generate the **Visual Studio** project firstly, then open the solution in the `build` directory and build it manually (choose "**Editor**" as the target).
-```shell
-cmake -S . -B build
-```
-
-Or only build and run the project with the following commands.
-
-```sh
-cmake --build build --config Release
-cd bin
-./Editor
-```
 
 ### macOS
 
