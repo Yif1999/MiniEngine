@@ -16,12 +16,12 @@ namespace MiniEngine
     {
         glm::vec3 Position;
         glm::vec3 Normal;
-        glm::vec2 TexCoords;
+        glm::vec2 Texcoord;
         glm::vec3 Tangent;
 
         bool operator==(const Vertex &other) const
         {
-            return Position == other.Position && TexCoords == other.TexCoords;
+            return Position == other.Position && Texcoord == other.Texcoord;
         }
     };
 
@@ -105,7 +105,7 @@ namespace MiniEngine
             glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, Normal));
             // vertex texture coords
             glEnableVertexAttribArray(2);
-            glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, TexCoords));
+            glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, Texcoord));
             // vertex tangent
             glEnableVertexAttribArray(3);
             glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, Tangent));

@@ -236,8 +236,8 @@ namespace MiniEngine
                         mesh_vert.Normal.y = normal[i].y;
                         mesh_vert.Normal.z = normal[i].z;
 
-                        mesh_vert.TexCoords.x = uv[i].x;
-                        mesh_vert.TexCoords.y = uv[i].y;
+                        mesh_vert.Texcoord.x = uv[i].x;
+                        mesh_vert.Texcoord.y = uv[i].y;
 
                         mesh_vert.Tangent.x = tangent.x;
                         mesh_vert.Tangent.y = tangent.y;

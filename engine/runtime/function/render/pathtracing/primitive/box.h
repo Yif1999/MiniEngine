@@ -57,8 +57,8 @@ namespace MiniEngine::PathTracing
         if (!ptr->hit(moved_r, t_min, t_max, rec))
             return false;
 
-        rec.p += offset;
-        rec.setFaceNormal(moved_r, rec.normal);
+        rec.hit_point.Position += offset;
+        rec.setFaceNormal(moved_r, rec.hit_point.Normal);
 
         return true;
     }
@@ -98,16 +98,16 @@ namespace MiniEngine::PathTracing
         if (!ptr->hit(rotated_r, t_min, t_max, rec))
             return false;
 
-        auto p = rec.p;
-        auto normal = rec.normal;
+        auto p = rec.hit_point.Position;
+        auto normal = rec.hit_point.Normal;
 
-        p[0] = cos_theta * rec.p[0] + sin_theta * rec.p[2];
-        p[2] = -sin_theta * rec.p[0] + cos_theta * rec.p[2];
+        p[0] = cos_theta * rec.hit_point.Position[0] + sin_theta * rec.hit_point.Position[2];
+        p[2] = -sin_theta * rec.hit_point.Position[0] + cos_theta * rec.hit_point.Position[2];
 
-        normal[0] = cos_theta * rec.normal[0] + sin_theta * rec.normal[2];
-        normal[2] = -sin_theta * rec.normal[0] + cos_theta * rec.normal[2];
+        normal[0] = cos_theta * rec.hit_point.Normal[0] + sin_theta * rec.hit_point.Normal[2];
+        normal[2] = -sin_theta * rec.hit_point.Normal[0] + cos_theta * rec.hit_point.Normal[2];
 
-        rec.p = p;
+        rec.hit_point.Position = p;
         rec.setFaceNormal(rotated_r, normal);
 
         return true;

@@ -4,6 +4,7 @@
 #include "runtime/function/render/pathtracing/common/onb.h"
 #include "runtime/function/render/pathtracing/common/pdf.h"
 #include "runtime/function/render/render_mesh.h"
+#include "runtime/function/render/render_texture.h"
 
 namespace MiniEngine::PathTracing
 {
@@ -47,13 +48,13 @@ namespace MiniEngine::PathTracing
         {
             srec.is_specular = false;
             srec.attenuation = albedo;
-            srec.pdf_ptr = make_shared<CosinePDF>(rec.normal);
+            srec.pdf_ptr = make_shared<CosinePDF>(rec.hit_point.Normal);
             return true;
         }
 
         float scatterPDF(const Ray &r_in, const HitRecord &rec, const Ray &scattered) const override
         {
-            auto cosine = dot(rec.normal, scattered.direction);
+            auto cosine = dot(rec.hit_point.Normal, scattered.direction);
             return cosine < 0 ? 0 : cosine / PI;
         }
     };
@@ -68,8 +69,8 @@ namespace MiniEngine::PathTracing
 
         virtual bool scatter(const Ray &r_in, const HitRecord &rec, ScatterRecord &srec) const override
         {
-            vec3 reflected = reflect(r_in.direction, rec.normal);
-            srec.specular_ray = Ray(rec.p, reflected + fuzz * sphericalRand(1.f));
+            vec3 reflected = reflect(r_in.direction, rec.hit_point.Normal);
+            srec.specular_ray = Ray(rec.hit_point.Position, reflected + fuzz * sphericalRand(1.f));
             srec.attenuation = albedo;
             srec.is_specular = true;
             srec.pdf_ptr = 0;
@@ -92,18 +93,18 @@ namespace MiniEngine::PathTracing
             float refraction_ratio = rec.front_face ? (1.0 / ir) : ir;
 
             vec3 unit_direction = normalize(r_in.direction);
-            float cos_theta = fmin(dot(-unit_direction, rec.normal), 1.0);
+            float cos_theta = fmin(dot(-unit_direction, rec.hit_point.Normal), 1.0);
             float sin_theta = sqrt(1.0 - cos_theta * cos_theta);
 
             bool cannot_refract = refraction_ratio * sin_theta > 1.0;
             vec3 direction;
 
             if (cannot_refract || reflectance(cos_theta, refraction_ratio) > linearRand(0.f, 1.f))
-                direction = reflect(unit_direction, rec.normal);
+                direction = reflect(unit_direction, rec.hit_point.Normal);
             else
-                direction = refract(unit_direction, rec.normal, refraction_ratio);
+                direction = refract(unit_direction, rec.hit_point.Normal, refraction_ratio);
 
-            srec.specular_ray = Ray(rec.p, direction);
+            srec.specular_ray = Ray(rec.hit_point.Position, direction);
 
             return true;
         }
@@ -143,8 +144,13 @@ namespace MiniEngine::PathTracing
     {
     public:
         MiniEngine::Material mat;
+        shared_ptr<Texture> diffuse_map;
 
-        Phong(MiniEngine::Material m) : mat(m) {}
+        Phong(MiniEngine::Material m)
+        {
+            this->mat = m;
+            diffuse_map = make_shared<Image>(mat.map_Kd.c_str());
+        }
 
         virtual bool scatter(const Ray &r_in, const HitRecord &rec, ScatterRecord &srec) const override
         {
@@ -153,12 +159,12 @@ namespace MiniEngine::PathTracing
                 return false;
             }
 
-            if (is_specular(mat) && linearRand(0.f, 1.f) < 0.5f)
+            if (is_specular(mat) && linearRand(0.f, 1.f) < 0.3f)
             {
-                vec3 reflected = reflect(r_in.direction, rec.normal);
+                vec3 reflected = reflect(r_in.direction, rec.hit_point.Normal);
                 vec3 noise = 1.f / log(mat.Ns) * ballRand(1.f);
 
-                vec3 normal = normalize(rec.normal);
+                vec3 normal = normalize(rec.hit_point.Normal);
                 vec3 tangent = normalize(cross(normal, cross(reflected, normal)));
                 vec3 bi_tangent = normalize(cross(normal, tangent));
 
@@ -171,7 +177,7 @@ namespace MiniEngine::PathTracing
 
                 noise = normal * noise_n + tangent * noise_t + bi_tangent * noise_bt;
 
-                srec.specular_ray = Ray(rec.p, reflected + noise);
+                srec.specular_ray = Ray(rec.hit_point.Position, reflected + noise);
                 srec.attenuation = mat.Ks;
                 srec.is_specular = true;
                 srec.pdf_ptr = nullptr;
@@ -184,28 +190,36 @@ namespace MiniEngine::PathTracing
                 float refraction_ratio = rec.front_face ? (1.0 / mat.Ni) : mat.Ni;
 
                 vec3 unit_direction = normalize(r_in.direction);
-                float cos_theta = fmin(dot(-unit_direction, rec.normal), 1.0);
+                float cos_theta = fmin(dot(-unit_direction, rec.hit_point.Normal), 1.0);
                 float sin_theta = sqrt(1.0 - cos_theta * cos_theta);
 
                 bool cannot_refract = refraction_ratio * sin_theta > 1.0;
                 vec3 direction;
 
                 if (cannot_refract || reflectance(cos_theta, refraction_ratio) > linearRand(0.f, 1.f))
-                    direction = reflect(unit_direction, rec.normal);
+                    direction = reflect(unit_direction, rec.hit_point.Normal);
                 else
-                    direction = refract(unit_direction, rec.normal, refraction_ratio);
+                    direction = refract(unit_direction, rec.hit_point.Normal, refraction_ratio);
 
                 srec.is_specular = true;
                 srec.pdf_ptr = nullptr;
                 srec.attenuation = mat.Tr;
-                srec.specular_ray = Ray(rec.p, direction);
+                srec.specular_ray = Ray(rec.hit_point.Position, direction);
 
                 return true;
             }
 
+            auto attenuation =  diffuse_map->value(rec.hit_point.Texcoord.s, rec.hit_point.Texcoord.t, rec.hit_point.Position);
+            if (attenuation[0]<0)
+            {
+                srec.attenuation = mat.Kd;
+            }
+            else{
+                srec.attenuation = attenuation;
+            }
+
             srec.is_specular = false;
-            srec.attenuation = mat.Kd;
-            srec.pdf_ptr = make_shared<CosinePDF>(rec.normal);
+            srec.pdf_ptr = make_shared<CosinePDF>(rec.hit_point.Normal);
             return true;
         }
 
@@ -219,14 +233,14 @@ namespace MiniEngine::PathTracing
 
         float scatterPDF(const Ray &r_in, const HitRecord &rec, const Ray &scattered) const override
         {
-            auto cosine = dot(rec.normal, scattered.direction);
+            auto cosine = dot(rec.hit_point.Normal, scattered.direction);
             return cosine < 0 ? 0 : cosine / PI;
         }
 
     private:
         inline bool is_transparent(MiniEngine::Material mat) const
         {
-            if (mat.Ni > 1)
+            if (mat.Ni > 1 && mat.Tr[0] < 1 || mat.Tr[1] < 1 || mat.Tr[2] < 1)
             {
                 return true;
             }

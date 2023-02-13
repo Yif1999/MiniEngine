@@ -40,8 +40,8 @@ namespace MiniEngine::PathTracing
         }
 
         rec.t = root;
-        rec.p = r.cast(rec.t);
-        vec3 outward_normal = (rec.p - center) / radius;
+        rec.hit_point.Position = r.cast(rec.t);
+        vec3 outward_normal = (rec.hit_point.Position - center) / radius;
         rec.setFaceNormal(r, outward_normal);
         rec.mat_ptr = mat_ptr;
 

@@ -264,13 +264,13 @@ namespace MiniEngine
                                     vertices[1].Position.z,
                                     vertices[2].Position.z,
                                     e0, e1, e2, area);
-            ParameterEquation texcoord_s(vertices[0].TexCoords.s,
-                                         vertices[1].TexCoords.s,
-                                         vertices[2].TexCoords.s,
+            ParameterEquation texcoord_s(vertices[0].Texcoord.s,
+                                         vertices[1].Texcoord.s,
+                                         vertices[2].Texcoord.s,
                                          e0, e1, e2, area);
-            ParameterEquation texcoord_t(vertices[0].TexCoords.t,
-                                         vertices[1].TexCoords.t,
-                                         vertices[2].TexCoords.t,
+            ParameterEquation texcoord_t(vertices[0].Texcoord.t,
+                                         vertices[1].Texcoord.t,
+                                         vertices[2].Texcoord.t,
                                          e0, e1, e2, area);
 
             for (int px = xmin; px <= xmax; px++)

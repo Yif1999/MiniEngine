@@ -2,6 +2,7 @@
 
 #include "runtime/function/render/pathtracing/common/util.h"
 #include "runtime/function/render/pathtracing/acc_struct/aabb.h"
+#include "runtime/function/render/render_mesh.h"
 
 namespace MiniEngine::PathTracing
 {
@@ -9,17 +10,15 @@ namespace MiniEngine::PathTracing
 
     struct HitRecord
     {
-        glm::vec3 p;
-        glm::vec3 normal;
+        MiniEngine::Vertex hit_point;
         shared_ptr<Material> mat_ptr;
         float t;
-
         bool front_face;
 
         inline void setFaceNormal(const Ray &r, const vec3 &outward_normal)
         {
             front_face = dot(r.direction, outward_normal) < 0;
-            normal = front_face ? outward_normal : -outward_normal;
+            hit_point.Normal = front_face ? outward_normal : -outward_normal;
         }
     };
 

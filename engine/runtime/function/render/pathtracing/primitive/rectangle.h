@@ -57,7 +57,7 @@ namespace MiniEngine::PathTracing
 
             auto area = (x1 - x0) * (z1 - z0);
             auto distance_squared = rec.t * rec.t * pow(length(v), 2);
-            auto cosine = fabs(dot(v, rec.normal) / length(v));
+            auto cosine = fabs(dot(v, rec.hit_point.Normal) / length(v));
             // cout<< distance_squared <<endl;
             return distance_squared / (cosine * area);
         }
@@ -102,7 +102,7 @@ namespace MiniEngine::PathTracing
         auto outward_normal = vec3(0, 0, 1);
         rec.setFaceNormal(r, outward_normal);
         rec.mat_ptr = m;
-        rec.p = r.cast(t);
+        rec.hit_point.Position = r.cast(t);
         return true;
     }
 
@@ -119,7 +119,7 @@ namespace MiniEngine::PathTracing
         auto outward_normal = vec3(0, 1, 0);
         rec.setFaceNormal(r, outward_normal);
         rec.mat_ptr = m;
-        rec.p = r.cast(t);
+        rec.hit_point.Position = r.cast(t);
         return true;
     }
 
@@ -136,7 +136,7 @@ namespace MiniEngine::PathTracing
         auto outward_normal = vec3(1, 0, 0);
         rec.setFaceNormal(r, outward_normal);
         rec.mat_ptr = m;
-        rec.p = r.cast(t);
+        rec.hit_point.Position = r.cast(t);
         return true;
     }
 }

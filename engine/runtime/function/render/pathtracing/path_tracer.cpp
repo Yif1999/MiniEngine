@@ -41,11 +41,11 @@ namespace MiniEngine::PathTracing
             return srec.attenuation * getColor(srec.specular_ray, mesh, lights, depth - 1);
         }
 
-        // auto light_ptr = make_shared<HittablePDF>(lights, rec.p);
+        // auto light_ptr = make_shared<HittablePDF>(lights, rec.hit_point.Position);
         // MixturePDF p(light_ptr, srec.pdf_ptr);
 
 
-        Ray scattered = Ray(rec.p, srec.pdf_ptr->generate());
+        Ray scattered = Ray(rec.hit_point.Position, srec.pdf_ptr->generate());
         auto pdf = srec.pdf_ptr->value(scattered.direction);
 
         return emitted + srec.attenuation * rec.mat_ptr->scatterPDF(r, rec, scattered) * getColor(scattered, mesh, lights, depth - 1) / pdf;
@@ -171,9 +171,9 @@ namespace MiniEngine::PathTracing
 
     void PathTracer::writeColor(unsigned char *pixels, ivec2 tex_size, ivec2 tex_coord, vec3 color, int samples)
     {
-        auto r = color.x;
-        auto g = color.y;
-        auto b = color.z;
+        auto r = color.r;
+        auto g = color.g;
+        auto b = color.b;
 
         auto scale = 1.0 / samples;
         r = pow(scale * r, 1 / 2.2);
@@ -189,9 +189,9 @@ namespace MiniEngine::PathTracing
     {
         vec3 color;
 
-        color.x = pow(pixels[3 * (tex_size.x * tex_coord.y + tex_coord.x) + 0] / 255.f, 2.2);
-        color.y = pow(pixels[3 * (tex_size.x * tex_coord.y + tex_coord.x) + 1] / 255.f, 2.2);
-        color.z = pow(pixels[3 * (tex_size.x * tex_coord.y + tex_coord.x) + 2] / 255.f, 2.2);
+        color.r = pow(pixels[3 * (tex_size.x * tex_coord.y + tex_coord.x) + 0] / 255.f, 2.2);
+        color.g = pow(pixels[3 * (tex_size.x * tex_coord.y + tex_coord.x) + 1] / 255.f, 2.2);
+        color.b = pow(pixels[3 * (tex_size.x * tex_coord.y + tex_coord.x) + 2] / 255.f, 2.2);
 
         return color;
     }
@@ -205,6 +205,8 @@ namespace MiniEngine::PathTracing
         // loop meshes
         for (const auto &mesh : m_model->meshes)
         {
+            auto mat = make_shared<Phong>(mesh.material);
+
             // loop triangles
             for (int id = 0; id < mesh.indices.size(); id += 3)
             {
@@ -213,13 +215,8 @@ namespace MiniEngine::PathTracing
                 vertices[1] = mesh.vertices[mesh.indices[id + 1]];
                 vertices[2] = mesh.vertices[mesh.indices[id + 2]];
 
-                vector<vec3> vt(3);
-                vt[0] = vertices[0].Position;
-                vt[1] = vertices[1].Position;
-                vt[2] = vertices[2].Position;
+                mesh_data.add(make_shared<Triangle>(vertices, mat));
 
-                auto mat = make_shared<Phong>(mesh.material);
-                mesh_data.add(make_shared<Triangle>(vt, mat));
 
                 // if (mat->is_emitted(mat->mat))
                 // {
