@@ -32,6 +32,10 @@ namespace MiniEngine
                 {
                     m_shader_folder = m_root_folder / value;
                 }
+                else if (name == "SchemaFolder")
+                {
+                    m_schema_folder = m_root_folder / value;
+                }
             }
         }
     }
@@ -40,6 +44,12 @@ namespace MiniEngine
 
     const std::filesystem::path& ConfigManager::getAssetFolder() const { return m_asset_folder; }
 
+    const std::filesystem::path& ConfigManager::getSchemaFolder() const { return m_schema_folder; }
+
     const std::filesystem::path& ConfigManager::getShaderFolder() const { return m_shader_folder; }
+
+    const std::string& ConfigManager::getDefaultWorldUrl() const { return m_default_world_url; }
+
+    const std::string& ConfigManager::getGlobalRenderingResUrl() const { return m_global_rendering_res_url; }
 
 } // namespace MiniEngine

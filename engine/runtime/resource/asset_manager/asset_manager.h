@@ -40,7 +40,7 @@ namespace MiniEngine
             // }
 
             // Serializer::read(asset_json, out_asset);
-            // return true;
+            return true;
         }
 
         template<typename AssetType>
@@ -61,7 +61,7 @@ namespace MiniEngine
             // asset_json_file << asset_json_text;
             // asset_json_file.flush();
 
-            // return true;
+            return true;
         }
 
         std::filesystem::path getFullPath(const std::string& relative_path) const;

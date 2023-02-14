@@ -1,15 +1,24 @@
-// #pragma once
+#pragma once
 
-// #include <string>
-// #include <vector>
+#include "runtime/core/meta/reflection/reflection.h"
+#include <string>
+#include <vector>
 
-// #include "runtime/resource/res_type/common/object.h"
+namespace MiniEngine
+{
+    REFLECTION_TYPE(WorldRes)
+    CLASS(WorldRes, Fields)
+    {
+        REFLECTION_BODY(WorldRes);
 
-// namespace MiniEngine
-// {
-//     class World
-//     {
-//     public:
-//         std::vector<ObjectInstanceRes> m_objects;
-//     };
-// } // namespace MiniEngine
+    public:
+        // world name
+        std::string              m_name;
+
+        // all scene urls for this world
+        std::vector<std::string> m_scene_urls;
+
+        // the default scene for this world, which should be first loading scene
+        std::string m_default_scene_url;
+    };
+} // namespace MiniEngine

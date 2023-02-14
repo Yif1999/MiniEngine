@@ -53,8 +53,6 @@ namespace MiniEngine::PathTracing
 
     void PathTracer::startRender(unsigned char *pixels)
     {
-        struct timeval startTime, endTime;
-
         int window_size = 512;
 
         // Image
@@ -80,25 +78,7 @@ namespace MiniEngine::PathTracing
         auto lights = make_shared<HittableList>(light_data);
 
         // Render
-        gettimeofday(&startTime,NULL);
-
-        // single thread
-        // for (int j = image_height - 1; j >= 0; --j)
-        // {
-        //     for (int i = 0; i < image_width; ++i)
-        //     {
-        //         vec3 pixel_color(0, 0, 0);
-
-        //         for (int s = 0; s < samples; ++s)
-        //         {
-        //             f32 u = (i + linearRand(0.f, 1.f)) / (image_width - 1);
-        //             f32 v = (j + linearRand(0.f, 1.f)) / (image_height - 1);
-        //             Ray r = cam.getRay(u, v);
-        //             pixel_color += getColor(r, mesh, lights, max_depth);
-        //         }
-        //         writeColor(pixels, ivec2(image_width, image_height), ivec2(i, j), pixel_color, samples);
-        //     }
-        // }
+        std::chrono::steady_clock::time_point startTime = std::chrono::steady_clock::now();
 
         // multi thread
         for (int j = image_height - 1; j >= 0; --j)
@@ -120,9 +100,11 @@ namespace MiniEngine::PathTracing
                 writeColor(pixels, ivec2(image_width, image_height), ivec2(i, j), pixel_color, samples); });
         }
 
-        gettimeofday(&endTime,NULL);
+        std::chrono::steady_clock::time_point endTime = std::chrono::steady_clock::now();
+        std::chrono::duration<float> time_span = std::chrono::duration_cast<std::chrono::duration<float>>(endTime - startTime);
+        float delta_time = time_span.count();
 
-        LOG_INFO("ray tracing is done in " + to_string((endTime.tv_sec - startTime.tv_sec) + (float)(endTime.tv_usec - startTime.tv_usec)/1000000.0) + "s");
+        LOG_INFO("ray tracing is done in " + to_string(delta_time) + "s");
 
         // Denoise
         float *denoise_buffer = new float[3 * 512 * 512];

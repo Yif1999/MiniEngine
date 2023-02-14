@@ -66,9 +66,6 @@ namespace MiniEngine
         logicalTick(delta_time);
         calculateFPS(delta_time);
 
-        // single thread
-        // exchange data between logic and render contexts
-
         rendererTick(delta_time);
 
         g_runtime_global_context.m_window_system->pollEvents();

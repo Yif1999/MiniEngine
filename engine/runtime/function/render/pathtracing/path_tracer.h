@@ -7,7 +7,6 @@
 #include "runtime/function/render/render_model.h"
 
 #include <glm/glm.hpp>
-#include <sys/time.h>
 
 namespace MiniEngine::PathTracing
 {

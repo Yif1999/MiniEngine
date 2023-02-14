@@ -32,7 +32,7 @@ namespace MiniEngine
             data = stbi_load(buff, &width, &height, &components_per_pixel, components_per_pixel);
 
             if (!data) {
-                std::cerr << "ERROR: Could not load texture image file '" << filename << "'.\n";
+                // std::cerr << "ERROR: Could not load texture image file '" << filename << "'.\n";
                 width = height = 0;
             }
 
