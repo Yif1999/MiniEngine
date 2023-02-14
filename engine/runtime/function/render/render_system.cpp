@@ -30,7 +30,7 @@ namespace MiniEngine
         pixels = new unsigned char[3*window_size*window_size];
         m_window = init_info.window_system->getWindow();
         // load display model
-        m_display = std::make_shared<Model>("asset/mesh/plane.obj");
+        m_display = std::make_shared<Model>("asset/object/basic/plane.obj");
         // load display shader
         m_shader = std::make_shared<Shader>("shader/glsl/unlit.vert", "shader/glsl/unlit.frag");
         // setup virtual camera
