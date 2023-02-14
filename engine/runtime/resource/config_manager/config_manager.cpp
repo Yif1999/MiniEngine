@@ -36,6 +36,10 @@ namespace MiniEngine
                 {
                     m_schema_folder = m_root_folder / value;
                 }
+                else if (name == "DefaultWorld")
+                {
+                    m_default_world_url = value;
+                }
             }
         }
     }

@@ -159,7 +159,7 @@ namespace MiniEngine::PathTracing
                 return false;
             }
 
-            if (is_specular(mat) && linearRand(0.f, 1.f) < 0.3f)
+            if (is_specular(mat) && linearRand(0.f, 1.f) < 0.5f)
             {
                 vec3 reflected = reflect(r_in.direction, rec.hit_point.Normal);
                 vec3 noise = 1.f / log(mat.Ns) * ballRand(1.f);

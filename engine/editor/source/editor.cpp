@@ -2,22 +2,22 @@
 
 #include "runtime/engine/engine.h"
 #include "runtime/function/global/global_contex.h"
-// #include "runtime/function/render/render_camera.h"
-// #include "runtime/function/render/render_system.h"
+#include "runtime/function/render/render_camera.h"
+#include "runtime/function/render/render_system.h"
 
 #include "editor/include/editor_global_context.h"
 // #include "editor/include/editor_input_manager.h"
-#include "editor/include/editor_scene_manager.h"
+// #include "editor/include/editor_scene_manager.h"
 #include "editor/include/editor_ui.h"
 
 #include <assert.h>
 
 namespace MiniEngine
 {
-    // void registerEdtorTickComponent(std::string component_type_name)
-    // {
-    //     g_editor_tick_component_types.insert(component_type_name);
-    // }
+    void registerEdtorTickComponent(std::string component_type_name)
+    {
+        // g_editor_tick_component_types.insert(component_type_name);
+    }
 
     Editor::Editor()
     {

@@ -31,7 +31,6 @@ namespace MiniEngine
     }
 
     void Engine::initialize() {}
-
     void Engine::clear() {}
 
     void Engine::run()
