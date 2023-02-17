@@ -1,7 +1,7 @@
 #pragma once
 
 #include "runtime/core/log/log_system.h"
-#include "runtime/function/global/global_contex.h"
+#include "runtime/function/global/global_context.h"
 
 #include <chrono>
 #include <thread>

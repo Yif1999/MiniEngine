@@ -2,7 +2,7 @@
 #include "runtime/core/base/macro.h"
 #include "runtime/core/meta/reflection/reflection_register.h"
 
-#include "runtime/function/global/global_contex.h"
+#include "runtime/function/global/global_context.h"
 #include "runtime/function/framework/world/world_manager.h"
 #include "runtime/function/input/input_system.h"
 #include "runtime/function/render/render_system.h"
@@ -79,7 +79,7 @@ namespace MiniEngine
     void Engine::logicalTick(float delta_time)
     {
         // g_runtime_global_context.m_world_manager->tick(delta_time);
-        g_runtime_global_context.m_input_system->tick();
+        // g_runtime_global_context.m_input_system->tick();
     }
 
     bool Engine::rendererTick(float delta_time)
