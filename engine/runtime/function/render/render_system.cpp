@@ -9,7 +9,7 @@
 #include "runtime/function/render/render_system.h"
 #include "runtime/function/render/render_scene.h"
 #include "runtime/function/render/render_swap_context.h"
-// #include "runtime/function/render/render_resource.h"
+#include "runtime/function/render/render_resource.h"
 
 // #include "runtime/function/render/pathtracing/path_tracer.h"
 
@@ -35,6 +35,7 @@ namespace MiniEngine
         GlobalRenderingRes global_rendering_res;
         const std::string &global_rendering_res_url = config_manager->getGlobalRenderingResUrl();
         asset_manager->loadAsset(global_rendering_res_url, global_rendering_res);
+        m_render_resource = std::make_shared<RenderResource>();
 
         // setup render camera
         const CameraPose &camera_pose = global_rendering_res.m_camera_config.m_pose;
@@ -93,6 +94,12 @@ namespace MiniEngine
         // process swap data between logic and render contexts
         processSwapData();
 
+        // update per-frame buffer
+        m_render_resource->updatePerFrameBuffer(m_render_scene, m_render_camera);
+
+        // update per-frame visible objects
+        m_render_scene->updateVisibleObjects(std::static_pointer_cast<RenderResource>(m_render_resource),
+                                             m_render_camera);
         // clean RT
         // memset(pixels,0,sizeof(char)*window_size*window_size*3);
 
@@ -137,6 +144,17 @@ namespace MiniEngine
 
     void RenderSystem::clear()
     {
+        if (m_render_scene)
+        {
+            m_render_scene->clear();
+        }
+        m_render_scene.reset();
+
+        if (m_render_resource)
+        {
+            m_render_resource->clear();
+        }
+        m_render_resource.reset();
     }
 
     void RenderSystem::processSwapData()
@@ -183,11 +201,11 @@ namespace MiniEngine
                     RenderMeshData mesh_data;
                     if (!is_mesh_loaded)
                     {
-                        // mesh_data = m_render_resource->loadMeshData(mesh_source, render_entity.m_bounding_box);
+                        mesh_data = m_render_resource->loadMeshData(mesh_source, render_entity.m_bounding_box);
                     }
                     else
                     {
-                        // render_entity.m_bounding_box = m_render_resource->getCachedBoudingBox(mesh_source);
+                        render_entity.m_bounding_box = m_render_resource->getCachedBoudingBox(mesh_source);
                     }
 
                     render_entity.m_mesh_asset_id = m_render_scene->getMeshAssetIdAllocator().allocGuid(mesh_source);
@@ -226,7 +244,7 @@ namespace MiniEngine
                     RenderMaterialData material_data;
                     if (!is_material_loaded)
                     {
-                        // material_data = m_render_resource->loadMaterialData(material_source);
+                        material_data = m_render_resource->loadMaterialData(material_source);
                     }
 
                     render_entity.m_material_asset_id =
@@ -301,10 +319,6 @@ namespace MiniEngine
 
             m_swap_context.resetCameraSwapData();
         }
-
-
-
-
     }
 
 } // namespace MiniEngine

@@ -3,16 +3,21 @@
 
 namespace MiniEngine
 {
-    REFLECTION_TYPE(MaterialRes)
-    CLASS(MaterialRes, Fields)
+    REFLECTION_TYPE(MaterialData)
+    CLASS(MaterialData, Fields)
     {
-        REFLECTION_BODY(MaterialRes);
+        REFLECTION_BODY(MaterialData);
 
     public:
-        std::string m_base_colour_texture_file;
-        std::string m_metallic_roughness_texture_file;
-        std::string m_normal_texture_file;
-        std::string m_occlusion_texture_file;
-        std::string m_emissive_texture_file;
+        std::string name;
+
+        Vector3 Kd; // diffuse reflectance of material, map_Kd is the texture file path.
+        Vector3 Ks; // specular reflectance of material.
+        Vector3 Ke; // emission intensity of light.
+        Vector3 Tr; // transmittance of material.
+        float Ns;     // shiness, the exponent of phong lobe.
+        float Ni;     // Index of Refraction(IOR) of transparent object like glass and water.
+
+        std::string map_Kd;
     };
 } // namespace MiniEngine

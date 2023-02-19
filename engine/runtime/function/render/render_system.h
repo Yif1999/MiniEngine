@@ -15,13 +15,17 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 
+#include "runtime/function/render/render_entity.h"
+#include "runtime/function/render/render_guid_allocator.h"
 #include "runtime/function/render/render_swap_context.h"
+#include "runtime/function/render/render_type.h"
 
 namespace MiniEngine
 {
     class WindowSystem;
     class WindowUI;
     class RenderScene;
+    class RenderResource;
     class RenderCamera;
 
     struct RenderSystemInitInfo
@@ -45,6 +49,7 @@ namespace MiniEngine
         GLFWwindow *m_window;
         std::shared_ptr<RenderCamera> m_render_camera;
         std::shared_ptr<RenderScene> m_render_scene;
+        std::shared_ptr<RenderResource> m_render_resource;
 
         void processSwapData();
     };

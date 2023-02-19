@@ -705,7 +705,7 @@ namespace MiniEngine
         RHI_SHARING_MODE_MAX_ENUM = 0x7FFFFFFF
     };
 
-    enum RHICommandBufferLevel : int
+    enum RHICommandBufferScene : int
     {
         RHI_COMMAND_BUFFER_LEVEL_PRIMARY = 0,
         RHI_COMMAND_BUFFER_LEVEL_SECONDARY = 1,
@@ -1724,7 +1724,7 @@ namespace MiniEngine
         uint32_t m_width {0};
         uint32_t m_height {0};
         uint32_t m_depth {0};
-        uint32_t m_mip_levels {0};
+        uint32_t m_mip_scenes {0};
         uint32_t m_array_layers {0};
         void*    m_pixels {nullptr};
 
