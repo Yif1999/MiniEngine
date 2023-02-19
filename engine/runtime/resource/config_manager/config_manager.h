@@ -21,7 +21,6 @@ namespace MiniEngine
         
         const std::string& getDefaultWorldUrl() const;
         const std::string& getGlobalRenderingResUrl() const;
-        const std::string& getGlobalParticleResUrl() const;
 
     private:
         std::filesystem::path m_root_folder;
@@ -34,6 +33,5 @@ namespace MiniEngine
 
         std::string m_default_world_url;
         std::string m_global_rendering_res_url;
-        std::string m_global_particle_res_url;
     };
 } // namespace MiniEngine

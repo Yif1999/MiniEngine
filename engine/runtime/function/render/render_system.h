@@ -15,13 +15,14 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 
+#include "runtime/function/render/render_swap_context.h"
+
 namespace MiniEngine
 {
     class WindowSystem;
     class WindowUI;
-    class Model;
-    class Shader;
-    class Camera;
+    class RenderScene;
+    class RenderCamera;
 
     struct RenderSystemInitInfo
     {
@@ -39,17 +40,12 @@ namespace MiniEngine
         void clear();
 
     private:
-        GLFWwindow* m_window {nullptr};
-        std::shared_ptr<Model> m_display;
-        std::shared_ptr<Model> m_model;
-        std::shared_ptr<Camera> m_camera;
-        std::shared_ptr<Shader> m_shader;
+        RenderSwapContext m_swap_context;
 
-        unsigned char *pixels;
-        unsigned char *texture;
-        int width, height, nChannels;
-        int scene_id,last_scene =0;
+        GLFWwindow *m_window;
+        std::shared_ptr<RenderCamera> m_render_camera;
+        std::shared_ptr<RenderScene> m_render_scene;
 
-        
+        void processSwapData();
     };
-} 
+}

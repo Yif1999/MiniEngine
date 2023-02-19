@@ -7,14 +7,12 @@
 #include <functional>
 #include <vector>
 
-#define window_size 512
-
 namespace MiniEngine
 {
     struct WindowCreateInfo
     {
-        int         width {window_size};
-        int         height {window_size};
+        int         width {1280};
+        int         height {720};
         const char* title {"Editor"};
         bool        is_fullscreen {false};
     };
