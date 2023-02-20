@@ -28,15 +28,15 @@ namespace MiniEngine
 
         m_asset_manager = std::make_shared<AssetManager>();
 
-        // m_world_manager = std::make_shared<WorldManager>();
-        // m_world_manager->initialize();
+        m_world_manager = std::make_shared<WorldManager>();
+        m_world_manager->initialize();
 
         m_window_system = std::make_shared<WindowSystem>();
         WindowCreateInfo window_create_info;
         m_window_system->initialize(window_create_info);
 
-        // m_input_system = std::make_shared<InputSystem>();
-        // m_input_system->initialize();
+        m_input_system = std::make_shared<InputSystem>();
+        m_input_system->initialize();
 
         m_render_system = std::make_shared<RenderSystem>();
         RenderSystemInitInfo render_init_info;
@@ -51,11 +51,11 @@ namespace MiniEngine
 
         m_window_system.reset();
 
-        // m_world_manager->clear();
-        // m_world_manager.reset();
+        m_world_manager->clear();
+        m_world_manager.reset();
         
-        // m_input_system->clear();
-        // m_input_system.reset();
+        m_input_system->clear();
+        m_input_system.reset();
 
         m_asset_manager.reset();
 

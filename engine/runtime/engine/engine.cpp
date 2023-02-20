@@ -78,8 +78,8 @@ namespace MiniEngine
 
     void Engine::logicalTick(float delta_time)
     {
-        // g_runtime_global_context.m_world_manager->tick(delta_time);
-        // g_runtime_global_context.m_input_system->tick();
+        g_runtime_global_context.m_world_manager->tick(delta_time);
+        g_runtime_global_context.m_input_system->tick();
     }
 
     bool Engine::rendererTick(float delta_time)

@@ -164,11 +164,8 @@ namespace MiniEngine
         std::shared_ptr<AssetManager> asset_manager = g_runtime_global_context.m_asset_manager;
         ASSERT(asset_manager);
 
-        // TODO: update global resources if needed
         if (swap_data.m_scene_resource_desc.has_value())
         {
-            // m_render_resource->uploadGlobalRenderResource(m_rhi, *swap_data.m_scene_resource_desc);
-
             // reset scene resource swap data to a clean state
             m_swap_context.resetSceneRsourceSwapData();
         }
@@ -319,6 +316,86 @@ namespace MiniEngine
 
             m_swap_context.resetCameraSwapData();
         }
+    }
+
+    void RenderSystem::swapLogicRenderData() { m_swap_context.swapLogicRenderData(); }
+
+    RenderSwapContext &RenderSystem::getSwapContext() { return m_swap_context; }
+
+    std::shared_ptr<RenderCamera> RenderSystem::getRenderCamera() const { return m_render_camera; }
+
+    void RenderSystem::updateEngineContentViewport(float offset_x, float offset_y, float width, float height)
+    {
+        m_viewport->x = offset_x;
+        m_viewport->y = offset_y;
+        m_viewport->width = width;
+        m_viewport->height = height;
+        m_viewport->minDepth = 0.0f;
+        m_viewport->maxDepth = 1.0f;
+
+        m_render_camera->setAspect(width / height);
+    }
+
+    EngineContentViewport RenderSystem::getEngineContentViewport() const
+    {
+        return {m_viewport->x, m_viewport->y, m_viewport->width, m_viewport->height};
+    }
+
+    uint32_t RenderSystem::getGuidOfPickedMesh(const Vector2 &picked_uv)
+    {
+        return 0;
+    }
+
+    GObjectID RenderSystem::getGObjectIDByMeshID(uint32_t mesh_id) const
+    {
+        return m_render_scene->getGObjectIDByMeshID(mesh_id);
+    }
+
+    void RenderSystem::createAxis(std::array<RenderEntity, 3> axis_entities, std::array<RenderMeshData, 3> mesh_datas)
+    {
+        for (int i = 0; i < axis_entities.size(); i++)
+        {
+            // m_render_resource->uploadGameObjectRenderResource(m_rhi, axis_entities[i], mesh_datas[i]);
+        }
+    }
+
+    void RenderSystem::setVisibleAxis(std::optional<RenderEntity> axis)
+    {
+        m_render_scene->m_render_axis = axis;
+
+        if (axis.has_value())
+        {
+            // std::static_pointer_cast<RenderPipeline>(m_render_pipeline)->setAxisVisibleState(true);
+        }
+        else
+        {
+            // std::static_pointer_cast<RenderPipeline>(m_render_pipeline)->setAxisVisibleState(false);
+        }
+    }
+
+    void RenderSystem::setSelectedAxis(size_t selected_axis)
+    {
+        // std::static_pointer_cast<RenderPipeline>(m_render_pipeline)->setSelectedAxis(selected_axis);
+    }
+
+    GuidAllocator<GameObjectPartId> &RenderSystem::getGOInstanceIdAllocator()
+    {
+        return m_render_scene->getInstanceIdAllocator();
+    }
+
+    GuidAllocator<MeshSourceDesc> &RenderSystem::getMeshAssetIdAllocator()
+    {
+        return m_render_scene->getMeshAssetIdAllocator();
+    }
+
+    void RenderSystem::clearForSceneReloading()
+    {
+        m_render_scene->clearForSceneReloading();
+    }
+
+    void RenderSystem::initializeUIRenderBackend(WindowUI *window_ui)
+    {
+        // m_render_pipeline->initializeUIRenderBackend(window_ui);
     }
 
 } // namespace MiniEngine

@@ -22,24 +22,8 @@ namespace MiniEngine
 
         void clear();
 
-        // virtual void uploadGlobalRenderResource(std::shared_ptr<RHI> rhi, SceneResourceDesc scene_resource_desc) = 0;
-
-        // virtual void uploadGameObjectRenderResource(std::shared_ptr<RHI> rhi,
-        //                                             RenderEntity         render_entity,
-        //                                             RenderMeshData       mesh_data,
-        //                                             RenderMaterialData   material_data) = 0;
-
-        // virtual void uploadGameObjectRenderResource(std::shared_ptr<RHI> rhi,
-        //                                             RenderEntity         render_entity,
-        //                                             RenderMeshData       mesh_data) = 0;
-
-        // virtual void uploadGameObjectRenderResource(std::shared_ptr<RHI> rhi,
-        //                                             RenderEntity         render_entity,
-        //                                             RenderMaterialData   material_data) = 0;
-
         void updatePerFrameBuffer(std::shared_ptr<RenderScene>  render_scene, std::shared_ptr<RenderCamera> camera);
 
-        // TODO: data caching
         std::shared_ptr<TextureData> loadTextureHDR(std::string file, int desired_channels = 4);
         std::shared_ptr<TextureData> loadTexture(std::string file, bool is_srgb = false);
         RenderMeshData               loadMeshData(const MeshSourceDesc& source, AxisAlignedBox& bounding_box);

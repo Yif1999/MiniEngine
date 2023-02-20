@@ -68,7 +68,7 @@ namespace MiniEngine
         }
     }
 
-    void RenderScene::clearForLevelReloading()
+    void RenderScene::clearForSceneReloading()
     {
         m_instance_id_allocator.clear();
         m_mesh_object_id_map.clear();

@@ -43,7 +43,7 @@ namespace MiniEngine
         GObjectID getGObjectIDByMeshID(uint32_t mesh_id) const;
         void      deleteEntityByGObjectID(GObjectID go_id);
 
-        void clearForLevelReloading();
+        void clearForSceneReloading();
 
     private:
         GuidAllocator<GameObjectPartId>   m_instance_id_allocator;

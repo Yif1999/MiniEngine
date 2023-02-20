@@ -7,16 +7,12 @@ namespace MiniEngine
 {
     class LogSystem;
     class InputSystem;
-    class PhysicsManager;
     class FileSystem;
     class AssetManager;
     class ConfigManager;
     class WorldManager;
     class RenderSystem;
     class WindowSystem;
-    class ParticleManager;
-    class DebugDrawManager;
-    class RenderDebugConfig;
 
     struct EngineInitParams;
 
