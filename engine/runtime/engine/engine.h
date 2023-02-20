@@ -36,10 +36,6 @@ namespace MiniEngine
         bool rendererTick(float delta_time);
 
         void calculateFPS(float delta_time);
-
-        /**
-         *  Each frame can only be called once
-         */
         float calculateDeltaTime();
 
     protected:

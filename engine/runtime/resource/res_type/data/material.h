@@ -3,10 +3,10 @@
 
 namespace MiniEngine
 {
-    REFLECTION_TYPE(MaterialData)
-    CLASS(MaterialData, Fields)
+    REFLECTION_TYPE(MaterialRes)
+    CLASS(MaterialRes, Fields)
     {
-        REFLECTION_BODY(MaterialData);
+        REFLECTION_BODY(MaterialRes);
 
     public:
         std::string name;
