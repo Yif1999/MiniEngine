@@ -91,7 +91,6 @@
       <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>..\..;..\..\backends;%VULKAN_SDK%\include;%SDL2_DIR%\include;$(VcpkgCurrentInstalledDir)include\SDL2;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>ImTextureID=ImU64;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -106,7 +105,6 @@
       <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>..\..;..\..\backends;%VULKAN_SDK%\include;%SDL2_DIR%\include;$(VcpkgCurrentInstalledDir)include\SDL2;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>ImTextureID=ImU64;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -124,7 +122,6 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <AdditionalIncludeDirectories>..\..;..\..\backends;%VULKAN_SDK%\include;%SDL2_DIR%\include;$(VcpkgCurrentInstalledDir)include\SDL2;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <BufferSecurityCheck>false</BufferSecurityCheck>
-      <PreprocessorDefinitions>ImTextureID=ImU64;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -145,7 +142,6 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <AdditionalIncludeDirectories>..\..;..\..\backends;%VULKAN_SDK%\include;%SDL2_DIR%\include;$(VcpkgCurrentInstalledDir)include\SDL2;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <BufferSecurityCheck>false</BufferSecurityCheck>
-      <PreprocessorDefinitions>ImTextureID=ImU64;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>

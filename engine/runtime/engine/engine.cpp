@@ -10,6 +10,7 @@
 
 namespace MiniEngine
 {
+    bool                            g_is_editor_mode {false};
     std::unordered_set<std::string> g_editor_tick_component_types {};
 
     void Engine::startEngine(const std::string& config_file_path)

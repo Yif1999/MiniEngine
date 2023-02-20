@@ -4,6 +4,8 @@
 // Implemented features:
 //  [X] Renderer: User texture binding. Use 'MTLTexture' as ImTextureID. Read the FAQ about ImTextureID!
 //  [X] Renderer: Support for large meshes (64k+ vertices) with 16-bit indices.
+// Missing features:
+//  [ ] Renderer: Multi-viewport / platform windows.
 
 // You can use unmodified imgui_impl_* files in your project. See examples/ folder for examples of using this. 
 // Prefer including the entire imgui/ repository into your project (either as a copy or as a submodule), and only build the backends you need.
@@ -24,7 +26,7 @@
 IMGUI_IMPL_API bool ImGui_ImplMetal_Init(id<MTLDevice> device);
 IMGUI_IMPL_API void ImGui_ImplMetal_Shutdown();
 IMGUI_IMPL_API void ImGui_ImplMetal_NewFrame(MTLRenderPassDescriptor* renderPassDescriptor);
-IMGUI_IMPL_API void ImGui_ImplMetal_RenderDrawData(ImDrawData* drawData,
+IMGUI_IMPL_API void ImGui_ImplMetal_RenderDrawData(ImDrawData* draw_data,
                                                    id<MTLCommandBuffer> commandBuffer,
                                                    id<MTLRenderCommandEncoder> commandEncoder);
 
@@ -44,7 +46,9 @@ IMGUI_IMPL_API void ImGui_ImplMetal_DestroyDeviceObjects();
 // More info about using Metal from C++: https://developer.apple.com/metal/cpp/
 
 #ifdef IMGUI_IMPL_METAL_CPP
+
 #include <Metal/Metal.hpp>
+
 #ifndef __OBJC__
 
 IMGUI_IMPL_API bool ImGui_ImplMetal_Init(MTL::Device* device);
@@ -61,4 +65,5 @@ IMGUI_IMPL_API bool ImGui_ImplMetal_CreateDeviceObjects(MTL::Device* device);
 IMGUI_IMPL_API void ImGui_ImplMetal_DestroyDeviceObjects();
 
 #endif
+
 #endif

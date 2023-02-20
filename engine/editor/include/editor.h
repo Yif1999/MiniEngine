@@ -4,7 +4,7 @@
 
 namespace MiniEngine
 {
-    class UI;
+    class EditorUI;
     class Engine;
 
     class Editor 
@@ -21,7 +21,7 @@ namespace MiniEngine
         void run();
 
     protected:
-        std::shared_ptr<UI> m_editor_ui;
+        std::shared_ptr<EditorUI> m_editor_ui;
         Engine* m_engine_runtime{ nullptr };
     };
 }
