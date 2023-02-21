@@ -23,10 +23,10 @@
 namespace MiniEngine
 {
     class WindowSystem;
-    class WindowUI;
     class RenderScene;
     class RenderResource;
     class RenderCamera;
+    class WindowUI;
 
     struct EngineContentViewport
     {
@@ -65,7 +65,7 @@ namespace MiniEngine
         RenderSwapContext &getSwapContext();
         std::shared_ptr<RenderCamera> getRenderCamera() const;
 
-        void initializeUIRenderBackend(WindowUI *window_ui);
+        void initializeUIRenderBackend(WindowUI* window_ui);
         void updateEngineContentViewport(float offset_x, float offset_y, float width, float height);
         uint32_t getGuidOfPickedMesh(const Vector2 &picked_uv);
         GObjectID getGObjectIDByMeshID(uint32_t mesh_id) const;
@@ -84,6 +84,7 @@ namespace MiniEngine
         RenderSwapContext m_swap_context;
 
         GLFWwindow *m_window;
+        WindowUI *m_window_ui;
         std::shared_ptr<RenderCamera> m_render_camera;
         std::shared_ptr<RenderScene> m_render_scene;
         std::shared_ptr<RenderResource> m_render_resource;

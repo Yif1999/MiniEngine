@@ -9,7 +9,7 @@ namespace MiniEngine
 
     class Editor 
     {
-        friend class UI;
+        friend class EditorUI;
 
     public:
         Editor();

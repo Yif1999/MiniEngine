@@ -36,6 +36,10 @@ namespace MiniEngine
                 {
                     m_schema_folder = m_root_folder / value;
                 }
+                else if (name == "FontFile")
+                {
+                    m_editor_font_path = m_root_folder / value;
+                }
                 else if (name == "DefaultWorld")
                 {
                     m_default_world_url = value;
@@ -55,6 +59,8 @@ namespace MiniEngine
     const std::filesystem::path &ConfigManager::getSchemaFolder() const { return m_schema_folder; }
 
     const std::filesystem::path &ConfigManager::getShaderFolder() const { return m_shader_folder; }
+
+    const std::filesystem::path& ConfigManager::getEditorFontPath() const { return m_editor_font_path; }
 
     const std::string &ConfigManager::getDefaultWorldUrl() const { return m_default_world_url; }
 

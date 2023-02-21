@@ -10,6 +10,7 @@
 #include "runtime/function/render/render_scene.h"
 #include "runtime/function/render/render_swap_context.h"
 #include "runtime/function/render/render_resource.h"
+#include "editor/include/editor_ui.h"
 
 // #include "runtime/function/render/pathtracing/path_tracer.h"
 
@@ -29,6 +30,7 @@ namespace MiniEngine
 
         // configure global opengl state
         glEnable(GL_MULTISAMPLE);
+        glEnable(GL_FRAMEBUFFER_SRGB);
         m_window = init_info.window_system->getWindow();
 
         // global rendering resource
@@ -136,6 +138,19 @@ namespace MiniEngine
         //     m_model.reset();
         //     m_model = std::make_shared<Model>("asset/scene/"+std::to_string(scene_id+1)+".obj");
         // }
+
+        if (m_window_ui)
+        {
+            ImGui_ImplOpenGL3_NewFrame();
+            ImGui_ImplGlfw_NewFrame();
+            ImGui::NewFrame();
+
+            m_window_ui->preRender();
+
+            ImGui::Render();
+
+            ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData()); 
+        }
 
         // swap buffers and poll IO events
         glfwSwapBuffers(m_window);
@@ -393,9 +408,12 @@ namespace MiniEngine
         m_render_scene->clearForSceneReloading();
     }
 
-    void RenderSystem::initializeUIRenderBackend(WindowUI *window_ui)
+    void RenderSystem::initializeUIRenderBackend(WindowUI* window_ui)
     {
-        // m_render_pipeline->initializeUIRenderBackend(window_ui);
+        m_window_ui = window_ui;
+
+        ImGui_ImplGlfw_InitForOpenGL(m_window,true);
+        ImGui_ImplOpenGL3_Init("#version 330");
     }
 
 } // namespace MiniEngine

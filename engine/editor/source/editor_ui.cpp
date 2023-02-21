@@ -268,7 +268,7 @@ namespace MiniEngine
     {
         showEditorMenu(&m_editor_menu_window_open);
         showEditorWorldObjectsWindow(&m_asset_window_open);
-        showEditorGameWindow(&m_game_engine_window_open);
+        // showEditorGameWindow(&m_game_engine_window_open);
         showEditorFileContentWindow(&m_file_content_window_open);
         showEditorDetailWindow(&m_detail_window_open);
     }
@@ -293,8 +293,6 @@ namespace MiniEngine
         ImGuiID main_docking_id = ImGui::GetID("Main Docking");
         if (ImGui::DockBuilderGetNode(main_docking_id) == nullptr)
         {
-            ImGui::DockBuilderRemoveNode(main_docking_id);
-
             ImGui::DockBuilderAddNode(main_docking_id, dock_flags);
             ImGui::DockBuilderSetNodePos(main_docking_id,
                                          ImVec2(main_viewport->WorkPos.x, main_viewport->WorkPos.y + 18.0f));
@@ -563,20 +561,18 @@ namespace MiniEngine
             ImGui::TableSetupColumn("Type", ImGuiTableColumnFlags_WidthFixed);
             ImGui::TableHeadersRow();
 
-            auto current_time = std::chrono::steady_clock::now();
-            if (current_time - m_last_file_tree_update > std::chrono::seconds(1))
-            {
-                m_editor_file_service.buildEngineFileTree();
-                m_last_file_tree_update = current_time;
-            }
-            m_last_file_tree_update = current_time;
+            // auto current_time = std::chrono::steady_clock::now();
+            // if (current_time - m_last_file_tree_update > std::chrono::seconds(1))
+            // {
+            //     m_editor_file_service.buildEngineFileTree();
+            //     m_last_file_tree_update = current_time;
+            // }
+            // m_last_file_tree_update = current_time;
 
-            EditorFileNode* editor_root_node = m_editor_file_service.getEditorRootNode();
-            buildEditorFileAssetsUITree(editor_root_node);
+            // EditorFileNode* editor_root_node = m_editor_file_service.getEditorRootNode();
+            // buildEditorFileAssetsUITree(editor_root_node);
             ImGui::EndTable();
         }
-
-        // file image list
 
         ImGui::End();
     }
@@ -844,6 +840,14 @@ namespace MiniEngine
         float content_scale = fmaxf(1.0f, fmaxf(x_scale, y_scale));
         windowContentScaleUpdate(content_scale);
         glfwSetWindowContentScaleCallback(init_info.window_system->getWindow(), windowContentScaleCallback);
+
+        ImGuiIO& io = ImGui::GetIO();
+        io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+        io.ConfigDockingAlwaysTabBar         = true;
+        io.ConfigWindowsMoveFromTitleBarOnly = true;
+        io.Fonts->AddFontFromFileTTF(
+            config_manager->getEditorFontPath().generic_string().data(), content_scale * 16, nullptr, nullptr);
+        io.Fonts->Build();
 
         ImGuiStyle& style     = ImGui::GetStyle();
         style.WindowPadding   = ImVec2(1.0, 0);
