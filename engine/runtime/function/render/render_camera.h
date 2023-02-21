@@ -3,6 +3,8 @@
 #include "runtime/core/math/math_headers.h"
 
 #include <mutex>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 namespace MiniEngine
 {
@@ -50,6 +52,8 @@ namespace MiniEngine
         Vector3   up() const { return (m_invRotation * Z); }
         Vector3   right() const { return (m_invRotation * X); }
         Vector2   getFOV() const { return {m_fovx, m_fovy}; }
+        glm::mat4 getGLMViewMatrix();
+        glm::mat4 getGLMPersProjMatrix() const;
         Matrix4x4 getViewMatrix();
         Matrix4x4 getPersProjMatrix() const;
         Matrix4x4 getLookAtMatrix() const { return Math::makeLookAtMatrix(position(), position() + forward(), up()); }

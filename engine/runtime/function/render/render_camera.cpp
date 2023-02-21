@@ -74,6 +74,21 @@ namespace MiniEngine
         m_invRotation = m_rotation.conjugate();
     }
 
+    glm::mat4 RenderCamera::getGLMViewMatrix()
+    {
+        glm::vec3 position(m_position.x, m_position.y, m_position.z);
+        glm::vec3 front(0.f, 0.f, -1.f);
+        glm::vec3 up(0.f, 1.f, 0.f);
+        return glm::lookAt(position, position + front, up);
+    }
+
+    glm::mat4 RenderCamera::getGLMPersProjMatrix() const
+    {
+        glm::mat4 proj_mat = glm::perspective(glm::radians(getFOV().y), m_aspect, m_znear, m_zfar);
+
+        return proj_mat;
+    }
+
     Matrix4x4 RenderCamera::getViewMatrix()
     {
         std::lock_guard<std::mutex> lock_guard(m_view_matrix_mutex);

@@ -19,6 +19,7 @@
 #include "runtime/function/render/render_guid_allocator.h"
 #include "runtime/function/render/render_swap_context.h"
 #include "runtime/function/render/render_type.h"
+#include "editor/include/editor_ui.h"
 
 namespace MiniEngine
 {
@@ -26,6 +27,7 @@ namespace MiniEngine
     class RenderScene;
     class RenderResource;
     class RenderCamera;
+    class RenderShader;
     class WindowUI;
 
     struct EngineContentViewport
@@ -89,6 +91,7 @@ namespace MiniEngine
         std::shared_ptr<RenderCamera> m_render_camera;
         std::shared_ptr<RenderScene> m_render_scene;
         std::shared_ptr<RenderResource> m_render_resource;
+        std::shared_ptr<RenderShader> m_render_shader;
 
         void processSwapData();
     };
