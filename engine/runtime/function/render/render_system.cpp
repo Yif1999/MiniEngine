@@ -31,7 +31,10 @@ namespace MiniEngine
         // configure global opengl state
         glEnable(GL_MULTISAMPLE);
         glEnable(GL_FRAMEBUFFER_SRGB);
+
         m_window = init_info.window_system->getWindow();
+        std::array<int, 2> window_size = init_info.window_system->getWindowSize();
+        m_viewport = {0.0f, 0.0f, (float)window_size[0], (float)window_size[1], 0.0f, 1.0f};
 
         // global rendering resource
         GlobalRenderingRes global_rendering_res;
@@ -51,13 +54,6 @@ namespace MiniEngine
         // setup render scene
         m_render_scene = std::make_shared<RenderScene>();
         m_render_scene->setVisibleNodesReference();
-
-        // //setup imgui
-        // IMGUI_CHECKVERSION();
-        // ImGui::CreateContext();
-        // ImGuiIO& io = ImGui::GetIO(); (void)io;
-        // ImGui_ImplGlfw_InitForOpenGL(m_window,true);
-        // ImGui_ImplOpenGL3_Init("#version 330");
 
         // // create render texture
         // unsigned int texture1;
@@ -116,28 +112,6 @@ namespace MiniEngine
         // update camera
         // m_camera->ProcessMouseMovement(3.f,0.f,true);
         // m_camera->ProcessKeyboard(LEFT,0.024f);
-
-        // // draw UI
-        // ImGui_ImplOpenGL3_NewFrame();
-        // ImGui_ImplGlfw_NewFrame();
-        // ImGui::NewFrame();
-        // ImGui::Begin("scene manager");
-        // ImGui::RadioButton("scene 1 (3k faces)",&scene_id,0);
-        // ImGui::SameLine();
-        // ImGui::RadioButton("scene 2 (25k faces)",&scene_id,1);
-        // ImGui::SameLine();
-        // ImGui::RadioButton("scene 3 (68k faces)",&scene_id,2);
-        // ImGui::SameLine();
-        // ImGui::End();
-        // ImGui::Render();
-        // ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
-        // // update scene
-        // if (scene_id!=last_scene)
-        // {
-        //     m_model.reset();
-        //     m_model = std::make_shared<Model>("asset/scene/"+std::to_string(scene_id+1)+".obj");
-        // }
 
         if (m_window_ui)
         {
@@ -341,19 +315,19 @@ namespace MiniEngine
 
     void RenderSystem::updateEngineContentViewport(float offset_x, float offset_y, float width, float height)
     {
-        m_viewport->x = offset_x;
-        m_viewport->y = offset_y;
-        m_viewport->width = width;
-        m_viewport->height = height;
-        m_viewport->minDepth = 0.0f;
-        m_viewport->maxDepth = 1.0f;
+        m_viewport.x = offset_x;
+        m_viewport.y = offset_y;
+        m_viewport.width = width;
+        m_viewport.height = height;
+        m_viewport.minDepth = 0.0f;
+        m_viewport.maxDepth = 1.0f;
 
         m_render_camera->setAspect(width / height);
     }
 
     EngineContentViewport RenderSystem::getEngineContentViewport() const
     {
-        return {m_viewport->x, m_viewport->y, m_viewport->width, m_viewport->height};
+        return {m_viewport.x, m_viewport.y, m_viewport.width, m_viewport.height};
     }
 
     uint32_t RenderSystem::getGuidOfPickedMesh(const Vector2 &picked_uv)

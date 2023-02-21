@@ -85,10 +85,10 @@ namespace MiniEngine
 
         GLFWwindow *m_window;
         WindowUI *m_window_ui;
+        RHIViewport m_viewport;
         std::shared_ptr<RenderCamera> m_render_camera;
         std::shared_ptr<RenderScene> m_render_scene;
         std::shared_ptr<RenderResource> m_render_resource;
-        std::shared_ptr<RHIViewport> m_viewport;
 
         void processSwapData();
     };
