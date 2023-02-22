@@ -313,7 +313,7 @@ namespace MiniEngine
             ImGui::DockBuilderDockWindow("World Objects", left_asset);
             ImGui::DockBuilderDockWindow("Components Details", right);
             ImGui::DockBuilderDockWindow("File Content", left_file_content);
-            ImGui::DockBuilderDockWindow("Game Engine", left_game_engine);
+            ImGui::DockBuilderDockWindow("Scene View", left_game_engine);
 
             ImGui::DockBuilderFinish(main_docking_id);
         }
@@ -587,7 +587,7 @@ namespace MiniEngine
         if (!*p_open)
             return;
 
-        if (!ImGui::Begin("Game Engine", p_open, window_flags))
+        if (!ImGui::Begin("Scene View", p_open, window_flags))
         {
             ImGui::End();
             return;
@@ -648,8 +648,8 @@ namespace MiniEngine
             ImGui::Indent(indent_val);
             if (g_is_editor_mode)
             {
-                ImGui::PushID("Editor Mode");
-                if (ImGui::Button("Editor Mode"))
+                ImGui::PushID("Render");
+                if (ImGui::Button("Render"))
                 {
                     g_is_editor_mode = false;
                     g_editor_global_context.m_scene_manager->drawSelectedEntityAxis();
@@ -660,7 +660,7 @@ namespace MiniEngine
             }
             else
             {
-                if (ImGui::Button("Game Mode"))
+                if (ImGui::Button("Stop"))
                 {
                     g_is_editor_mode = true;
                     g_editor_global_context.m_scene_manager->drawSelectedEntityAxis();
@@ -672,17 +672,6 @@ namespace MiniEngine
 
             ImGui::Unindent();
             ImGui::EndMenuBar();
-        }
-
-        if (!g_is_editor_mode)
-        {
-            // ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "Press Left Alt key to display the mouse cursor!");
-        }
-        else
-        {
-            // ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f),
-            //                    "Current editor camera move speed: [%f]",
-            //                    g_editor_global_context.m_input_manager->getCameraSpeed());
         }
 
         // GetWindowPos() ----->  X--------------------------------------------O

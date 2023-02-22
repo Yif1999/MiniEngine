@@ -9,6 +9,7 @@
 #include "runtime/function/render/render_system.h"
 #include "runtime/function/render/render_scene.h"
 #include "runtime/function/render/render_shader.h"
+#include "runtime/function/render/render_model.h"
 #include "runtime/function/render/render_swap_context.h"
 #include "runtime/function/render/render_resource.h"
 
@@ -37,7 +38,7 @@ namespace MiniEngine
         std::array<int, 2> window_size = init_info.window_system->getWindowSize();
         m_viewport = {0.0f, 0.0f, (float)window_size[0], (float)window_size[1], 0.0f, 1.0f};
 
-        // global rendering resource
+        // load rendering resource
         GlobalRenderingRes global_rendering_res;
         const std::string &global_rendering_res_url = config_manager->getGlobalRenderingResUrl();
         asset_manager->loadAsset(global_rendering_res_url, global_rendering_res);
@@ -52,19 +53,41 @@ namespace MiniEngine
         m_render_camera->setAspect(global_rendering_res.m_camera_config.m_aspect.x /
                                    global_rendering_res.m_camera_config.m_aspect.y);
 
-        // setup render scene
+        // create render scene
         m_render_scene = std::make_shared<RenderScene>();
         m_render_scene->setVisibleNodesReference();
 
-        // setup render shader
-        m_render_shader = std::make_shared<RenderShader>("shader/glsl/unlit.vert", "shader/glsl/unlit.frag");
-        m_render_shader->use();
-        glm::mat4 projection = m_render_camera->getGLMPersProjMatrix();
-        glm::mat4 view = m_render_camera->getGLMViewMatrix();
-        glm::mat4 model = glm::mat4(1.0f);
-        m_render_shader->setMat4("projection", projection);
-        m_render_shader->setMat4("view", view);
-        m_render_shader->setMat4("model", model);
+        // create render shader
+        m_render_shader = std::make_shared<RenderShader>((config_manager->getShaderFolder() / "unlit.vert").c_str(),
+                                                         (config_manager->getShaderFolder() / "unlit.frag").c_str());
+        m_render_model = std::make_shared<Model>("/Volumes/T7/Dev/MiniEngine/scene/staircase/stairscase.obj");
+   
+        // create render target frame buffer
+        unsigned int framebuffer;
+        glGenFramebuffers(1, &framebuffer);
+        glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+
+        unsigned int texColorBuffer;
+        glGenTextures(1, &texColorBuffer);
+        glBindTexture(GL_TEXTURE_2D, texColorBuffer);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, m_viewport.width, m_viewport.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glBindTexture(GL_TEXTURE_2D, 0);
+   
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texColorBuffer, 0); 
+
+        unsigned int rbo;
+        glGenRenderbuffers(1, &rbo);
+        glBindRenderbuffer(GL_RENDERBUFFER, rbo); 
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, m_viewport.width, m_viewport.height);  
+        glBindRenderbuffer(GL_RENDERBUFFER, 0);
+
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
+
+        if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+            std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
         // // create render texture
         // unsigned int texture1;
@@ -87,9 +110,9 @@ namespace MiniEngine
 
     void RenderSystem::tick(float delta_time)
     {
-        // clean frame buffer
+        // clean window frame buffer
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // process swap data between logic and render contexts
         processSwapData();
@@ -101,8 +124,16 @@ namespace MiniEngine
         m_render_scene->updateVisibleObjects(std::static_pointer_cast<RenderResource>(m_render_resource),
                                              m_render_camera);
 
-        // draw models in the scene    
-                   
+
+        // draw models in the scene
+        m_render_shader->use();
+        glm::mat4 projection = m_render_camera->getGLMPersProjMatrix();
+        glm::mat4 view = m_render_camera->getGLMViewMatrix();
+        glm::mat4 model = glm::mat4(1.0f);
+        m_render_shader->setMat4("projection", projection);
+        m_render_shader->setMat4("view", view);
+        m_render_shader->setMat4("model", model);
+        m_render_model->Draw(m_render_shader);
 
         // draw editor ui
         if (m_window_ui)

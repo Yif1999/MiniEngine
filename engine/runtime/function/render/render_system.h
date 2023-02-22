@@ -29,6 +29,7 @@ namespace MiniEngine
     class RenderCamera;
     class RenderShader;
     class WindowUI;
+    class Model;
 
     struct EngineContentViewport
     {
@@ -92,7 +93,10 @@ namespace MiniEngine
         std::shared_ptr<RenderScene> m_render_scene;
         std::shared_ptr<RenderResource> m_render_resource;
         std::shared_ptr<RenderShader> m_render_shader;
+        std::shared_ptr<Model> m_render_model;
 
         void processSwapData();
     };
+
+    
 }
