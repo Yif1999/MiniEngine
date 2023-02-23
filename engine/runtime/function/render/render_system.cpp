@@ -63,11 +63,9 @@ namespace MiniEngine
         m_render_model = std::make_shared<Model>("/Volumes/T7/Dev/MiniEngine/scene/staircase/stairscase.obj");
    
         // create render target frame buffer
-        unsigned int framebuffer;
         glGenFramebuffers(1, &framebuffer);
         glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
 
-        unsigned int texColorBuffer;
         glGenTextures(1, &texColorBuffer);
         glBindTexture(GL_TEXTURE_2D, texColorBuffer);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, m_viewport.width, m_viewport.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
@@ -77,7 +75,6 @@ namespace MiniEngine
    
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texColorBuffer, 0); 
 
-        unsigned int rbo;
         glGenRenderbuffers(1, &rbo);
         glBindRenderbuffer(GL_RENDERBUFFER, rbo); 
         glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, m_viewport.width, m_viewport.height);  
@@ -110,9 +107,6 @@ namespace MiniEngine
 
     void RenderSystem::tick(float delta_time)
     {
-        // clean window frame buffer
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // process swap data between logic and render contexts
         processSwapData();
@@ -126,6 +120,10 @@ namespace MiniEngine
 
 
         // draw models in the scene
+        glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
         m_render_shader->use();
         glm::mat4 projection = m_render_camera->getGLMPersProjMatrix();
         glm::mat4 view = m_render_camera->getGLMViewMatrix();
@@ -136,6 +134,10 @@ namespace MiniEngine
         m_render_model->Draw(m_render_shader);
 
         // draw editor ui
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glClearColor(0.0f, 0.0f, 0.0f, 0.0f); 
+        glClear(GL_COLOR_BUFFER_BIT);
+
         if (m_window_ui)
         {
             ImGui_ImplOpenGL3_NewFrame();

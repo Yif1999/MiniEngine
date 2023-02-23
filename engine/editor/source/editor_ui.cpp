@@ -715,6 +715,9 @@ namespace MiniEngine
             g_editor_global_context.m_input_manager->setEngineWindowSize(render_target_window_size);
         }
 
+        uint64_t texture_id = g_runtime_global_context.m_render_system->texColorBuffer;
+        ImGui::Image((void*)texture_id, ImVec2(render_target_window_size.x, render_target_window_size.y));
+
         ImGui::End();
     }
 

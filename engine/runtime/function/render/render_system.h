@@ -83,6 +83,8 @@ namespace MiniEngine
 
         void clearForSceneReloading();
 
+        unsigned int framebuffer, texColorBuffer, rbo;
+
     private:
         RenderSwapContext m_swap_context;
 
