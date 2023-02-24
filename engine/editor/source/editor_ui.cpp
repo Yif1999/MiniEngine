@@ -716,7 +716,16 @@ namespace MiniEngine
         }
 
         uint64_t texture_id = g_runtime_global_context.m_render_system->texColorBuffer;
-        ImGui::Image((void*)texture_id, ImVec2(render_target_window_size.x, render_target_window_size.y));
+        ImGui::GetWindowDrawList()->AddImage((void *)texture_id,
+                                             ImVec2(render_target_window_pos.x, render_target_window_pos.y),
+                                             ImVec2(render_target_window_pos.x + render_target_window_size.x, render_target_window_pos.y + render_target_window_size.y),
+                                             ImVec2(0, 0),
+                                             ImVec2(1, 1));
+
+        if (!g_is_editor_mode)
+        {
+            ImGui::TextColored(ImVec4(1.0f, 1.0f, 1.0f, 1.0f), "Press Left Alt key to display the mouse cursor!");
+        }
 
         ImGui::End();
     }

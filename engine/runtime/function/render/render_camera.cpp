@@ -1,5 +1,7 @@
 #include "runtime/function/render/render_camera.h"
 
+#include <iostream>
+
 namespace MiniEngine
 {
     void RenderCamera::setCurrentCameraType(RenderCameraType type)
@@ -118,6 +120,7 @@ namespace MiniEngine
     void RenderCamera::setAspect(float aspect)
     {
         m_aspect = aspect;
+        std::cout<<aspect<<std::endl;
 
         // 1 / tan(fovy * 0.5) / aspect = 1 / tan(fovx * 0.5)
         // 1 / tan(fovy * 0.5) = aspect / tan(fovx * 0.5)
