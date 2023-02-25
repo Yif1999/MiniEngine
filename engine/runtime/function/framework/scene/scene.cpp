@@ -15,8 +15,6 @@ namespace MiniEngine
     void Scene::clear()
     {
         m_gobjects.clear();
-
-        ASSERT(g_runtime_global_context.m_physics_manager);
     }
 
     GObjectID Scene::createObject(const ObjectInstanceRes& object_instance_res)
@@ -59,8 +57,6 @@ namespace MiniEngine
         {
             return false;
         }
-
-        ASSERT(g_runtime_global_context.m_physics_manager);
 
         for (const ObjectInstanceRes& object_instance_res : scene_res.m_objects)
         {

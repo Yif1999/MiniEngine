@@ -2,7 +2,7 @@
 #include "runtime/engine/engine.h"
 #include "runtime/core/meta/reflection/reflection.h"
 #include "runtime/resource/asset_manager/asset_manager.h"
-#include "runtime/function/global/global_contex.h"
+#include "runtime/function/global/global_context.h"
 #include "runtime/function/framework/component/component.h"
 #include "runtime/function/framework/component/transform/transform_component.h"
 
@@ -15,19 +15,19 @@ namespace MiniEngine
 {
     bool shouldComponentTick(std::string component_type_name)
     {
-        // if (g_is_editor_mode)
-        // {
-        //     return g_editor_tick_component_types.find(component_type_name) != g_editor_tick_component_types.end();
-        // }
-        // else
-        // {
+        if (g_is_editor_mode)
+        {
+            return g_editor_tick_component_types.find(component_type_name) != g_editor_tick_component_types.end();
+        }
+        else
+        {
             return true;
-        // }
+        }
     }
 
     GObject::~GObject()
     {
-        for (auto& component : m_components)
+        for (auto &component : m_components)
         {
             REFLECTION_DELETE(component);
         }
@@ -36,7 +36,7 @@ namespace MiniEngine
 
     void GObject::tick(float delta_time)
     {
-        for (auto& component : m_components)
+        for (auto &component : m_components)
         {
             if (shouldComponentTick(component.getTypeName()))
             {
@@ -45,9 +45,9 @@ namespace MiniEngine
         }
     }
 
-    bool GObject::hasComponent(const std::string& compenent_type_name) const
+    bool GObject::hasComponent(const std::string &compenent_type_name) const
     {
-        for (const auto& component : m_components)
+        for (const auto &component : m_components)
         {
             if (component.getTypeName() == compenent_type_name)
                 return true;
@@ -56,7 +56,7 @@ namespace MiniEngine
         return false;
     }
 
-    bool GObject::load(const ObjectInstanceRes& object_instance_res)
+    bool GObject::load(const ObjectInstanceRes &object_instance_res)
     {
         // clear old components
         m_components.clear();
@@ -97,9 +97,9 @@ namespace MiniEngine
         return true;
     }
 
-    void GObject::save(ObjectInstanceRes& out_object_instance_res)
+    void GObject::save(ObjectInstanceRes &out_object_instance_res)
     {
-        out_object_instance_res.m_name       = m_name;
+        out_object_instance_res.m_name = m_name;
         out_object_instance_res.m_definition = m_definition_url;
 
         out_object_instance_res.m_instanced_components = m_components;

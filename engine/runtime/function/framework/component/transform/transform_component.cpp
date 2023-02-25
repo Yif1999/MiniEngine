@@ -38,16 +38,10 @@ namespace MiniEngine
     {
         std::swap(m_current_index, m_next_index);
 
-        if (m_is_dirty)
+        if (g_is_editor_mode)
         {
-            // update transform component, dirty flag will be reset in mesh component
-            // tryUpdateRigidBodyComponent();
+            m_transform_buffer[m_next_index] = m_transform;
         }
-
-        // if (g_is_editor_mode)
-        // {
-        //     m_transform_buffer[m_next_index] = m_transform;
-        // }
     }
 
 } // namespace MiniEngine

@@ -40,7 +40,7 @@ namespace MiniEngine
         }
 
         // draws the model, and thus all its meshes
-        void Draw(shared_ptr<Shader> shader)
+        void Draw(shared_ptr<RenderShader> shader)
         {
             for (unsigned int i = 0; i < meshes.size(); i++)
                 meshes[i].Draw(shader);

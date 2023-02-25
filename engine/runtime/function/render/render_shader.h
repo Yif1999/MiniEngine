@@ -10,13 +10,13 @@
 
 namespace MiniEngine
 {
-    class Shader
+    class RenderShader
     {
     public:
         unsigned int ID;
         // constructor generates the shader on the fly
         // ------------------------------------------------------------------------
-        Shader(const char* vertexPath, const char* fragmentPath)
+        RenderShader(const char* vertexPath, const char* fragmentPath)
         {
             // 1. retrieve the vertex/fragment source code from filePath
             std::string vertexCode;

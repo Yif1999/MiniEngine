@@ -6,9 +6,9 @@
 
 #include <vector>
 
-namespace Piccolo
+namespace MiniEngine
 {
-    class PiccoloEditor;
+    class Editor;
 
     enum class EditorCommand : unsigned int
     {
@@ -66,4 +66,4 @@ namespace Piccolo
         size_t       m_cursor_on_axis {3};
         unsigned int m_editor_command {0};
     };
-} // namespace Piccolo
+} // namespace MiniEngine

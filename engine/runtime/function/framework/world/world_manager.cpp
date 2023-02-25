@@ -6,7 +6,7 @@
 #include "runtime/resource/config_manager/config_manager.h"
 
 #include "runtime/function/framework/scene/scene.h"
-#include "runtime/function/global/global_contex.h"
+#include "runtime/function/global/global_context.h"
 
 namespace MiniEngine
 {

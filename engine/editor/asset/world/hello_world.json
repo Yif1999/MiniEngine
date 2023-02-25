@@ -1,7 +1,0 @@
-{
-    "name": "HelloWorld",
-    "scene_urls": [
-      "asset/scene/staircase/stairscase.obj"
-    ],
-    "default_scene_url": "asset/scene/staircase/stairscase.obj"
-  }

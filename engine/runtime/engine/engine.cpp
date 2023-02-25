@@ -2,7 +2,7 @@
 #include "runtime/core/base/macro.h"
 #include "runtime/core/meta/reflection/reflection_register.h"
 
-#include "runtime/function/global/global_contex.h"
+#include "runtime/function/global/global_context.h"
 #include "runtime/function/framework/world/world_manager.h"
 #include "runtime/function/input/input_system.h"
 #include "runtime/function/render/render_system.h"
@@ -10,6 +10,7 @@
 
 namespace MiniEngine
 {
+    bool                            g_is_editor_mode {false};
     std::unordered_set<std::string> g_editor_tick_component_types {};
 
     void Engine::startEngine(const std::string& config_file_path)
@@ -64,7 +65,6 @@ namespace MiniEngine
     {
         logicalTick(delta_time);
         calculateFPS(delta_time);
-
         rendererTick(delta_time);
 
         g_runtime_global_context.m_window_system->pollEvents();

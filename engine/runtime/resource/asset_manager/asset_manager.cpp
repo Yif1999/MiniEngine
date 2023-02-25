@@ -1,6 +1,6 @@
 #include "runtime/resource/asset_manager/asset_manager.h"
 #include "runtime/resource/config_manager/config_manager.h"
-#include "runtime/function/global/global_contex.h"
+#include "runtime/function/global/global_context.h"
 
 #include <filesystem>
 

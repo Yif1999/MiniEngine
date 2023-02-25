@@ -3,16 +3,17 @@
 #include "runtime/resource/asset_manager/asset_manager.h"
 #include "runtime/resource/config_manager/config_manager.h"
 
+#include "runtime/function/global/global_context.h"
 #include "runtime/function/render/window_system.h"
-#include "runtime/function/global/global_contex.h"
-#include "runtime/function/render/render_shader.h"
-#include "runtime/function/render/render_model.h"
 #include "runtime/function/render/render_camera.h"
 #include "runtime/function/render/render_system.h"
+#include "runtime/function/render/render_scene.h"
+#include "runtime/function/render/render_shader.h"
+#include "runtime/function/render/render_model.h"
+#include "runtime/function/render/render_swap_context.h"
+#include "runtime/function/render/render_resource.h"
 
 #include "runtime/function/render/pathtracing/path_tracer.h"
-
-#define window_size 512
 
 namespace MiniEngine
 {
@@ -23,114 +24,152 @@ namespace MiniEngine
 
     void RenderSystem::initialize(RenderSystemInitInfo init_info)
     {
-        // configure opengl state
+        std::shared_ptr<ConfigManager> config_manager = g_runtime_global_context.m_config_manager;
+        ASSERT(config_manager);
+        std::shared_ptr<AssetManager> asset_manager = g_runtime_global_context.m_asset_manager;
+        ASSERT(asset_manager);
+
+        // configure global opengl state
         glEnable(GL_MULTISAMPLE);
+        glEnable(GL_FRAMEBUFFER_SRGB);
 
-        // initialization
-        pixels = new unsigned char[3*window_size*window_size];
+        // setup window & viewport
         m_window = init_info.window_system->getWindow();
-        // load display model
-        m_display = std::make_shared<Model>("asset/object/basic/plane.obj");
-        // load display shader
-        m_shader = std::make_shared<Shader>("shader/glsl/unlit.vert", "shader/glsl/unlit.frag");
-        // setup virtual camera
-        m_virtualcamera = std::make_shared<Camera>(glm::vec3(0.0f, 1.0f, 0.0f));
+        std::array<int, 2> window_size = init_info.window_system->getWindowSize();
         
+        // load rendering resource
+        GlobalRenderingRes global_rendering_res;
+        const std::string &global_rendering_res_url = config_manager->getGlobalRenderingResUrl();
+        asset_manager->loadAsset(global_rendering_res_url, global_rendering_res);
+
         // setup render camera
-        m_camera = std::make_shared<Camera>(glm::vec3(0.0f, 1.0f, -12.0f),glm::vec3(0.0f, 1.0f, 0.0f),90.0f,-2.0f);
-        // load render model
-        m_model = std::make_shared<Model>("/Volumes/T7/Dev/MiniEngine/scene/staircase/stairscase.obj");
+        const CameraPose &camera_pose = global_rendering_res.m_camera_config.m_pose;
+        m_render_camera = std::make_shared<RenderCamera>();
+        m_render_camera->lookAt(camera_pose.m_position, camera_pose.m_target, camera_pose.m_up);
+        m_render_camera->m_zfar = global_rendering_res.m_camera_config.m_z_far;
+        m_render_camera->m_znear = global_rendering_res.m_camera_config.m_z_near;
+        m_render_camera->setAspect(global_rendering_res.m_camera_config.m_aspect.x /
+                                   global_rendering_res.m_camera_config.m_aspect.y);
 
-        //setup imgui
-        IMGUI_CHECKVERSION();
-        ImGui::CreateContext();
-        ImGuiIO& io = ImGui::GetIO(); (void)io;
-        ImGui_ImplGlfw_InitForOpenGL(m_window,true);
-        ImGui_ImplOpenGL3_Init("#version 330");
-
-        // create render texture
-        unsigned int texture1;
-        glGenTextures(1, &texture1);
-        glBindTexture(GL_TEXTURE_2D, texture1);
-        // set the texture wrapping parameters
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        // set texture filtering parameters
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, window_size , window_size, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
-
-        // set viewport
-        m_shader->use();
-        glm::mat4 projection = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, 0.0f, 10.0f);
-        glm::mat4 view = m_virtualcamera->GetViewMatrix();
-        glm::mat4 model = glm::mat4(1.0f);
-        m_shader->setMat4("projection", projection);
-        m_shader->setMat4("view", view);
-        m_shader->setMat4("model", model);
-
-        // pathtracer initialize
-        PathTracing::PathTracer* tracer = new PathTracing::PathTracer();
-        tracer->transferModelData(m_model);
-        std::thread pt(&PathTracing::PathTracer::startRender,tracer,pixels);
-        pt.detach();
-
+        // create render shader
+        m_render_shader = std::make_shared<RenderShader>((config_manager->getShaderFolder() / "unlit.vert").c_str(),
+                                                         (config_manager->getShaderFolder() / "unlit.frag").c_str());
     }
 
     void RenderSystem::tick(float delta_time)
     {
-        // clean canvas
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        // refresh render target frame buffer
+        refreshFrameBuffer();
+
+        // draw models in the scene
+        glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+        glViewport(0, 0, m_viewport.width, m_viewport.height);
+        glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        if (m_render_model)
+        {
+            m_render_shader->use();
+            glm::mat4 projection = m_render_camera->getGLMPersProjMatrix();
+            glm::mat4 view = m_render_camera->getGLMViewMatrix();
+            glm::mat4 model = glm::mat4(1.0f);
+            m_render_shader->setMat4("projection", projection);
+            m_render_shader->setMat4("view", view);
+            m_render_shader->setMat4("model", model);
+            m_render_model->Draw(m_render_shader);
+        }
+
+        // draw editor ui
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        // clean RT
-        // memset(pixels,0,sizeof(char)*window_size*window_size*3);
+        if (m_ui)
+        {
+            ImGui_ImplOpenGL3_NewFrame();
+            ImGui_ImplGlfw_NewFrame();
+            ImGui::NewFrame();
 
-        // swap RT
-        m_shader->use();
-        m_shader->setInt("texture1", 0);
-        m_display->Draw(m_shader);
+            m_ui->preRender();
+            ImGui::Render();
 
-        // update RT
-        glTexSubImage2D(GL_TEXTURE_2D,0,0,0,window_size,window_size,GL_RGB,GL_UNSIGNED_BYTE,pixels);
+            ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+        }
 
-        // update camera
-        m_camera->ProcessMouseMovement(3.f,0.f,true);
-        m_camera->ProcessKeyboard(LEFT,0.024f);
-
-        // // draw UI
-        // ImGui_ImplOpenGL3_NewFrame();
-        // ImGui_ImplGlfw_NewFrame();
-        // ImGui::NewFrame();
-        // ImGui::Begin("scene manager");
-        // ImGui::RadioButton("scene 1 (3k faces)",&scene_id,0);
-        // ImGui::SameLine();
-        // ImGui::RadioButton("scene 2 (25k faces)",&scene_id,1);
-        // ImGui::SameLine();
-        // ImGui::RadioButton("scene 3 (68k faces)",&scene_id,2);
-        // ImGui::SameLine();
-        // ImGui::End();
-        // ImGui::Render();
-        // ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
-        // // update scene
-        // if (scene_id!=last_scene)
-        // {
-        //     m_model.reset();
-        //     m_model = std::make_shared<Model>("asset/scene/"+std::to_string(scene_id+1)+".obj");
-        // }
-
-        // swap buffers and poll IO events
+        // swap buffers
         glfwSwapBuffers(m_window);
-        glfwPollEvents();
+    }
+
+    void RenderSystem::loadScene(char* filepath)
+    {
+        m_render_model = std::make_shared<Model>(filepath);
+    }
+
+    void RenderSystem::refreshFrameBuffer()
+    {
+        if (framebuffer)
+        {
+            glDeleteFramebuffers(1, &framebuffer);
+            glDeleteTextures(1, &texColorBuffer);
+            glDeleteRenderbuffers(1, &texDepthBuffer);
+        }
+
+        glGenFramebuffers(1, &framebuffer);
+        glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+
+        glGenTextures(1, &texColorBuffer);
+        glBindTexture(GL_TEXTURE_2D, texColorBuffer);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, m_viewport.width, m_viewport.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glBindTexture(GL_TEXTURE_2D, 0);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texColorBuffer, 0);
+
+        glGenRenderbuffers(1, &texDepthBuffer);
+        glBindRenderbuffer(GL_RENDERBUFFER, texDepthBuffer);
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, m_viewport.width, m_viewport.height);
+        glBindRenderbuffer(GL_RENDERBUFFER, 0);
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, texDepthBuffer);
+
+        if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+            LOG_WARN("framebuffer is not complete");
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
 
     void RenderSystem::clear()
     {
-        m_display.reset();
-        m_model.reset();
-        m_shader.reset();
-        m_camera.reset();
+        if (m_render_model)
+        {
+            m_render_model.reset();
+        }
+    }
+
+    std::shared_ptr<RenderCamera> RenderSystem::getRenderCamera() const 
+    { 
+        return m_render_camera; 
+    }
+
+    void RenderSystem::updateEngineContentViewport(float offset_x, float offset_y, float width, float height)
+    {
+        m_viewport.x = offset_x;
+        m_viewport.y = offset_y;
+        m_viewport.width = width;
+        m_viewport.height = height;
+
+        m_render_camera->setAspect(width / height);
+    }
+
+    EngineContentViewport RenderSystem::getEngineContentViewport() const
+    {
+        return {m_viewport.x, m_viewport.y, m_viewport.width, m_viewport.height};
+    }
+
+    void RenderSystem::initializeUIRenderBackend(WindowUI *window_ui)
+    {
+        m_ui = window_ui;
+
+        ImGui_ImplGlfw_InitForOpenGL(m_window, true);
+        ImGui_ImplOpenGL3_Init("#version 330");
     }
 
 } // namespace MiniEngine
