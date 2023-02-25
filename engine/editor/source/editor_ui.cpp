@@ -27,6 +27,7 @@
 #include <imgui.h>
 #include <imgui_internal.h>
 #include <stb_image.h>
+#include <nfd.h>
 
 namespace MiniEngine
 {
@@ -329,6 +330,21 @@ namespace MiniEngine
                     // g_runtime_global_context.m_world_manager->reloadCurrentScene();
                     // g_runtime_global_context.m_render_system->clearForSceneReloading();
                     // g_editor_global_context.m_scene_manager->onGObjectSelected(k_invalid_gobject_id);
+
+                    nfdchar_t *outPath = NULL;
+                    nfdresult_t result = NFD_OpenDialog( NULL, NULL, &outPath );
+                        
+                    if ( result == NFD_OKAY ) {
+                        puts("Success!");
+                        puts(outPath);
+                        free(outPath);
+                    }
+                    else if ( result == NFD_CANCEL ) {
+                        puts("User pressed cancel.");
+                    }
+                    else {
+                        printf("Error: %s\n", NFD_GetError() );
+                    }
                 }
                 // if (ImGui::MenuItem("Save Current Scene"))
                 // {

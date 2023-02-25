@@ -22,12 +22,13 @@ target_include_directories(
 
 target_include_directories(
     ${TARGET_NAME} 
-    PUBLIC ${THIRD_PARTY_DIR}/tinyobjloader
+    PUBLIC ${THIRD_PARTY_DIR}/nativefiledialog
 )
 
 target_link_libraries(${TARGET_NAME} glfw)
 target_link_libraries(${TARGET_NAME} glad)
 target_link_libraries(${TARGET_NAME} stb)
+target_link_libraries(${TARGET_NAME} nativefiledialog)
 target_link_libraries(${TARGET_NAME} Runtime)
 
 file(GLOB ASSETS "./asset" "./shader" "./config/editor.ini")

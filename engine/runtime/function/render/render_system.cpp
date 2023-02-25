@@ -98,6 +98,11 @@ namespace MiniEngine
         glfwSwapBuffers(m_window);
     }
 
+    shared_ptr<Model> RenderSystem::loadScene()
+    {
+        
+    }
+
     void RenderSystem::refreshFrameBuffer()
     {
         if (framebuffer)
