@@ -64,7 +64,7 @@ namespace MiniEngine
         unsigned int getTexColorBuffer() {return texColorBuffer;}
         unsigned int getTexDepthBuffer() {return texDepthBuffer;}
 
-        std::shared_ptr<Model> loadScene();
+        void loadScene(char* filepath);
 
     private:
         void refreshFrameBuffer();

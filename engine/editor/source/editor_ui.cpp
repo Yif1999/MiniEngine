@@ -334,16 +334,14 @@ namespace MiniEngine
                     nfdchar_t *outPath = NULL;
                     nfdresult_t result = NFD_OpenDialog( NULL, NULL, &outPath );
                         
-                    if ( result == NFD_OKAY ) {
-                        puts("Success!");
-                        puts(outPath);
+                    if ( result == NFD_OKAY ) 
+                    {
+                        g_runtime_global_context.m_render_system->loadScene(outPath);
                         free(outPath);
                     }
-                    else if ( result == NFD_CANCEL ) {
-                        puts("User pressed cancel.");
-                    }
+                    else if ( result == NFD_CANCEL ) {}
                     else {
-                        printf("Error: %s\n", NFD_GetError() );
+                        LOG_ERROR(NFD_GetError());
                     }
                 }
                 // if (ImGui::MenuItem("Save Current Scene"))

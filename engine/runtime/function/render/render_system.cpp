@@ -68,14 +68,17 @@ namespace MiniEngine
         glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        m_render_shader->use();
-        glm::mat4 projection = m_render_camera->getGLMPersProjMatrix();
-        glm::mat4 view = m_render_camera->getGLMViewMatrix();
-        glm::mat4 model = glm::mat4(1.0f);
-        m_render_shader->setMat4("projection", projection);
-        m_render_shader->setMat4("view", view);
-        m_render_shader->setMat4("model", model);
-        // m_render_model->Draw(m_render_shader);
+        if (m_render_model)
+        {
+            m_render_shader->use();
+            glm::mat4 projection = m_render_camera->getGLMPersProjMatrix();
+            glm::mat4 view = m_render_camera->getGLMViewMatrix();
+            glm::mat4 model = glm::mat4(1.0f);
+            m_render_shader->setMat4("projection", projection);
+            m_render_shader->setMat4("view", view);
+            m_render_shader->setMat4("model", model);
+            m_render_model->Draw(m_render_shader);
+        }
 
         // draw editor ui
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -98,9 +101,9 @@ namespace MiniEngine
         glfwSwapBuffers(m_window);
     }
 
-    shared_ptr<Model> RenderSystem::loadScene()
+    void RenderSystem::loadScene(char* filepath)
     {
-        
+        m_render_model = std::make_shared<Model>(filepath);
     }
 
     void RenderSystem::refreshFrameBuffer()
@@ -130,7 +133,7 @@ namespace MiniEngine
         glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, texDepthBuffer);
 
         if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-            LOG_WARN("Framebuffer is not complete!");
+            LOG_WARN("framebuffer is not complete");
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
 
