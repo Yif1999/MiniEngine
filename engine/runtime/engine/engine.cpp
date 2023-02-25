@@ -65,7 +65,6 @@ namespace MiniEngine
     {
         logicalTick(delta_time);
         calculateFPS(delta_time);
-
         rendererTick(delta_time);
 
         g_runtime_global_context.m_window_system->pollEvents();
@@ -79,7 +78,7 @@ namespace MiniEngine
 
     void Engine::logicalTick(float delta_time)
     {
-        g_runtime_global_context.m_world_manager->tick(delta_time);
+        // g_runtime_global_context.m_world_manager->tick(delta_time);
         g_runtime_global_context.m_input_system->tick();
     }
 

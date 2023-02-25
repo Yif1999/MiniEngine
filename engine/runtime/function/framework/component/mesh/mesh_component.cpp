@@ -69,12 +69,12 @@ namespace MiniEngine
                 mesh_part.m_transform_desc.m_transform_matrix = object_transform_matrix;
             }
 
-            RenderSwapContext& render_swap_context = g_runtime_global_context.m_render_system->getSwapContext();
-            RenderSwapData&    logic_swap_data     = render_swap_context.getLogicSwapData();
+            // RenderSwapContext& render_swap_context = g_runtime_global_context.m_render_system->getSwapContext();
+            // RenderSwapData&    logic_swap_data     = render_swap_context.getLogicSwapData();
 
-            logic_swap_data.addDirtyGameObject(GameObjectDesc {m_parent_object.lock()->getID(), dirty_mesh_parts});
+            // logic_swap_data.addDirtyGameObject(GameObjectDesc {m_parent_object.lock()->getID(), dirty_mesh_parts});
 
-            transform_component->setDirtyFlag(false);
+            // transform_component->setDirtyFlag(false);
         }
     }
 } // namespace MiniEngine

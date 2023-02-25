@@ -21,15 +21,15 @@ namespace MiniEngine
 
     void EditorSceneManager::tick(float delta_time)
     {
-        std::shared_ptr<GObject> selected_gobject = getSelectedGObject().lock();
-        if (selected_gobject)
-        {
-            TransformComponent* transform_component = selected_gobject->tryGetComponent(TransformComponent);
-            if (transform_component)
-            {
-                transform_component->setDirtyFlag(true);
-            }
-        }
+        // std::shared_ptr<GObject> selected_gobject = getSelectedGObject().lock();
+        // if (selected_gobject)
+        // {
+        //     TransformComponent* transform_component = selected_gobject->tryGetComponent(TransformComponent);
+        //     if (transform_component)
+        //     {
+        //         transform_component->setDirtyFlag(true);
+        //     }
+        // }
     }
 
     float intersectPlaneRay(Vector3 normal, float d, Vector3 origin, Vector3 dir)
@@ -181,7 +181,7 @@ namespace MiniEngine
             }
         }
 
-        g_editor_global_context.m_render_system->setSelectedAxis(m_selected_axis);
+        // g_editor_global_context.m_render_system->setSelectedAxis(m_selected_axis);
 
         return m_selected_axis;
     }
@@ -208,35 +208,35 @@ namespace MiniEngine
 
     void EditorSceneManager::drawSelectedEntityAxis()
     {
-        std::shared_ptr<GObject> selected_object = getSelectedGObject().lock();
+        // std::shared_ptr<GObject> selected_object = getSelectedGObject().lock();
 
-        if (selected_object != nullptr)
-        {
-            const TransformComponent* transform_component = selected_object->tryGetComponentConst(TransformComponent);
+        // if (selected_object != nullptr)
+        // {
+        //     const TransformComponent* transform_component = selected_object->tryGetComponentConst(TransformComponent);
 
-            Vector3    scale;
-            Quaternion rotation;
-            Vector3    translation;
-            transform_component->getMatrix().decomposition(translation, scale, rotation);
-            Matrix4x4     translation_matrix = Matrix4x4::getTrans(translation);
-            Matrix4x4     scale_matrix       = Matrix4x4::buildScaleMatrix(1.0f, 1.0f, 1.0f);
-            Matrix4x4     axis_model_matrix  = translation_matrix * scale_matrix;
-            RenderEntity* selected_aixs      = getAxisMeshByType(m_axis_mode);
-            if (m_axis_mode == EditorAxisMode::TranslateMode || m_axis_mode == EditorAxisMode::RotateMode)
-            {
-                selected_aixs->m_model_matrix = axis_model_matrix;
-            }
-            else if (m_axis_mode == EditorAxisMode::ScaleMode)
-            {
-                selected_aixs->m_model_matrix = axis_model_matrix * Matrix4x4(rotation);
-            }
+        //     Vector3    scale;
+        //     Quaternion rotation;
+        //     Vector3    translation;
+        //     transform_component->getMatrix().decomposition(translation, scale, rotation);
+        //     Matrix4x4     translation_matrix = Matrix4x4::getTrans(translation);
+        //     Matrix4x4     scale_matrix       = Matrix4x4::buildScaleMatrix(1.0f, 1.0f, 1.0f);
+        //     Matrix4x4     axis_model_matrix  = translation_matrix * scale_matrix;
+        //     RenderEntity* selected_aixs      = getAxisMeshByType(m_axis_mode);
+        //     if (m_axis_mode == EditorAxisMode::TranslateMode || m_axis_mode == EditorAxisMode::RotateMode)
+        //     {
+        //         selected_aixs->m_model_matrix = axis_model_matrix;
+        //     }
+        //     else if (m_axis_mode == EditorAxisMode::ScaleMode)
+        //     {
+        //         selected_aixs->m_model_matrix = axis_model_matrix * Matrix4x4(rotation);
+        //     }
 
-            g_editor_global_context.m_render_system->setVisibleAxis(*selected_aixs);
-        }
-        else
-        {
-            g_editor_global_context.m_render_system->setVisibleAxis(std::nullopt);
-        }
+        //     g_editor_global_context.m_render_system->setVisibleAxis(*selected_aixs);
+        // }
+        // else
+        // {
+        //     g_editor_global_context.m_render_system->setVisibleAxis(std::nullopt);
+        // }
     }
 
     std::weak_ptr<GObject> EditorSceneManager::getSelectedGObject() const
@@ -282,20 +282,20 @@ namespace MiniEngine
     void EditorSceneManager::onDeleteSelectedGObject()
     {
         // delete selected entity
-        std::shared_ptr<GObject> selected_object = getSelectedGObject().lock();
-        if (selected_object != nullptr)
-        {
-            std::shared_ptr<Scene> current_active_Scene =
-                g_runtime_global_context.m_world_manager->getCurrentActiveScene().lock();
-            if (current_active_Scene == nullptr)
-                return;
+        // std::shared_ptr<GObject> selected_object = getSelectedGObject().lock();
+        // if (selected_object != nullptr)
+        // {
+        //     std::shared_ptr<Scene> current_active_Scene =
+        //         g_runtime_global_context.m_world_manager->getCurrentActiveScene().lock();
+        //     if (current_active_Scene == nullptr)
+        //         return;
 
-            current_active_Scene->deleteGObjectByID(m_selected_gobject_id);
+        //     current_active_Scene->deleteGObjectByID(m_selected_gobject_id);
 
-            RenderSwapContext& swap_context = g_editor_global_context.m_render_system->getSwapContext();
-            swap_context.getLogicSwapData().addDeleteGameObject(GameObjectDesc {selected_object->getID(), {}});
-        }
-        onGObjectSelected(k_invalid_gobject_id);
+        //     RenderSwapContext& swap_context = g_editor_global_context.m_render_system->getSwapContext();
+        //     swap_context.getLogicSwapData().addDeleteGameObject(GameObjectDesc {selected_object->getID(), {}});
+        // }
+        // onGObjectSelected(k_invalid_gobject_id);
     }
 
     void EditorSceneManager::moveEntity(float     new_mouse_pos_x,
@@ -416,7 +416,7 @@ namespace MiniEngine
             m_rotation_axis.m_model_matrix    = axis_model_matrix;
             m_scale_aixs.m_model_matrix       = axis_model_matrix;
 
-            g_editor_global_context.m_render_system->setVisibleAxis(m_translation_axis);
+            // g_editor_global_context.m_render_system->setVisibleAxis(m_translation_axis);
 
             transform_component->setPosition(new_translation);
             transform_component->setRotation(new_rotation);
@@ -538,41 +538,42 @@ namespace MiniEngine
 
     void EditorSceneManager::uploadAxisResource()
     {
-        auto& instance_id_allocator   = g_editor_global_context.m_render_system->getGOInstanceIdAllocator();
-        auto& mesh_asset_id_allocator = g_editor_global_context.m_render_system->getMeshAssetIdAllocator();
+        // auto& instance_id_allocator   = g_editor_global_context.m_render_system->getGOInstanceIdAllocator();
+        // auto& mesh_asset_id_allocator = g_editor_global_context.m_render_system->getMeshAssetIdAllocator();
 
-        // assign some value that won't be used by other game objects
-        {
-            GameObjectPartId axis_instance_id = {0xFFAA, 0xFFAA};
-            MeshSourceDesc   mesh_source_desc = {"%%translation_axis%%"};
+        // // assign some value that won't be used by other game objects
+        // {
+        //     GameObjectPartId axis_instance_id = {0xFFAA, 0xFFAA};
+        //     MeshSourceDesc   mesh_source_desc = {"%%translation_axis%%"};
 
-            m_translation_axis.m_instance_id   = instance_id_allocator.allocGuid(axis_instance_id);
-            m_translation_axis.m_mesh_asset_id = mesh_asset_id_allocator.allocGuid(mesh_source_desc);
-        }
+        //     m_translation_axis.m_instance_id   = instance_id_allocator.allocGuid(axis_instance_id);
+        //     m_translation_axis.m_mesh_asset_id = mesh_asset_id_allocator.allocGuid(mesh_source_desc);
+        // }
 
-        {
-            GameObjectPartId axis_instance_id = {0xFFBB, 0xFFBB};
-            MeshSourceDesc   mesh_source_desc = {"%%rotate_axis%%"};
+        // {
+        //     GameObjectPartId axis_instance_id = {0xFFBB, 0xFFBB};
+        //     MeshSourceDesc   mesh_source_desc = {"%%rotate_axis%%"};
 
-            m_rotation_axis.m_instance_id   = instance_id_allocator.allocGuid(axis_instance_id);
-            m_rotation_axis.m_mesh_asset_id = mesh_asset_id_allocator.allocGuid(mesh_source_desc);
-        }
+        //     m_rotation_axis.m_instance_id   = instance_id_allocator.allocGuid(axis_instance_id);
+        //     m_rotation_axis.m_mesh_asset_id = mesh_asset_id_allocator.allocGuid(mesh_source_desc);
+        // }
 
-        {
-            GameObjectPartId axis_instance_id = {0xFFCC, 0xFFCC};
-            MeshSourceDesc   mesh_source_desc = {"%%scale_axis%%"};
+        // {
+        //     GameObjectPartId axis_instance_id = {0xFFCC, 0xFFCC};
+        //     MeshSourceDesc   mesh_source_desc = {"%%scale_axis%%"};
 
-            m_scale_aixs.m_instance_id   = instance_id_allocator.allocGuid(axis_instance_id);
-            m_scale_aixs.m_mesh_asset_id = mesh_asset_id_allocator.allocGuid(mesh_source_desc);
-        }
+        //     m_scale_aixs.m_instance_id   = instance_id_allocator.allocGuid(axis_instance_id);
+        //     m_scale_aixs.m_mesh_asset_id = mesh_asset_id_allocator.allocGuid(mesh_source_desc);
+        // }
 
-        g_editor_global_context.m_render_system->createAxis(
-            {m_translation_axis, m_rotation_axis, m_scale_aixs},
-            {m_translation_axis.m_mesh_data, m_rotation_axis.m_mesh_data, m_scale_aixs.m_mesh_data});
+        // g_editor_global_context.m_render_system->createAxis(
+        //     {m_translation_axis, m_rotation_axis, m_scale_aixs},
+        //     {m_translation_axis.m_mesh_data, m_rotation_axis.m_mesh_data, m_scale_aixs.m_mesh_data});
     }
 
     size_t EditorSceneManager::getGuidOfPickedMesh(const Vector2& picked_uv) const
     {
-        return g_editor_global_context.m_render_system->getGuidOfPickedMesh(picked_uv);
+        // return g_editor_global_context.m_render_system->getGuidOfPickedMesh(picked_uv);
+        return 0;
     }
 } // namespace MiniEngine

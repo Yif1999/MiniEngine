@@ -21,8 +21,6 @@
 #include "runtime/function/render/render_type.h"
 #include "editor/include/editor_ui.h"
 
-#include "runtime/function/render/temp_camera.h"
-
 namespace MiniEngine
 {
     class WindowSystem;
@@ -56,52 +54,27 @@ namespace MiniEngine
         void tick(float delta_time);
         void clear();
 
-        void swapLogicRenderData();
-        RenderSwapContext &getSwapContext();
         std::shared_ptr<RenderCamera> getRenderCamera() const;
 
         void initializeUIRenderBackend(WindowUI* window_ui);
         void updateEngineContentViewport(float offset_x, float offset_y, float width, float height);
-        uint32_t getGuidOfPickedMesh(const Vector2 &picked_uv);
-        GObjectID getGObjectIDByMeshID(uint32_t mesh_id) const;
-
         EngineContentViewport getEngineContentViewport() const;
-
-        void createAxis(std::array<RenderEntity, 3> axis_entities, std::array<RenderMeshData, 3> mesh_datas);
-        void setVisibleAxis(std::optional<RenderEntity> axis);
-        void setSelectedAxis(size_t selected_axis);
-        GuidAllocator<GameObjectPartId> &getGOInstanceIdAllocator();
-        GuidAllocator<MeshSourceDesc> &getMeshAssetIdAllocator();
-
-        void clearForSceneReloading();
-
-        unsigned int texColorBuffer, texDepthBuffer, framebuffer= 0;
-
-        unsigned int texture1;
+        
+        unsigned int getFrameBuffer() {return framebuffer;}
+        unsigned int getTexColorBuffer() {return texColorBuffer;}
+        unsigned int getTexDepthBuffer() {return texDepthBuffer;}
 
     private:
-        RenderSwapContext m_swap_context;
+        void refreshFrameBuffer();
 
         GLFWwindow *m_window;
         WindowUI *m_ui;
         EngineContentViewport m_viewport;
-        std::shared_ptr<RenderCamera> m_render_camera;
-        std::shared_ptr<RenderScene> m_render_scene;
-        std::shared_ptr<RenderResource> m_render_resource;
-        std::shared_ptr<RenderShader> m_render_shader;
         std::shared_ptr<Model> m_render_model;
+        std::shared_ptr<RenderCamera> m_render_camera;
+        std::shared_ptr<RenderShader> m_render_shader;
 
-        void processSwapData();
-        void refreshFrameBuffer();
-
-        std::shared_ptr<Model> m_display;
-        std::shared_ptr<Model> m_model;
-        std::shared_ptr<Camera> m_camera;
-        std::shared_ptr<Camera> m_virtualcamera;
-
-        unsigned char *pixels;
-        unsigned char *texture;
-        int width, height, nChannels;
+        unsigned int texColorBuffer, texDepthBuffer, framebuffer= 0;
     };
 
     

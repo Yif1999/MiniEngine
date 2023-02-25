@@ -267,9 +267,9 @@ namespace MiniEngine
     void EditorUI::showEditorUI()
     {
         showEditorMenu(&m_editor_menu_window_open);
-        showEditorWorldObjectsWindow(&m_asset_window_open);
+        // showEditorWorldObjectsWindow(&m_asset_window_open);
         showEditorGameWindow(&m_game_engine_window_open);
-        showEditorFileContentWindow(&m_file_content_window_open);
+        // showEditorFileContentWindow(&m_file_content_window_open);
         showEditorDetailWindow(&m_detail_window_open);
     }
 
@@ -301,7 +301,7 @@ namespace MiniEngine
 
             ImGuiID center = main_docking_id;
             ImGuiID left;
-            ImGuiID right = ImGui::DockBuilderSplitNode(center, ImGuiDir_Right, 0.25f, nullptr, &left);
+            ImGuiID right = ImGui::DockBuilderSplitNode(center, ImGuiDir_Right, 0.3f, nullptr, &left);
 
             ImGuiID left_other;
             ImGuiID left_file_content = ImGui::DockBuilderSplitNode(left, ImGuiDir_Down, 0.30f, nullptr, &left_other);
@@ -310,9 +310,9 @@ namespace MiniEngine
             ImGuiID left_asset =
                 ImGui::DockBuilderSplitNode(left_other, ImGuiDir_Left, 0.30f, nullptr, &left_game_engine);
 
-            ImGui::DockBuilderDockWindow("World Objects", left_asset);
-            ImGui::DockBuilderDockWindow("Components Details", right);
-            ImGui::DockBuilderDockWindow("File Content", left_file_content);
+            // ImGui::DockBuilderDockWindow("World Objects", left_asset);
+            ImGui::DockBuilderDockWindow("Settings", right);
+            // ImGui::DockBuilderDockWindow("File Content", left_file_content);
             ImGui::DockBuilderDockWindow("Scene View", left_game_engine);
 
             ImGui::DockBuilderFinish(main_docking_id);
@@ -322,18 +322,18 @@ namespace MiniEngine
 
         if (ImGui::BeginMenuBar())
         {
-            if (ImGui::BeginMenu("Menu"))
+            if (ImGui::BeginMenu("File"))
             {
-                if (ImGui::MenuItem("Reload Current Scene"))
+                if (ImGui::MenuItem("Open..."))
                 {
-                    g_runtime_global_context.m_world_manager->reloadCurrentScene();
-                    g_runtime_global_context.m_render_system->clearForSceneReloading();
-                    g_editor_global_context.m_scene_manager->onGObjectSelected(k_invalid_gobject_id);
+                    // g_runtime_global_context.m_world_manager->reloadCurrentScene();
+                    // g_runtime_global_context.m_render_system->clearForSceneReloading();
+                    // g_editor_global_context.m_scene_manager->onGObjectSelected(k_invalid_gobject_id);
                 }
-                if (ImGui::MenuItem("Save Current Scene"))
-                {
-                    g_runtime_global_context.m_world_manager->saveCurrentScene();
-                }
+                // if (ImGui::MenuItem("Save Current Scene"))
+                // {
+                //     g_runtime_global_context.m_world_manager->saveCurrentScene();
+                // }
                 if (ImGui::MenuItem("Exit"))
                 {
                     g_editor_global_context.m_engine_runtime->shutdownEngine();
@@ -343,10 +343,10 @@ namespace MiniEngine
             }
             if (ImGui::BeginMenu("Window"))
             {
-                ImGui::MenuItem("World Objects", nullptr, &m_asset_window_open);
-                ImGui::MenuItem("Game", nullptr, &m_game_engine_window_open);
-                ImGui::MenuItem("File Content", nullptr, &m_file_content_window_open);
-                ImGui::MenuItem("Detail", nullptr, &m_detail_window_open);
+                // ImGui::MenuItem("World Objects", nullptr, &m_asset_window_open);
+                ImGui::MenuItem("Scene", nullptr, &m_game_engine_window_open);
+                // ImGui::MenuItem("File Content", nullptr, &m_file_content_window_open);
+                ImGui::MenuItem("Settings", nullptr, &m_detail_window_open);
                 ImGui::EndMenu();
             }
             ImGui::EndMenuBar();
@@ -500,39 +500,13 @@ namespace MiniEngine
         if (!*p_open)
             return;
 
-        if (!ImGui::Begin("Components Details", p_open, window_flags))
+        if (!ImGui::Begin("Settings", p_open, window_flags))
         {
             ImGui::End();
             return;
         }
 
-        std::shared_ptr<GObject> selected_object = g_editor_global_context.m_scene_manager->getSelectedGObject().lock();
-        if (selected_object == nullptr)
-        {
-            ImGui::End();
-            return;
-        }
 
-        const std::string& name = selected_object->getName();
-        static char        cname[128];
-        memset(cname, 0, 128);
-        memcpy(cname, name.c_str(), name.size());
-
-        ImGui::Text("Name");
-        ImGui::SameLine();
-        ImGui::InputText("##Name", cname, IM_ARRAYSIZE(cname), ImGuiInputTextFlags_ReadOnly);
-
-        static ImGuiTableFlags flags                      = ImGuiTableFlags_Resizable | ImGuiTableFlags_NoSavedSettings;
-        auto&&                 selected_object_components = selected_object->getComponents();
-        for (auto component_ptr : selected_object_components)
-        {
-            m_editor_ui_creator["TreeNodePush"](("<" + component_ptr.getTypeName() + ">").c_str(), nullptr);
-            auto object_instance = Reflection::ReflectionInstance(
-                MiniEngine::Reflection::TypeMeta::newMetaFromName(component_ptr.getTypeName().c_str()),
-                component_ptr.operator->());
-            createClassUI(object_instance);
-            m_editor_ui_creator["TreeNodePop"](("<" + component_ptr.getTypeName() + ">").c_str(), nullptr);
-        }
         ImGui::End();
     }
 
@@ -621,18 +595,29 @@ namespace MiniEngine
         if (ImGui::BeginMenuBar())
         {
             ImGui::Indent(10.f);
-            drawAxisToggleButton("Trans", trans_button_ckecked, (int)EditorAxisMode::TranslateMode);
-            ImGui::Unindent();
+            // drawAxisToggleButton("Trans", trans_button_ckecked, (int)EditorAxisMode::TranslateMode);
+            // ImGui::Unindent();
 
-            ImGui::SameLine();
+            // ImGui::SameLine();
 
-            drawAxisToggleButton("Rotate", rotate_button_ckecked, (int)EditorAxisMode::RotateMode);
+            // drawAxisToggleButton("Rotate", rotate_button_ckecked, (int)EditorAxisMode::RotateMode);
 
-            ImGui::SameLine();
+            // ImGui::SameLine();
 
-            drawAxisToggleButton("Scale", scale_button_ckecked, (int)EditorAxisMode::ScaleMode);
+            // drawAxisToggleButton("Scale", scale_button_ckecked, (int)EditorAxisMode::ScaleMode);
 
-            ImGui::SameLine();
+            // ImGui::SameLine();
+
+            if (!g_is_editor_mode)
+            {
+                ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1.0f), "Press Left Alt key to display the mouse cursor!");
+            }
+            else
+            {
+                ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1.0f),
+                                "Current editor camera move speed: [%f]",
+                                g_editor_global_context.m_input_manager->getCameraSpeed());
+            }
 
             float indent_val = 0.0f;
 
@@ -660,7 +645,7 @@ namespace MiniEngine
             }
             else
             {
-                if (ImGui::Button("Stop"))
+                if (ImGui::Button(" Stop "))
                 {
                     g_is_editor_mode = true;
                     g_editor_global_context.m_scene_manager->drawSelectedEntityAxis();
@@ -724,17 +709,12 @@ namespace MiniEngine
         // <<" "<<render_target_window_size.y
         // <<std::endl;
 
-        uint64_t texture_id = g_runtime_global_context.m_render_system->texColorBuffer;
+        uint64_t texture_id = g_runtime_global_context.m_render_system->getTexColorBuffer();
         ImGui::GetWindowDrawList()->AddImage((void *)texture_id,
                                              ImVec2(render_target_window_pos.x, render_target_window_pos.y),
                                              ImVec2(render_target_window_size.x + render_target_window_pos.x, render_target_window_size.y + render_target_window_pos.y),
                                              ImVec2(0, 0),
                                              ImVec2(1, 1));
-
-        if (!g_is_editor_mode)
-        {
-            ImGui::TextColored(ImVec4(1.0f, 1.0f, 1.0f, 1.0f), "Press Left Alt key to display the mouse cursor!");
-        }
 
         ImGui::End();
     }

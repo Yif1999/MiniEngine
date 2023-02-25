@@ -264,18 +264,18 @@ namespace MiniEngine
         if (current_active_scene == nullptr)
             return;
 
-        if (isCursorInRect(m_engine_window_pos, m_engine_window_size))
-        {
-            if (key == GLFW_MOUSE_BUTTON_LEFT)
-            {
-                Vector2 picked_uv((m_mouse_x - m_engine_window_pos.x) / m_engine_window_size.x,
-                                  (m_mouse_y - m_engine_window_pos.y) / m_engine_window_size.y);
-                size_t  select_mesh_id = g_editor_global_context.m_scene_manager->getGuidOfPickedMesh(picked_uv);
+        // if (isCursorInRect(m_engine_window_pos, m_engine_window_size))
+        // {
+        //     if (key == GLFW_MOUSE_BUTTON_LEFT)
+        //     {
+        //         Vector2 picked_uv((m_mouse_x - m_engine_window_pos.x) / m_engine_window_size.x,
+        //                           (m_mouse_y - m_engine_window_pos.y) / m_engine_window_size.y);
+        //         size_t  select_mesh_id = g_editor_global_context.m_scene_manager->getGuidOfPickedMesh(picked_uv);
 
-                size_t gobject_id = g_editor_global_context.m_render_system->getGObjectIDByMeshID(select_mesh_id);
-                g_editor_global_context.m_scene_manager->onGObjectSelected(gobject_id);
-            }
-        }
+        //         size_t gobject_id = g_editor_global_context.m_render_system->getGObjectIDByMeshID(select_mesh_id);
+        //         g_editor_global_context.m_scene_manager->onGObjectSelected(gobject_id);
+        //     }
+        // }
     }
 
     void EditorInputManager::onWindowClosed() { g_editor_global_context.m_engine_runtime->shutdownEngine(); }

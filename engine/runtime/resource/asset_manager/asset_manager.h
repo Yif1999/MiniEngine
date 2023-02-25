@@ -37,7 +37,7 @@ namespace MiniEngine
             auto&&      asset_json = Json::parse(asset_json_text, error);
             if (!error.empty())
             {
-                LOG_ERROR("parse json file {} failed!", asset_url);
+                LOG_FATAL("parse json file {} failed!", asset_url);
                 return false;
             }
 
