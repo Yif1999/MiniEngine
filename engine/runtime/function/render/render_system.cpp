@@ -36,7 +36,7 @@ namespace MiniEngine
         // setup window & viewport
         m_window = init_info.window_system->getWindow();
         std::array<int, 2> window_size = init_info.window_system->getWindowSize();
-
+        
         // load rendering resource
         GlobalRenderingRes global_rendering_res;
         const std::string &global_rendering_res_url = config_manager->getGlobalRenderingResUrl();
@@ -54,7 +54,6 @@ namespace MiniEngine
         // create render shader
         m_render_shader = std::make_shared<RenderShader>((config_manager->getShaderFolder() / "unlit.vert").c_str(),
                                                          (config_manager->getShaderFolder() / "unlit.frag").c_str());
-
     }
 
     void RenderSystem::tick(float delta_time)
