@@ -715,10 +715,19 @@ namespace MiniEngine
             g_editor_global_context.m_input_manager->setEngineWindowSize(render_target_window_size);
         }
 
+        EngineContentViewport render_target_viewport;
+        render_target_viewport = g_runtime_global_context.m_render_system->getEngineContentViewport();
+
+        // std::cout<<" "<<render_target_window_pos.x
+        // <<" "<<render_target_window_pos.y
+        // <<" "<<render_target_window_size.x
+        // <<" "<<render_target_window_size.y
+        // <<std::endl;
+
         uint64_t texture_id = g_runtime_global_context.m_render_system->texColorBuffer;
         ImGui::GetWindowDrawList()->AddImage((void *)texture_id,
                                              ImVec2(render_target_window_pos.x, render_target_window_pos.y),
-                                             ImVec2(render_target_window_pos.x + render_target_window_size.x, render_target_window_pos.y + render_target_window_size.y),
+                                             ImVec2(render_target_window_size.x + render_target_window_pos.x, render_target_window_size.y + render_target_window_pos.y),
                                              ImVec2(0, 0),
                                              ImVec2(1, 1));
 

@@ -21,6 +21,8 @@
 #include "runtime/function/render/render_type.h"
 #include "editor/include/editor_ui.h"
 
+#include "runtime/function/render/temp_camera.h"
+
 namespace MiniEngine
 {
     class WindowSystem;
@@ -37,16 +39,6 @@ namespace MiniEngine
         float y{0.f};
         float width{0.f};
         float height{0.f};
-    };
-
-    struct RHIViewport
-    {
-        float x;
-        float y;
-        float width;
-        float height;
-        float minDepth;
-        float maxDepth;
     };
 
     struct RenderSystemInitInfo
@@ -85,12 +77,14 @@ namespace MiniEngine
 
         unsigned int texColorBuffer, texDepthBuffer, framebuffer= 0;
 
+        unsigned int texture1;
+
     private:
         RenderSwapContext m_swap_context;
 
         GLFWwindow *m_window;
-        WindowUI *m_window_ui;
-        RHIViewport m_viewport;
+        WindowUI *m_ui;
+        EngineContentViewport m_viewport;
         std::shared_ptr<RenderCamera> m_render_camera;
         std::shared_ptr<RenderScene> m_render_scene;
         std::shared_ptr<RenderResource> m_render_resource;
@@ -99,6 +93,15 @@ namespace MiniEngine
 
         void processSwapData();
         void refreshFrameBuffer();
+
+        std::shared_ptr<Model> m_display;
+        std::shared_ptr<Model> m_model;
+        std::shared_ptr<Camera> m_camera;
+        std::shared_ptr<Camera> m_virtualcamera;
+
+        unsigned char *pixels;
+        unsigned char *texture;
+        int width, height, nChannels;
     };
 
     

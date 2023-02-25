@@ -13,7 +13,7 @@
 #include "runtime/function/render/render_swap_context.h"
 #include "runtime/function/render/render_resource.h"
 
-// #include "runtime/function/render/pathtracing/path_tracer.h"
+#include "runtime/function/render/pathtracing/path_tracer.h"
 
 namespace MiniEngine
 {
@@ -36,7 +36,6 @@ namespace MiniEngine
         // setup window & viewport
         m_window = init_info.window_system->getWindow();
         std::array<int, 2> window_size = init_info.window_system->getWindowSize();
-        m_viewport = {0.0f, 0.0f, (float)window_size[0], (float)window_size[1], 0.0f, 1.0f};
 
         // load rendering resource
         GlobalRenderingRes global_rendering_res;
@@ -60,27 +59,43 @@ namespace MiniEngine
         // create render shader
         m_render_shader = std::make_shared<RenderShader>((config_manager->getShaderFolder() / "unlit.vert").c_str(),
                                                          (config_manager->getShaderFolder() / "unlit.frag").c_str());
-        m_render_model = std::make_shared<Model>("/Volumes/T7/Dev/MiniEngine/scene/staircase/stairscase.obj");
-   
-        // refresh render target frame buffer
+
+        // create render target frame buffer
         refreshFrameBuffer();
 
-        // // create render texture
-        // unsigned int texture1;
-        // glGenTextures(1, &texture1);
-        // glBindTexture(GL_TEXTURE_2D, texture1);
-        // // set the texture wrapping parameters
-        // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        // // set texture filtering parameters
-        // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        // glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, window_size , window_size, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
+        // load display model
+        m_display = std::make_shared<Model>("asset/object/basic/plane.obj");
+        // load display shader
+        m_render_shader = std::make_shared<RenderShader>("shader/glsl/unlit.vert", "shader/glsl/unlit.frag");
+        // setup virtual camera
+        m_camera = std::make_shared<Camera>(glm::vec3(0.0f, 1.0f, 0.0f));
+        // load render model
+        m_model = std::make_shared<Model>("/Volumes/T7/Dev/MiniEngine/scene/staircase/stairscase.obj");
 
-        // // pathtracer initialize
-        // PathTracing::PathTracer* tracer = new PathTracing::PathTracer();
+        // // create render texture
+        glGenTextures(1, &texture1);
+        glBindTexture(GL_TEXTURE_2D, texture1);
+        // set the texture wrapping parameters
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        // set texture filtering parameters
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        pixels = stbi_load("container.jpg", &width, &height, &nChannels, 0);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, pixels);
+
+        m_render_shader->use();
+        glm::mat4 projection = glm::ortho(-2.0f, 2.0f, -2.0f, 2.0f, 0.0f, 10.0f);
+        glm::mat4 view = m_camera->GetViewMatrix();
+        glm::mat4 model = glm::mat4(1.0f);
+        m_render_shader->setMat4("projection", projection);
+        m_render_shader->setMat4("view", view);
+        m_render_shader->setMat4("model", model);
+
+        // pathtracer initialize
+        // PathTracing::PathTracer *tracer = new PathTracing::PathTracer();
         // tracer->transferModelData(m_model);
-        // std::thread pt(&PathTracing::PathTracer::startRender,tracer,pixels);
+        // std::thread pt(&PathTracing::PathTracer::startRender, tracer, pixels);
         // pt.detach();
     }
 
@@ -102,30 +117,33 @@ namespace MiniEngine
 
         // draw models in the scene
         glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
-        glClearColor(0.01f, 0.01f, 0.01f, 1.0f);
+        glViewport(0, 0, m_viewport.width, m_viewport.height);
+        glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        glBindTexture(GL_TEXTURE_2D, texture1);
         m_render_shader->use();
-        glm::mat4 projection = m_render_camera->getGLMPersProjMatrix();
-        glm::mat4 view = m_render_camera->getGLMViewMatrix();
-        glm::mat4 model = glm::mat4(1.0f);
-        m_render_shader->setMat4("projection", projection);
-        m_render_shader->setMat4("view", view);
-        m_render_shader->setMat4("model", model);
-        m_render_model->Draw(m_render_shader);
+        m_render_shader->setInt("texture1", 0);
+        // glm::mat4 projection = m_render_camera->getGLMPersProjMatrix();
+        // glm::mat4 view = m_render_camera->getGLMViewMatrix();
+        // glm::mat4 model = glm::mat4(1.0f);
+        // m_render_shader->setMat4("projection", projection);
+        // m_render_shader->setMat4("view", view);
+        // m_render_shader->setMat4("model", model);
+        m_display->Draw(m_render_shader);
 
         // draw editor ui
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        glClearColor(0.0f, 0.0f, 0.0f, 0.0f); 
+        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        if (m_window_ui)
+        if (m_ui)
         {
             ImGui_ImplOpenGL3_NewFrame();
             ImGui_ImplGlfw_NewFrame();
             ImGui::NewFrame();
 
-            m_window_ui->preRender();
+            m_ui->preRender();
 
             ImGui::Render();
 
@@ -169,15 +187,15 @@ namespace MiniEngine
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glBindTexture(GL_TEXTURE_2D, 0);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texColorBuffer, 0); 
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texColorBuffer, 0);
 
         glGenRenderbuffers(1, &texDepthBuffer);
-        glBindRenderbuffer(GL_RENDERBUFFER, texDepthBuffer); 
-        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, m_viewport.width, m_viewport.height);  
+        glBindRenderbuffer(GL_RENDERBUFFER, texDepthBuffer);
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, m_viewport.width, m_viewport.height);
         glBindRenderbuffer(GL_RENDERBUFFER, 0);
         glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, texDepthBuffer);
 
-        if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+        if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
             LOG_ERROR("Framebuffer is not complete!");
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
@@ -355,8 +373,6 @@ namespace MiniEngine
         m_viewport.y = offset_y;
         m_viewport.width = width;
         m_viewport.height = height;
-        m_viewport.minDepth = 0.0f;
-        m_viewport.maxDepth = 1.0f;
 
         m_render_camera->setAspect(width / height);
     }
@@ -420,7 +436,7 @@ namespace MiniEngine
 
     void RenderSystem::initializeUIRenderBackend(WindowUI *window_ui)
     {
-        m_window_ui = window_ui;
+        m_ui = window_ui;
 
         ImGui_ImplGlfw_InitForOpenGL(m_window, true);
         ImGui_ImplOpenGL3_Init("#version 330");
