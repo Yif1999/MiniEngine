@@ -1,74 +1,167 @@
 #pragma once
 
-#include "runtime/core/math/math_headers.h"
-
-#include <mutex>
+#include <glad/glad.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+#include <vector>
+#include <iostream>
+
 namespace MiniEngine
 {
-    enum class RenderCameraType : int
+    // Defines several possible options for camera movement. Used as abstraction to stay away from window-system specific input methods
+    enum Camera_Movement
     {
-        Editor,
-        Motor
+        FORWARD,
+        BACKWARD,
+        LEFT,
+        RIGHT,
+        UP,
+        DOWN
     };
 
-    class RenderCamera
+    // Default camera values
+    const float YAW = 90.0f;
+    const float PITCH = -90.0f;
+    const float SPEED = 2.5f;
+    const float SENSITIVITY = 0.1f;
+    const float ZOOM = 45.0f;
+    const float ASPECT = 16.f/9.f;
+    const float NEAR = 0.1f;
+    const float FAR = 1000.f;
+
+
+
+    // An abstract camera class that processes input and calculates the corresponding Euler Angles, Vectors and Matrices for use in OpenGL
+    class Camera
     {
     public:
-        RenderCameraType m_current_camera_type {RenderCameraType::Editor};
+        // camera Attributes
+        glm::vec3 Position;
+        glm::vec3 Front;
+        glm::vec3 Up;
+        glm::vec3 Right;
+        glm::vec3 WorldUp;
+        // euler Angles
+        float Yaw;
+        float Pitch;
+        // camera options
+        float MovementSpeed;
+        float MouseSensitivity;
+        float Zoom;
+        float Aspect;
+        float Near;
+        float Far;
 
-        static const Vector3 X, Y, Z;
+        // constructor with vectors
+        Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f),
+               glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f),
+               float yaw = YAW, float pitch = PITCH,
+               float aspect = ASPECT,
+               float near = NEAR, float far = FAR) : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVITY), Zoom(ZOOM)
+        {
+            Position = position;
+            WorldUp = up;
+            Yaw = yaw;
+            Pitch = pitch;
+            Aspect = aspect;
+            Near = near;
+            Far = far;
+            updateCameraVectors();
+        }
 
-        Vector3    m_position {0.0f, 0.0f, 0.0f};
-        Quaternion m_rotation {Quaternion::IDENTITY};
-        Quaternion m_invRotation {Quaternion::IDENTITY};
-        float      m_znear {1000.0f};
-        float      m_zfar {0.1f};
-        Vector3    m_up_axis {Z};
+        // returns the view matrix calculated using Euler Angles and the LookAt Matrix
+        glm::mat4 getViewMatrix()
+        {
+            return glm::lookAt(Position, Position + Front, Up);
+        }
 
-        static constexpr float MIN_FOV {10.0f};
-        static constexpr float MAX_FOV {89.0f};
-        static constexpr int   MAIN_VIEW_MATRIX_INDEX {0};
+        // returns the proj matrix
+        glm::mat4 getPersProjMatrix()
+        {
+            return glm::perspective(glm::radians(Zoom), Aspect, Near, Far);
+        }
 
-        std::vector<Matrix4x4> m_view_matrices {Matrix4x4::IDENTITY};
+        // set aspect from ui
+        void setAspect(float aspect)
+        {
+            Aspect = aspect;
+        }
 
-        void setCurrentCameraType(RenderCameraType type);
-        void setMainViewMatrix(const Matrix4x4& view_matrix, RenderCameraType type = RenderCameraType::Editor);
+        // processes input received from any keyboard-like input system. Accepts input parameter in the form of camera defined ENUM (to abstract it from windowing systems)
+        void processKeyboard(Camera_Movement direction, float deltaTime)
+        {
+            float velocity = MovementSpeed * deltaTime;
+            if (direction == FORWARD)
+                Position += Front * velocity;
+            if (direction == BACKWARD)
+                Position -= Front * velocity;
+            if (direction == LEFT)
+                Position -= Right * velocity;
+            if (direction == RIGHT)
+                Position += Right * velocity;
+            if (direction == UP)
+                Position += WorldUp * velocity;
+            if (direction == DOWN)
+                Position -= WorldUp * velocity;
+        }
 
-        void move(Vector3 delta);
-        void rotate(Vector2 delta);
-        void zoom(float offset);
-        void lookAt(const Vector3& position, const Vector3& target, const Vector3& up);
+        // processes input received from a mouse input system. Expects the offset value in both the x and y direction.
+        void processMouseMovement(float xoffset, float yoffset, GLboolean constrainPitch = true)
+        {
+            xoffset *= MouseSensitivity;
+            yoffset *= MouseSensitivity;
 
-        void setAspect(float aspect);
-        void setFOVx(float fovx) { m_fovx = fovx; }
+            Yaw += xoffset;
+            Pitch += yoffset;
 
-        Vector3    position() const { return m_position; }
-        Quaternion rotation() const { return m_rotation; }
+            // make sure that when pitch is out of bounds, screen doesn't get flipped
+            if (constrainPitch)
+            {
+                if (Pitch > 89.0f)
+                    Pitch = 89.0f;
+                if (Pitch < -89.0f)
+                    Pitch = -89.0f;
+            }
 
-        Vector3   forward() const { return (m_invRotation * Y); }
-        Vector3   up() const { return (m_invRotation * Z); }
-        Vector3   right() const { return (m_invRotation * X); }
-        Vector2   getFOV() const { return {m_fovx, m_fovy}; }
-        glm::mat4 getGLMViewMatrix();
-        glm::mat4 getGLMPersProjMatrix() const;
-        Matrix4x4 getViewMatrix();
-        Matrix4x4 getPersProjMatrix() const;
-        Matrix4x4 getLookAtMatrix() const { return Math::makeLookAtMatrix(position(), position() + forward(), up()); }
-        float     getFovYDeprecated() const { return m_fovy; }
+            // update Front, Right and Up Vectors using the updated Euler angles
+            updateCameraVectors();
+        }
 
-    protected:
-        float m_aspect {0.f};
-        float m_fovx {Degree(89.f).valueDegrees()};
-        float m_fovy {0.f};
+        // processes input received from a mouse scroll-wheel event. Only requires input on the vertical wheel-axis
+        void processMouseScroll(float yoffset, int mode)
+        {
+            if (mode)
+            {
+                Zoom -= (float)yoffset;
+                if (Zoom < 10.0f)
+                    Zoom = 10.0f;
+                if (Zoom > 90.0f)
+                    Zoom = 90.0f;
+            }
+            else
+            {
+                if (yoffset > 0)
+                    MovementSpeed *= 1.2f;
+                else
+                    MovementSpeed *= 0.8f;
+            }
+            
+        }
 
-        std::mutex m_view_matrix_mutex;
+    private:
+        // calculates the front vector from the Camera's (updated) Euler Angles
+        void updateCameraVectors()
+        {
+            // calculate the new Front vector
+            glm::vec3 front;
+            front.x = cos(glm::radians(Yaw)) * cos(glm::radians(Pitch));
+            front.y = sin(glm::radians(Pitch));
+            front.z = sin(glm::radians(Yaw)) * cos(glm::radians(Pitch));
+            Front = glm::normalize(front);
+            // also re-calculate the Right and Up vector
+            Right = glm::normalize(glm::cross(Front, WorldUp)); // normalize the vectors, because their length gets closer to 0 the more you look up or down which results in slower movement.
+            Up = glm::normalize(glm::cross(Right, Front));
+        }
     };
-
-    inline const Vector3 RenderCamera::X = {1.0f, 0.0f, 0.0f};
-    inline const Vector3 RenderCamera::Y = {0.0f, 1.0f, 0.0f};
-    inline const Vector3 RenderCamera::Z = {0.0f, 0.0f, 1.0f};
-
-} // namespace MiniEngine
+}

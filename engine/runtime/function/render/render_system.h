@@ -26,7 +26,7 @@ namespace MiniEngine
     class WindowSystem;
     class RenderScene;
     class RenderResource;
-    class RenderCamera;
+    class Camera;
     class Shader;
     class WindowUI;
     class Model;
@@ -54,7 +54,7 @@ namespace MiniEngine
         void tick(float delta_time);
         void clear();
 
-        std::shared_ptr<RenderCamera> getRenderCamera() const;
+        std::shared_ptr<Camera> getRenderCamera() const;
 
         void initializeUIRenderBackend(WindowUI* window_ui);
         void updateEngineContentViewport(float offset_x, float offset_y, float width, float height);
@@ -65,6 +65,7 @@ namespace MiniEngine
         unsigned int getTexDepthBuffer() {return texDepthBuffer;}
 
         void loadScene(char* filepath);
+        void unloadScene();
 
     private:
         void refreshFrameBuffer();
@@ -75,7 +76,7 @@ namespace MiniEngine
         std::shared_ptr<Model> m_render_model;
         std::shared_ptr<Shader> m_render_shader;
         std::shared_ptr<Shader> m_tracer_shader;
-        std::shared_ptr<RenderCamera> m_render_camera;
+        std::shared_ptr<Camera> m_render_camera;
 
         unsigned int texColorBuffer, texDepthBuffer, framebuffer= 0;
     };

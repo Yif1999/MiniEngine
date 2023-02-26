@@ -5,6 +5,7 @@
 #include "runtime/core/meta/reflection/reflection.h"
 
 #include <cassert>
+#include <glm/glm.hpp>
 
 namespace MiniEngine
 {
@@ -436,6 +437,11 @@ namespace MiniEngine
         {
             return Vector3(
                 Math::clamp(v.x, min.x, max.x), Math::clamp(v.y, min.y, max.y), Math::clamp(v.z, min.z, max.z));
+        }
+
+        glm::vec3 to_glm() const
+        {
+            return glm::vec3(x, y, z);
         }
 
         static float getMaxElement(const Vector3& v) { return Math::getMaxElement(v.x, v.y, v.z); }

@@ -10,7 +10,7 @@
 namespace MiniEngine
 {
     class Editor;
-    class RenderCamera;
+    class Camera;
     class RenderEntity;
 
     enum class EditorAxisMode : int
@@ -45,12 +45,12 @@ namespace MiniEngine
             size_t    cursor_on_axis,
             Matrix4x4 model_matrix);
 
-        void setEditorCamera(std::shared_ptr<RenderCamera> camera) { m_camera = camera; }
+        void setEditorCamera(std::shared_ptr<Camera> camera) { m_camera = camera; }
         void uploadAxisResource();
         size_t getGuidOfPickedMesh(const Vector2& picked_uv) const;
 
     public:
-        std::shared_ptr<RenderCamera> getEditorCamera() { return m_camera; };
+        std::shared_ptr<Camera> getEditorCamera() { return m_camera; };
 
         GObjectID getSelectedObjectID() { return m_selected_gobject_id; };
         Matrix4x4 getSelectedObjectMatrix() { return m_selected_object_matrix; }
@@ -68,7 +68,7 @@ namespace MiniEngine
         Matrix4x4 m_selected_object_matrix{ Matrix4x4::IDENTITY };
 
         EditorAxisMode m_axis_mode{ EditorAxisMode::TranslateMode };
-        std::shared_ptr<RenderCamera> m_camera;
+        std::shared_ptr<Camera> m_camera;
 
         size_t m_selected_axis{ 3 };
 

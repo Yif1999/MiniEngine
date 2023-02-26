@@ -13,7 +13,7 @@
 namespace MiniEngine
 {
     class RenderResource;
-    class RenderCamera;
+    class Camera;
 
     class RenderScene
     {
@@ -30,7 +30,7 @@ namespace MiniEngine
 
         // update visible objects in each frame
         void updateVisibleObjects(std::shared_ptr<RenderResource> render_resource,
-                                  std::shared_ptr<RenderCamera>   camera);
+                                  std::shared_ptr<Camera>   camera);
 
         // set visible nodes ptr in render pass
         void setVisibleNodesReference();

@@ -16,9 +16,16 @@
 
 namespace MiniEngine
 {
-    void EditorInputManager::initialize() { registerInput(); }
+    void EditorInputManager::initialize() 
+    { 
+        g_camera = g_runtime_global_context.m_render_system->getRenderCamera();
+        registerInput(); 
+    }
 
-    void EditorInputManager::tick(float delta_time) { processEditorCommand(); }
+    void EditorInputManager::tick(float delta_time) 
+    { 
+        processEditorCommand(delta_time); 
+    }
 
     void EditorInputManager::registerInput()
     {
@@ -50,43 +57,32 @@ namespace MiniEngine
         }
     }
 
-    void EditorInputManager::processEditorCommand()
+    void EditorInputManager::processEditorCommand(float delta_time)
     {
-        float           camera_speed  = m_camera_speed;
-        std::shared_ptr editor_camera = g_editor_global_context.m_scene_manager->getEditorCamera();
-        Quaternion      camera_rotate = editor_camera->rotation().inverse();
-        Vector3         camera_relative_pos(0, 0, 0);
-
         if ((unsigned int)EditorCommand::camera_foward & m_editor_command)
         {
-            camera_relative_pos += camera_rotate * Vector3 {0, camera_speed, 0};
+            g_camera->processKeyboard(FORWARD, delta_time);
         }
         if ((unsigned int)EditorCommand::camera_back & m_editor_command)
         {
-            camera_relative_pos += camera_rotate * Vector3 {0, -camera_speed, 0};
+            g_camera->processKeyboard(BACKWARD, delta_time);
         }
         if ((unsigned int)EditorCommand::camera_left & m_editor_command)
         {
-            camera_relative_pos += camera_rotate * Vector3 {-camera_speed, 0, 0};
+            g_camera->processKeyboard(LEFT, delta_time);
         }
         if ((unsigned int)EditorCommand::camera_right & m_editor_command)
         {
-            camera_relative_pos += camera_rotate * Vector3 {camera_speed, 0, 0};
+            g_camera->processKeyboard(RIGHT, delta_time);
         }
         if ((unsigned int)EditorCommand::camera_up & m_editor_command)
         {
-            camera_relative_pos += Vector3 {0, 0, camera_speed};
+            g_camera->processKeyboard(UP, delta_time);
         }
         if ((unsigned int)EditorCommand::camera_down & m_editor_command)
         {
-            camera_relative_pos += Vector3 {0, 0, -camera_speed};
+            g_camera->processKeyboard(DOWN, delta_time);
         }
-        if ((unsigned int)EditorCommand::delete_object & m_editor_command)
-        {
-            g_editor_global_context.m_scene_manager->onDeleteSelectedGObject();
-        }
-
-        editor_camera->move(camera_relative_pos);
     }
 
     void EditorInputManager::onKeyInEditorMode(int key, int scancode, int action, int mods)
@@ -192,8 +188,7 @@ namespace MiniEngine
             {
                 glfwSetInputMode(
                     g_editor_global_context.m_window_system->getWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-                g_editor_global_context.m_scene_manager->getEditorCamera()->rotate(
-                    Vector2(ypos - m_mouse_y, xpos - m_mouse_x) * angularVelocity);
+                    g_camera->processMouseMovement(xpos - m_mouse_x, m_mouse_y - ypos);
             }
             else if (g_editor_global_context.m_window_system->isMouseButtonDown(GLFW_MOUSE_BUTTON_LEFT))
             {
@@ -238,19 +233,12 @@ namespace MiniEngine
         {
             if (g_editor_global_context.m_window_system->isMouseButtonDown(GLFW_MOUSE_BUTTON_RIGHT))
             {
-                if (yoffset > 0)
-                {
-                    m_camera_speed *= 1.2f;
-                }
-                else
-                {
-                    m_camera_speed *= 0.8f;
-                }
+                g_camera->processMouseScroll(yoffset, 0);
+                m_camera_speed = g_camera->MovementSpeed;
             }
             else
             {
-                g_editor_global_context.m_scene_manager->getEditorCamera()->zoom(
-                    (float)yoffset * 2.0f); // wheel scrolled up = zoom in by 2 extra degrees
+                g_camera->processMouseScroll(yoffset, 1);
             }
         }
     }

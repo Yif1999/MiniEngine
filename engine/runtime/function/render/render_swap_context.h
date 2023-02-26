@@ -31,12 +31,12 @@ namespace MiniEngine
         SceneColorGradingResourceDesc m_color_grading_resource_desc;
     };
 
-    struct CameraSwapData
-    {
-        std::optional<float>            m_fov_x;
-        std::optional<RenderCameraType> m_camera_type;
-        std::optional<Matrix4x4>        m_view_matrix;
-    };
+    // struct CameraSwapData
+    // {
+    //     std::optional<float>            m_fov_x;
+    //     std::optional<RenderCameraType> m_camera_type;
+    //     std::optional<Matrix4x4>        m_view_matrix;
+    // };
 
     struct GameObjectResourceDesc
     {
@@ -55,7 +55,7 @@ namespace MiniEngine
         std::optional<SceneResourceDesc>       m_scene_resource_desc;
         std::optional<GameObjectResourceDesc>  m_game_object_resource_desc;
         std::optional<GameObjectResourceDesc>  m_game_object_to_delete;
-        std::optional<CameraSwapData>          m_camera_swap_data;
+        // std::optional<CameraSwapData>          m_camera_swap_data;
 
         void addDirtyGameObject(GameObjectDesc&& desc);
         void addDeleteGameObject(GameObjectDesc&& desc);

@@ -13,6 +13,7 @@ namespace MiniEngine
 
     public:
         Vector3 m_position;
+        Vector3 m_rotation;
         Vector3 m_target;
         Vector3 m_up;
     };

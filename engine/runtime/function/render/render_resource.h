@@ -13,7 +13,7 @@ namespace MiniEngine
 {
     class RHI;
     class RenderScene;
-    class RenderCamera;
+    class Camera;
 
     class RenderResource
     {
@@ -22,7 +22,7 @@ namespace MiniEngine
 
         void clear();
 
-        void updatePerFrameBuffer(std::shared_ptr<RenderScene>  render_scene, std::shared_ptr<RenderCamera> camera);
+        void updatePerFrameBuffer(std::shared_ptr<RenderScene>  render_scene, std::shared_ptr<Camera> camera);
 
         std::shared_ptr<TextureData> loadTextureHDR(std::string file, int desired_channels = 4);
         std::shared_ptr<TextureData> loadTexture(std::string file, bool is_srgb = false);

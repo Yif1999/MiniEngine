@@ -8,7 +8,7 @@ namespace MiniEngine
     }
 
     void RenderScene::updateVisibleObjects(std::shared_ptr<RenderResource> render_resource,
-                                           std::shared_ptr<RenderCamera>   camera)
+                                           std::shared_ptr<Camera>   camera)
     {
         updateVisibleObjectsAxis(render_resource);
     }

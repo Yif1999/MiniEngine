@@ -30,6 +30,8 @@ namespace MiniEngine
         ASSERT(asset_manager);
 
         // configure global opengl state
+        glEnable(GL_CULL_FACE);
+        glEnable(GL_DEPTH_TEST);
         glEnable(GL_MULTISAMPLE);
         glEnable(GL_FRAMEBUFFER_SRGB);
 
@@ -43,25 +45,20 @@ namespace MiniEngine
         asset_manager->loadAsset(global_rendering_res_url, global_rendering_res);
 
         // setup render camera
-        const CameraPose &camera_pose = global_rendering_res.m_camera_config.m_pose;
-        m_render_camera = std::make_shared<RenderCamera>();
-        m_render_camera->lookAt(camera_pose.m_position, camera_pose.m_target, camera_pose.m_up);
-        m_render_camera->m_zfar = global_rendering_res.m_camera_config.m_z_far;
-        m_render_camera->m_znear = global_rendering_res.m_camera_config.m_z_near;
-        m_render_camera->setAspect(global_rendering_res.m_camera_config.m_aspect.x /
-                                   global_rendering_res.m_camera_config.m_aspect.y);
+        const CameraConfig &camera_config = global_rendering_res.m_camera_config;
+        const CameraPose &camera_pose = camera_config.m_pose;
+
+        m_render_camera = std::make_shared<Camera>(camera_pose.m_position.to_glm(),
+                                                   glm::vec3(0.f, 1.f, 0.f), 
+                                                   camera_pose.m_rotation.z, camera_pose.m_rotation.y,
+                                                   camera_config.m_aspect.x / camera_config.m_aspect.y, 
+                                                   camera_config.m_z_near, camera_config.m_z_far);
 
         // create and setup shader
         m_render_shader = std::make_shared<Shader>((config_manager->getShaderFolder() / "lit.vert").c_str(),
                                                    (config_manager->getShaderFolder() / "lit.frag").c_str());
         m_tracer_shader = std::make_shared<Shader>((config_manager->getShaderFolder() / "unlit.vert").c_str(),
                                                    (config_manager->getShaderFolder() / "unlit.frag").c_str());
-        m_render_shader->use();
-        m_render_shader->setVec3("viewPos",
-                                 m_render_camera->m_position.x,
-                                 m_render_camera->m_position.y,
-                                 m_render_camera->m_position.z);
-        m_tracer_shader->use();
     }
 
     void RenderSystem::tick(float delta_time)
@@ -78,12 +75,13 @@ namespace MiniEngine
         if (m_render_model)
         {
             m_render_shader->use();
-            glm::mat4 projection = m_render_camera->getGLMPersProjMatrix();
-            glm::mat4 view = m_render_camera->getGLMViewMatrix();
+            glm::mat4 projection = m_render_camera->getPersProjMatrix();
+            glm::mat4 view = m_render_camera->getViewMatrix();
             glm::mat4 model = glm::mat4(1.0f);
             m_render_shader->setMat4("projection", projection);
             m_render_shader->setMat4("view", view);
             m_render_shader->setMat4("model", model);
+            m_render_shader->setVec3("viewPos", m_render_camera->Position);
             m_render_model->Draw(m_render_shader);
         }
 
@@ -112,6 +110,11 @@ namespace MiniEngine
     {
         clear();
         m_render_model = std::make_shared<Model>(filepath);
+    }
+
+    void RenderSystem::unloadScene()
+    {
+        clear();
     }
 
     void RenderSystem::refreshFrameBuffer()
@@ -153,7 +156,7 @@ namespace MiniEngine
         }
     }
 
-    std::shared_ptr<RenderCamera> RenderSystem::getRenderCamera() const
+    std::shared_ptr<Camera> RenderSystem::getRenderCamera() const
     {
         return m_render_camera;
     }

@@ -34,7 +34,7 @@ namespace MiniEngine
     public:
         void registerInput();
         void updateCursorOnAxis(Vector2 cursor_uv);
-        void processEditorCommand();
+        void processEditorCommand(float delta_time);
         void onKeyInEditorMode(int key, int scancode, int action, int mods);
 
         void onKey(int key, int scancode, int action, int mods);
@@ -61,9 +61,11 @@ namespace MiniEngine
         Vector2 m_engine_window_size {1280.0f, 768.0f};
         float   m_mouse_x {0.0f};
         float   m_mouse_y {0.0f};
-        float   m_camera_speed {0.05f};
+        float   m_camera_speed {5.f};
 
         size_t       m_cursor_on_axis {3};
         unsigned int m_editor_command {0};
+
+        std::shared_ptr<Camera> g_camera;
     };
 } // namespace MiniEngine

@@ -344,6 +344,11 @@ namespace MiniEngine
                         LOG_ERROR(NFD_GetError());
                     }
                 }
+                if (ImGui::MenuItem("Close"))
+                {
+                    g_runtime_global_context.m_render_system->unloadScene();
+                }
+                ImGui::Text("-----");
                 // if (ImGui::MenuItem("Save Current Scene"))
                 // {
                 //     g_runtime_global_context.m_world_manager->saveCurrentScene();
@@ -662,10 +667,10 @@ namespace MiniEngine
                 if (ImGui::Button(" Stop "))
                 {
                     g_is_editor_mode = true;
-                    g_editor_global_context.m_scene_manager->drawSelectedEntityAxis();
-                    g_runtime_global_context.m_input_system->resetGameCommand();
-                    g_editor_global_context.m_render_system->getRenderCamera()->setMainViewMatrix(
-                        g_editor_global_context.m_scene_manager->getEditorCamera()->getViewMatrix());
+                    // g_editor_global_context.m_scene_manager->drawSelectedEntityAxis();
+                    // g_runtime_global_context.m_input_system->resetGameCommand();
+                    // g_editor_global_context.m_render_system->getRenderCamera()->setMainViewMatrix(
+                    //     g_editor_global_context.m_scene_manager->getEditorCamera()->getViewMatrix());
                 }
             }
 
@@ -727,8 +732,8 @@ namespace MiniEngine
         ImGui::GetWindowDrawList()->AddImage((void *)texture_id,
                                              ImVec2(render_target_window_pos.x, render_target_window_pos.y),
                                              ImVec2(render_target_window_size.x + render_target_window_pos.x, render_target_window_size.y + render_target_window_pos.y),
-                                             ImVec2(0, 0),
-                                             ImVec2(1, 1));
+                                             ImVec2(0, 1),
+                                             ImVec2(1, 0));
 
         ImGui::End();
     }
