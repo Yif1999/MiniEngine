@@ -27,7 +27,7 @@ namespace MiniEngine
     class RenderScene;
     class RenderResource;
     class RenderCamera;
-    class RenderShader;
+    class Shader;
     class WindowUI;
     class Model;
 
@@ -73,8 +73,9 @@ namespace MiniEngine
         WindowUI *m_ui;
         EngineContentViewport m_viewport;
         std::shared_ptr<Model> m_render_model;
+        std::shared_ptr<Shader> m_render_shader;
+        std::shared_ptr<Shader> m_tracer_shader;
         std::shared_ptr<RenderCamera> m_render_camera;
-        std::shared_ptr<RenderShader> m_render_shader;
 
         unsigned int texColorBuffer, texDepthBuffer, framebuffer= 0;
     };

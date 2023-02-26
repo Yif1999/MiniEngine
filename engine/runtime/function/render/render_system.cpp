@@ -36,7 +36,7 @@ namespace MiniEngine
         // setup window & viewport
         m_window = init_info.window_system->getWindow();
         std::array<int, 2> window_size = init_info.window_system->getWindowSize();
-        
+
         // load rendering resource
         GlobalRenderingRes global_rendering_res;
         const std::string &global_rendering_res_url = config_manager->getGlobalRenderingResUrl();
@@ -51,9 +51,17 @@ namespace MiniEngine
         m_render_camera->setAspect(global_rendering_res.m_camera_config.m_aspect.x /
                                    global_rendering_res.m_camera_config.m_aspect.y);
 
-        // create render shader
-        m_render_shader = std::make_shared<RenderShader>((config_manager->getShaderFolder() / "unlit.vert").c_str(),
-                                                         (config_manager->getShaderFolder() / "unlit.frag").c_str());
+        // create and setup shader
+        m_render_shader = std::make_shared<Shader>((config_manager->getShaderFolder() / "lit.vert").c_str(),
+                                                   (config_manager->getShaderFolder() / "lit.frag").c_str());
+        m_tracer_shader = std::make_shared<Shader>((config_manager->getShaderFolder() / "unlit.vert").c_str(),
+                                                   (config_manager->getShaderFolder() / "unlit.frag").c_str());
+        m_render_shader->use();
+        m_render_shader->setVec3("viewPos",
+                                 m_render_camera->m_position.x,
+                                 m_render_camera->m_position.y,
+                                 m_render_camera->m_position.z);
+        m_tracer_shader->use();
     }
 
     void RenderSystem::tick(float delta_time)
@@ -100,8 +108,9 @@ namespace MiniEngine
         glfwSwapBuffers(m_window);
     }
 
-    void RenderSystem::loadScene(char* filepath)
+    void RenderSystem::loadScene(char *filepath)
     {
+        clear();
         m_render_model = std::make_shared<Model>(filepath);
     }
 
@@ -144,9 +153,9 @@ namespace MiniEngine
         }
     }
 
-    std::shared_ptr<RenderCamera> RenderSystem::getRenderCamera() const 
-    { 
-        return m_render_camera; 
+    std::shared_ptr<RenderCamera> RenderSystem::getRenderCamera() const
+    {
+        return m_render_camera;
     }
 
     void RenderSystem::updateEngineContentViewport(float offset_x, float offset_y, float width, float height)

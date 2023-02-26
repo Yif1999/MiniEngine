@@ -62,7 +62,7 @@ namespace MiniEngine
         }
 
         // render the mesh
-        void Draw(std::shared_ptr<RenderShader> shader)
+        void Draw(std::shared_ptr<Shader> shader)
         {
             // draw mesh
             glBindVertexArray(VAO);
