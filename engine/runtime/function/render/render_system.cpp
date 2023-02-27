@@ -55,10 +55,10 @@ namespace MiniEngine
                                                    camera_config.m_z_near, camera_config.m_z_far);
 
         // create and setup shader
-        m_render_shader = std::make_shared<Shader>((config_manager->getShaderFolder() / "lit.vert").c_str(),
-                                                   (config_manager->getShaderFolder() / "lit.frag").c_str());
-        m_tracer_shader = std::make_shared<Shader>((config_manager->getShaderFolder() / "unlit.vert").c_str(),
-                                                   (config_manager->getShaderFolder() / "unlit.frag").c_str());
+        m_render_shader = std::make_shared<Shader>((config_manager->getShaderFolder() / "lit.vert").generic_string().data(),
+                                                   (config_manager->getShaderFolder() / "lit.frag").generic_string().data());
+        m_tracer_shader = std::make_shared<Shader>((config_manager->getShaderFolder() / "unlit.vert").generic_string().data(),
+                                                   (config_manager->getShaderFolder() / "unlit.frag").generic_string().data());
     }
 
     void RenderSystem::tick(float delta_time)

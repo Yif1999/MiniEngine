@@ -312,7 +312,7 @@ namespace MiniEngine
                 ImGui::DockBuilderSplitNode(left_other, ImGuiDir_Left, 0.30f, nullptr, &left_game_engine);
 
             // ImGui::DockBuilderDockWindow("World Objects", left_asset);
-            ImGui::DockBuilderDockWindow("Settings", right);
+            ImGui::DockBuilderDockWindow("Inspector", right);
             // ImGui::DockBuilderDockWindow("File Content", left_file_content);
             ImGui::DockBuilderDockWindow("Scene View", left_game_engine);
 
@@ -363,9 +363,9 @@ namespace MiniEngine
             if (ImGui::BeginMenu("Window"))
             {
                 // ImGui::MenuItem("World Objects", nullptr, &m_asset_window_open);
-                ImGui::MenuItem("Scene", nullptr, &m_game_engine_window_open);
+                ImGui::MenuItem("Scene View", nullptr, &m_game_engine_window_open);
                 // ImGui::MenuItem("File Content", nullptr, &m_file_content_window_open);
-                ImGui::MenuItem("Settings", nullptr, &m_detail_window_open);
+                ImGui::MenuItem("Inspector", nullptr, &m_detail_window_open);
                 ImGui::EndMenu();
             }
             ImGui::EndMenuBar();
@@ -519,12 +519,33 @@ namespace MiniEngine
         if (!*p_open)
             return;
 
-        if (!ImGui::Begin("Settings", p_open, window_flags))
+        if (!ImGui::Begin("Inspector", p_open, window_flags))
         {
             ImGui::End();
             return;
         }
 
+        // Inspector
+        ImGuiIO& io = ImGui::GetIO();
+
+        if (ImGui::TreeNode("Camera"))
+        {
+            ImGui::TreePop();
+            ImGui::Spacing();
+        }
+
+        if (ImGui::TreeNode("Rendering"))
+        {
+            ImGui::TreePop();
+            ImGui::Spacing();
+        }
+
+        if (ImGui::TreeNode("Style"))
+        {
+            ImGui::ShowStyleEditor();
+            ImGui::TreePop();
+            ImGui::Spacing();
+        }
 
         ImGui::End();
     }
