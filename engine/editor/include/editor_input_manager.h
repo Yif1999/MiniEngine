@@ -66,6 +66,6 @@ namespace MiniEngine
         size_t       m_cursor_on_axis {3};
         unsigned int m_editor_command {0};
 
-        std::shared_ptr<Camera> g_camera;
+        std::shared_ptr<Camera> m_camera;
     };
 } // namespace MiniEngine

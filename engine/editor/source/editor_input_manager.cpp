@@ -18,7 +18,7 @@ namespace MiniEngine
 {
     void EditorInputManager::initialize() 
     { 
-        g_camera = g_runtime_global_context.m_render_system->getRenderCamera();
+        m_camera = g_runtime_global_context.m_render_system->getRenderCamera();
         registerInput(); 
     }
 
@@ -61,27 +61,27 @@ namespace MiniEngine
     {
         if ((unsigned int)EditorCommand::camera_foward & m_editor_command)
         {
-            g_camera->processKeyboard(FORWARD, delta_time);
+            m_camera->processKeyboard(FORWARD, delta_time);
         }
         if ((unsigned int)EditorCommand::camera_back & m_editor_command)
         {
-            g_camera->processKeyboard(BACKWARD, delta_time);
+            m_camera->processKeyboard(BACKWARD, delta_time);
         }
         if ((unsigned int)EditorCommand::camera_left & m_editor_command)
         {
-            g_camera->processKeyboard(LEFT, delta_time);
+            m_camera->processKeyboard(LEFT, delta_time);
         }
         if ((unsigned int)EditorCommand::camera_right & m_editor_command)
         {
-            g_camera->processKeyboard(RIGHT, delta_time);
+            m_camera->processKeyboard(RIGHT, delta_time);
         }
         if ((unsigned int)EditorCommand::camera_up & m_editor_command)
         {
-            g_camera->processKeyboard(UP, delta_time);
+            m_camera->processKeyboard(UP, delta_time);
         }
         if ((unsigned int)EditorCommand::camera_down & m_editor_command)
         {
-            g_camera->processKeyboard(DOWN, delta_time);
+            m_camera->processKeyboard(DOWN, delta_time);
         }
     }
 
@@ -188,7 +188,7 @@ namespace MiniEngine
             {
                 glfwSetInputMode(
                     g_editor_global_context.m_window_system->getWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-                    g_camera->processMouseMovement(xpos - m_mouse_x, m_mouse_y - ypos);
+                    m_camera->processMouseMovement(xpos - m_mouse_x, m_mouse_y - ypos);
             }
             else if (g_editor_global_context.m_window_system->isMouseButtonDown(GLFW_MOUSE_BUTTON_LEFT))
             {
@@ -233,12 +233,12 @@ namespace MiniEngine
         {
             if (g_editor_global_context.m_window_system->isMouseButtonDown(GLFW_MOUSE_BUTTON_RIGHT))
             {
-                g_camera->processMouseScroll(yoffset, 0);
-                m_camera_speed = g_camera->MovementSpeed;
+                m_camera->processMouseScroll(yoffset, 0);
+                m_camera_speed = m_camera->MovementSpeed;
             }
             else
             {
-                g_camera->processMouseScroll(yoffset, 1);
+                m_camera->processMouseScroll(yoffset, 1);
             }
         }
     }

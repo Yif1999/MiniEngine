@@ -77,6 +77,7 @@ namespace MiniEngine
         std::shared_ptr<Shader> m_render_shader;
         std::shared_ptr<Shader> m_tracer_shader;
         std::shared_ptr<Camera> m_render_camera;
+        std::shared_ptr<PathTracing::PathTracer> m_path_tracer;
 
         unsigned int texColorBuffer, texDepthBuffer, framebuffer= 0;
     };

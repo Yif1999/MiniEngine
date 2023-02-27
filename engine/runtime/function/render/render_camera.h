@@ -52,6 +52,9 @@ namespace MiniEngine
         float Aspect;
         float Near;
         float Far;
+        float Aperture;
+        float FocusDistance;
+        int FocusMode;
 
         // constructor with vectors
         Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f),
@@ -149,7 +152,6 @@ namespace MiniEngine
             
         }
 
-    private:
         // calculates the front vector from the Camera's (updated) Euler Angles
         void updateCameraVectors()
         {

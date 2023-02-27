@@ -35,17 +35,20 @@ namespace MiniEngine
         WindowCreateInfo window_create_info;
         m_window_system->initialize(window_create_info);
 
-        m_input_system = std::make_shared<InputSystem>();
-        m_input_system->initialize();
-
         m_render_system = std::make_shared<RenderSystem>();
         RenderSystemInitInfo render_init_info;
         render_init_info.window_system = m_window_system;
         m_render_system->initialize(render_init_info);
+
+        m_input_system = std::make_shared<InputSystem>();
+        m_input_system->initialize();
     }
 
     void RuntimeGlobalContext::shutdownSystems()
     {
+        m_input_system->clear();
+        m_input_system.reset();
+        
         m_render_system->clear();
         m_render_system.reset();
 
@@ -53,9 +56,6 @@ namespace MiniEngine
 
         m_world_manager->clear();
         m_world_manager.reset();
-        
-        m_input_system->clear();
-        m_input_system.reset();
 
         m_asset_manager.reset();
 

@@ -5,6 +5,8 @@
 #include "runtime/core/math/vector2.h"
 
 #include "runtime/function/framework/object/object.h"
+#include "runtime/function/render/render_camera.h"
+#include "runtime/function/render/pathtracing/path_tracer.h"
 #include "runtime/function/ui/window_ui.h"
 
 #include "editor/include/editor_file_system.h"
@@ -58,5 +60,8 @@ namespace MiniEngine
         bool m_detail_window_open            = true;
         bool m_scene_lights_window_open      = true;
         bool m_scene_lights_data_window_open = true;
+
+        std::shared_ptr<Camera> m_camera;
+        std::shared_ptr<PathTracing::RenderingInitInfo> m_rendering_init_info;
     };
 }

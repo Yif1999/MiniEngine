@@ -10,9 +10,23 @@
 
 namespace MiniEngine::PathTracing
 {
+    struct RenderingInitInfo
+    {
+        ivec2 Resolution;
+        unsigned int SampleCount;
+        unsigned int BounceLimit;
+        bool BVH;
+        bool MultiThread;
+        bool Denoise;
+        bool Output;
+    };
+
     class PathTracer
     {
     public:
+        RenderingInitInfo init_info;
+
+        PathTracer();
         void startRender(unsigned char *pixels);
         void transferModelData(shared_ptr<Model> m_model);
 

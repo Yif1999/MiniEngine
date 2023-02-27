@@ -12,7 +12,6 @@
 #include "runtime/function/render/render_model.h"
 #include "runtime/function/render/render_swap_context.h"
 #include "runtime/function/render/render_resource.h"
-
 #include "runtime/function/render/pathtracing/path_tracer.h"
 
 namespace MiniEngine
@@ -59,6 +58,9 @@ namespace MiniEngine
                                                    (config_manager->getShaderFolder() / "lit.frag").generic_string().data());
         m_tracer_shader = std::make_shared<Shader>((config_manager->getShaderFolder() / "unlit.vert").generic_string().data(),
                                                    (config_manager->getShaderFolder() / "unlit.frag").generic_string().data());
+
+        // init path tracer & config RT
+        m_path_tracer = std::make_shared<PathTracing::PathTracer>();
     }
 
     void RenderSystem::tick(float delta_time)
