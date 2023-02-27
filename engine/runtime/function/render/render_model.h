@@ -21,6 +21,7 @@
 #include <map>
 #include <vector>
 #include <unordered_map>
+#include <filesystem>
 
 using namespace std;
 
@@ -51,8 +52,8 @@ namespace MiniEngine
         void loadModel(string const &path)
         {
             // read file
-            filesystem::path directory = filesystem::path(path).parent_path();
             std::string inputfile = path;
+            filesystem::path directory = filesystem::path(path).parent_path();
             tinyobj::ObjReaderConfig reader_config;
             reader_config.mtl_search_path = directory.generic_string().data();
 

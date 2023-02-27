@@ -99,7 +99,7 @@ endif()
 
 add_library(dnnl STATIC ${DNNL_SOURCES})
 
-target_compile_options(item_utest 
+target_compile_options(dnnl 
 	PRIVATE 
 	$<$<CXX_COMPILER_ID:MSVC>:/bigobj> 
 	$<$<CXX_COMPILER_ID:GNU>:-Wa,-mbig-obj>) 
