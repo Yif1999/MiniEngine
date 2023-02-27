@@ -51,10 +51,10 @@ namespace MiniEngine
         void loadModel(string const &path)
         {
             // read file
-            string directory = path.substr(0, path.find_last_of('/'));
+            filesystem::path directory = filesystem::path(path).parent_path();
             std::string inputfile = path;
             tinyobj::ObjReaderConfig reader_config;
-            reader_config.mtl_search_path = directory;
+            reader_config.mtl_search_path = directory.generic_string().data();
 
             tinyobj::ObjReader reader;
 

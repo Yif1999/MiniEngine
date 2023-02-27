@@ -99,6 +99,11 @@ endif()
 
 add_library(dnnl STATIC ${DNNL_SOURCES})
 
+target_compile_options(item_utest 
+	PRIVATE 
+	$<$<CXX_COMPILER_ID:MSVC>:/bigobj> 
+	$<$<CXX_COMPILER_ID:GNU>:-Wa,-mbig-obj>) 
+
 target_include_directories(dnnl
   PUBLIC
     $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/mkl-dnn/include>
