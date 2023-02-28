@@ -189,6 +189,7 @@ namespace MiniEngine
 
                     if (!with_normal)
                     {
+                        cout<<"eig"<<endl;
                         glm::vec3 v0 = vertex[1] - vertex[0];
                         glm::vec3 v1 = vertex[2] - vertex[1];
                         normal[0] = glm::normalize(v0 * v1);

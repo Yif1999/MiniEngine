@@ -15,12 +15,15 @@ namespace MiniEngine::PathTracing
 {
     PathTracer::PathTracer()
     {
-        init_info.BounceLimit = 4;
-        init_info.BVH =true;
-        init_info.Denoise = true;
-        init_info.MultiThread = true;
-        init_info.Output = false;
-        init_info.Resolution= glm::ivec2(640, 480);
+        init_info = make_shared<RenderingInitInfo>();
+
+        init_info->BounceLimit = 4;
+        init_info->BVH =true;
+        init_info->Denoise = true;
+        init_info->MultiThread = true;
+        init_info->Output = false;
+        init_info->Resolution= glm::ivec2(640, 480);
+        init_info->SampleCount = 64;
     }
 
     vec3 PathTracer::getColor(const Ray &r, const Hittable &mesh, shared_ptr<HittableList> &lights, int depth)

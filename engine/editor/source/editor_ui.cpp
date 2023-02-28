@@ -45,6 +45,7 @@ namespace MiniEngine
     EditorUI::EditorUI()
     {
         m_camera = g_editor_global_context.m_render_system->getRenderCamera();
+        m_rendering_init_info = g_editor_global_context.m_render_system->getPathTracer()->init_info;
         const auto& asset_folder            = g_runtime_global_context.m_config_manager->getAssetFolder();
         m_editor_ui_creator["TreeNodePush"] = [this](const std::string& name, void* value_ptr) -> void {
             static ImGuiTableFlags flags      = ImGuiTableFlags_Resizable | ImGuiTableFlags_NoSavedSettings;
@@ -566,20 +567,23 @@ namespace MiniEngine
         if (ImGui::TreeNode("Rendering"))
         {
             ImGui::Text("Resolution");
-            ImGui::DragFloat("Width", &t, 0.005f, -INFINITY, INFINITY, "%.2f", ImGuiSliderFlags_AlwaysClamp);
-            ImGui::DragFloat("Height", &t, 0.005f, -INFINITY, INFINITY, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+            ImGui::DragInt("Width", &m_rendering_init_info->Resolution.x, 1.f, 1.f, 4096.f, "%d", ImGuiSliderFlags_AlwaysClamp);
+            ImGui::DragInt("Height", &m_rendering_init_info->Resolution.y, 1.f, 1.f, 4096.f, "%d", ImGuiSliderFlags_AlwaysClamp);
 
             ImGui::Text("Ray Tracing");
-            ImGui::DragFloat("Sample Count", &t, 0.005f, -INFINITY, INFINITY, "%.2f", ImGuiSliderFlags_AlwaysClamp);
-            ImGui::DragFloat("Bounce Limit", &t, 0.005f, -INFINITY, INFINITY, "%.2f", ImGuiSliderFlags_AlwaysClamp);
-            ImGui::Checkbox("BVH", &a);
-            ImGui::Checkbox("Multi-Thread", &a);
-            ImGui::Checkbox("Denoise", &a);
+            ImGui::DragInt("Sample Count", &m_rendering_init_info->SampleCount, 1.f, 1.f, INFINITY, "%d", ImGuiSliderFlags_AlwaysClamp);
+            ImGui::DragInt("Bounce Limit", &m_rendering_init_info->BounceLimit, 1.f, 1.f, 1024.f, "%d", ImGuiSliderFlags_AlwaysClamp);
+            ImGui::Checkbox("BVH", &m_rendering_init_info->BVH);
+            ImGui::Checkbox("Multi-Thread", &m_rendering_init_info->MultiThread);
+            ImGui::Checkbox("Denoise", &m_rendering_init_info->Denoise);
 
             ImGui::Text("Output");
-            ImGui::Checkbox("Render to Disk", &a);
-            static char buf[64] = "";
-            ImGui::InputText("..", buf, 64);
+            ImGui::Checkbox("Render to Disk", &m_rendering_init_info->Output);
+            static char buf[128] = "";
+            if (ImGui::InputText("..", buf, 128))
+            {
+                strcpy(m_rendering_init_info->SavePath, buf);
+            }
             ImGui::SameLine();
             if (ImGui::Button("Browse"))
             {
@@ -589,6 +593,7 @@ namespace MiniEngine
                 if ( result == NFD_OKAY ) 
                 {
                     strcpy(buf, outPath);
+                    strcpy(m_rendering_init_info->SavePath, buf);
                     free(outPath);
                 }
                 else if ( result == NFD_CANCEL ) {}

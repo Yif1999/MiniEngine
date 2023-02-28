@@ -13,18 +13,19 @@ namespace MiniEngine::PathTracing
     struct RenderingInitInfo
     {
         ivec2 Resolution;
-        unsigned int SampleCount;
-        unsigned int BounceLimit;
+        int SampleCount;
+        int BounceLimit;
         bool BVH;
         bool MultiThread;
         bool Denoise;
         bool Output;
+        char SavePath[128];
     };
 
     class PathTracer
     {
     public:
-        RenderingInitInfo init_info;
+        shared_ptr<RenderingInitInfo> init_info;
 
         PathTracer();
         void startRender(unsigned char *pixels);

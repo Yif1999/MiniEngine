@@ -55,6 +55,7 @@ namespace MiniEngine
         void clear();
 
         std::shared_ptr<Camera> getRenderCamera() const;
+        std::shared_ptr<PathTracing::PathTracer> getPathTracer() const;
 
         void initializeUIRenderBackend(WindowUI* window_ui);
         void updateEngineContentViewport(float offset_x, float offset_y, float width, float height);

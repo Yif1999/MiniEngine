@@ -163,6 +163,11 @@ namespace MiniEngine
         return m_render_camera;
     }
 
+    std::shared_ptr<PathTracing::PathTracer> RenderSystem::getPathTracer() const
+    {
+        return m_path_tracer;
+    }
+
     void RenderSystem::updateEngineContentViewport(float offset_x, float offset_y, float width, float height)
     {
         m_viewport.x = offset_x;

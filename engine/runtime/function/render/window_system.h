@@ -12,7 +12,7 @@ namespace MiniEngine
     struct WindowCreateInfo
     {
         int         width {1280};
-        int         height {720};
+        int         height {768};
         const char* title {"Editor"};
         bool        is_fullscreen {false};
     };
