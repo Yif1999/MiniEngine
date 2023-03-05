@@ -10,6 +10,7 @@
 #include "runtime/function/render/render_scene.h"
 #include "runtime/function/render/render_shader.h"
 #include "runtime/function/render/render_model.h"
+#include "runtime/function/render/render_canvas.h"
 #include "runtime/function/render/render_swap_context.h"
 #include "runtime/function/render/render_resource.h"
 #include "runtime/function/render/pathtracing/path_tracer.h"
@@ -29,7 +30,7 @@ namespace MiniEngine
         ASSERT(asset_manager);
 
         // configure global opengl state
-        glEnable(GL_CULL_FACE);
+        // glEnable(GL_CULL_FACE);
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_MULTISAMPLE);
         glEnable(GL_FRAMEBUFFER_SRGB);
@@ -52,14 +53,15 @@ namespace MiniEngine
                                                    camera_pose.m_rotation.z, camera_pose.m_rotation.y,
                                                    camera_config.m_aspect.x / camera_config.m_aspect.y, 
                                                    camera_config.m_z_near, camera_config.m_z_far);
+        m_viewer_camera = std::make_shared<Camera>(glm::vec3(0.0f, 1.0f, 0.0f));
 
         // create and setup shader
         m_render_shader = std::make_shared<Shader>((config_manager->getShaderFolder() / "lit.vert").generic_string().data(),
                                                    (config_manager->getShaderFolder() / "lit.frag").generic_string().data());
-        m_tracer_shader = std::make_shared<Shader>((config_manager->getShaderFolder() / "unlit.vert").generic_string().data(),
+        m_canvas_shader = std::make_shared<Shader>((config_manager->getShaderFolder() / "unlit.vert").generic_string().data(),
                                                    (config_manager->getShaderFolder() / "unlit.frag").generic_string().data());
 
-        // init path tracer & config RT
+        // init path tracer
         m_path_tracer = std::make_shared<PathTracing::PathTracer>();
     }
 
@@ -74,7 +76,21 @@ namespace MiniEngine
         glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        if (m_render_model)
+        if (!g_is_editor_mode)
+        {
+            m_canvas_shader->use();
+            m_canvas_shader->setInt("result", 0);
+            glm::mat4 projection = m_viewer_camera->getOrthoProjMatrix();
+            glm::mat4 view = m_viewer_camera->getViewMatrix();
+            glm::mat4 model = glm::mat4(1.0f);
+            m_canvas_shader->setMat4("projection", projection);
+            m_canvas_shader->setMat4("view", view);
+            m_canvas_shader->setMat4("model", model);
+            m_render_canvas->Draw(m_canvas_shader);
+            glBindTexture(GL_TEXTURE_2D, m_path_tracer->RT);
+            glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_path_tracer->width, m_path_tracer->height, GL_RGB, GL_UNSIGNED_BYTE, m_path_tracer->pixels);
+        }
+        else if (m_render_model)
         {
             m_render_shader->use();
             glm::mat4 projection = m_render_camera->getPersProjMatrix();
@@ -119,6 +135,13 @@ namespace MiniEngine
         clear();
     }
 
+    void RenderSystem::setupCanvas(float hw, float hh)
+    {
+        if (m_render_canvas)
+            m_render_canvas.reset();
+        m_render_canvas = std::make_shared<Canvas>(hw, hh);
+    }
+
     void RenderSystem::refreshFrameBuffer()
     {
         if (framebuffer)
@@ -145,8 +168,9 @@ namespace MiniEngine
         glBindRenderbuffer(GL_RENDERBUFFER, 0);
         glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, texDepthBuffer);
 
-        if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-            LOG_WARN("framebuffer is not complete");
+        // if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+        //     LOG_WARN("framebuffer is not complete");
+
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
 
@@ -156,6 +180,23 @@ namespace MiniEngine
         {
             m_render_model.reset();
         }
+    }
+
+    void RenderSystem::startRendering()
+    {
+        m_path_tracer->should_stop_tracing = false;
+        m_tracing_process = std::thread(&PathTracing::PathTracer::startTracing,m_path_tracer,m_render_model);
+        m_tracing_process.detach();
+    };
+
+    void RenderSystem::stopRendering()
+    {
+        m_path_tracer->should_stop_tracing = true;
+    };
+
+    std::shared_ptr<Model> RenderSystem::getRenderModel() const
+    {
+        return m_render_model;
     }
 
     std::shared_ptr<Camera> RenderSystem::getRenderCamera() const
