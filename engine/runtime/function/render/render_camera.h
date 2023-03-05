@@ -21,16 +21,14 @@ namespace MiniEngine
     };
 
     // Default camera values
-    const float YAW = 90.0f;
-    const float PITCH = -90.0f;
+    const float YAW = 90.f;
+    const float PITCH = -90.f;
     const float SPEED = 2.5f;
     const float SENSITIVITY = 0.1f;
     const float ZOOM = 45.0f;
     const float ASPECT = 16.f/9.f;
     const float NEAR = 0.1f;
     const float FAR = 1000.f;
-
-
 
     // An abstract camera class that processes input and calculates the corresponding Euler Angles, Vectors and Matrices for use in OpenGL
     class Camera
@@ -83,6 +81,12 @@ namespace MiniEngine
         glm::mat4 getPersProjMatrix()
         {
             return glm::perspective(glm::radians(Zoom), Aspect, Near, Far);
+        }
+
+        // returns the ortho matrix
+        glm::mat4 getOrthoProjMatrix()
+        {
+            return glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, 0.0f, 10.0f);
         }
 
         // set aspect from ui

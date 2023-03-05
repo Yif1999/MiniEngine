@@ -571,7 +571,7 @@ namespace MiniEngine
             ImGui::DragInt("Height", &m_rendering_init_info->Resolution.y, 1.f, 1.f, 4096.f, "%d", ImGuiSliderFlags_AlwaysClamp);
 
             ImGui::Text("Ray Tracing");
-            ImGui::DragInt("Sample Count", &m_rendering_init_info->SampleCount, 1.f, 1.f, INFINITY, "%d", ImGuiSliderFlags_AlwaysClamp);
+            ImGui::DragInt("Sample Count", &m_rendering_init_info->SampleCount, 1.f, 1.f, 1048576.f, "%d", ImGuiSliderFlags_AlwaysClamp);
             ImGui::DragInt("Bounce Limit", &m_rendering_init_info->BounceLimit, 1.f, 1.f, 1024.f, "%d", ImGuiSliderFlags_AlwaysClamp);
             ImGui::Checkbox("BVH", &m_rendering_init_info->BVH);
             ImGui::Checkbox("Multi-Thread", &m_rendering_init_info->MultiThread);
@@ -736,9 +736,17 @@ namespace MiniEngine
                 if (ImGui::Button("Render"))
                 {
                     g_is_editor_mode = false;
-                    g_editor_global_context.m_scene_manager->drawSelectedEntityAxis();
-                    g_editor_global_context.m_input_manager->resetEditorCommand();
-                    g_editor_global_context.m_window_system->setFocusMode(true);
+                    g_editor_global_context.m_render_system->setupCanvas(1.f,1.f);
+
+                    if (!g_editor_global_context.m_render_system->getRenderModel())
+                    {
+                    }
+                    else
+                    {
+                        g_editor_global_context.m_render_system->getPathTracer()->initializeRenderer();
+                        g_editor_global_context.m_render_system->startRendering();
+                    }
+
                 }
                 ImGui::PopID();
             }
@@ -747,10 +755,8 @@ namespace MiniEngine
                 if (ImGui::Button(" Stop "))
                 {
                     g_is_editor_mode = true;
-                    // g_editor_global_context.m_scene_manager->drawSelectedEntityAxis();
-                    // g_runtime_global_context.m_input_system->resetGameCommand();
-                    // g_editor_global_context.m_render_system->getRenderCamera()->setMainViewMatrix(
-                    //     g_editor_global_context.m_scene_manager->getEditorCamera()->getViewMatrix());
+
+                    g_editor_global_context.m_render_system->stopRendering();
                 }
             }
 

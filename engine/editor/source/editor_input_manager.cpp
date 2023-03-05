@@ -180,43 +180,46 @@ namespace MiniEngine
 
     void EditorInputManager::onCursorPos(double xpos, double ypos)
     {
-        float angularVelocity =
-            180.0f / Math::max(m_engine_window_size.x, m_engine_window_size.y); // 180 degrees while moving full screen
-        if (m_mouse_x >= 0.0f && m_mouse_y >= 0.0f)
+        if (g_is_editor_mode)
         {
-            if (g_editor_global_context.m_window_system->isMouseButtonDown(GLFW_MOUSE_BUTTON_RIGHT))
+            float angularVelocity =
+                180.0f / Math::max(m_engine_window_size.x, m_engine_window_size.y); // 180 degrees while moving full screen
+            if (m_mouse_x >= 0.0f && m_mouse_y >= 0.0f)
             {
-                glfwSetInputMode(
-                    g_editor_global_context.m_window_system->getWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-                    m_camera->processMouseMovement(xpos - m_mouse_x, m_mouse_y - ypos);
-            }
-            else if (g_editor_global_context.m_window_system->isMouseButtonDown(GLFW_MOUSE_BUTTON_LEFT))
-            {
-                g_editor_global_context.m_scene_manager->moveEntity(
-                    xpos,
-                    ypos,
-                    m_mouse_x,
-                    m_mouse_y,
-                    m_engine_window_pos,
-                    m_engine_window_size,
-                    m_cursor_on_axis,
-                    g_editor_global_context.m_scene_manager->getSelectedObjectMatrix());
-                glfwSetInputMode(g_editor_global_context.m_window_system->getWindow(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-            }
-            else
-            {
-                glfwSetInputMode(g_editor_global_context.m_window_system->getWindow(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-
-                if (isCursorInRect(m_engine_window_pos, m_engine_window_size))
+                if (g_editor_global_context.m_window_system->isMouseButtonDown(GLFW_MOUSE_BUTTON_RIGHT))
                 {
-                    Vector2 cursor_uv = Vector2((m_mouse_x - m_engine_window_pos.x) / m_engine_window_size.x,
-                                                (m_mouse_y - m_engine_window_pos.y) / m_engine_window_size.y);
-                    updateCursorOnAxis(cursor_uv);
+                    glfwSetInputMode(
+                        g_editor_global_context.m_window_system->getWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+                        m_camera->processMouseMovement(xpos - m_mouse_x, m_mouse_y - ypos);
+                }
+                else if (g_editor_global_context.m_window_system->isMouseButtonDown(GLFW_MOUSE_BUTTON_LEFT))
+                {
+                    g_editor_global_context.m_scene_manager->moveEntity(
+                        xpos,
+                        ypos,
+                        m_mouse_x,
+                        m_mouse_y,
+                        m_engine_window_pos,
+                        m_engine_window_size,
+                        m_cursor_on_axis,
+                        g_editor_global_context.m_scene_manager->getSelectedObjectMatrix());
+                    glfwSetInputMode(g_editor_global_context.m_window_system->getWindow(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+                }
+                else
+                {
+                    glfwSetInputMode(g_editor_global_context.m_window_system->getWindow(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+
+                    if (isCursorInRect(m_engine_window_pos, m_engine_window_size))
+                    {
+                        Vector2 cursor_uv = Vector2((m_mouse_x - m_engine_window_pos.x) / m_engine_window_size.x,
+                                                    (m_mouse_y - m_engine_window_pos.y) / m_engine_window_size.y);
+                        updateCursorOnAxis(cursor_uv);
+                    }
                 }
             }
+            m_mouse_x = xpos;
+            m_mouse_y = ypos;
         }
-        m_mouse_x = xpos;
-        m_mouse_y = ypos;
     }
 
     void EditorInputManager::onCursorEnter(int entered)

@@ -237,7 +237,6 @@ namespace MiniEngine::PathTracing
             return cosine < 0 ? 0 : cosine / PI;
         }
 
-    private:
         inline bool is_transparent(MiniEngine::Material mat) const
         {
             if (mat.Ni > 1 && mat.Tr[0] < 1 || mat.Tr[1] < 1 || mat.Tr[2] < 1)
@@ -265,6 +264,7 @@ namespace MiniEngine::PathTracing
             return false;
         }
 
+    private:
         static float reflectance(float cosine, float ref_idx)
         {
             // Use Schlick's approximation for reflectance.

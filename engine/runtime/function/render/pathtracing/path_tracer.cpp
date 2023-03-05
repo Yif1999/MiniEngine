@@ -16,14 +16,40 @@ namespace MiniEngine::PathTracing
     PathTracer::PathTracer()
     {
         init_info = make_shared<RenderingInitInfo>();
-
         init_info->BounceLimit = 4;
-        init_info->BVH =true;
+        init_info->BVH = true;
         init_info->Denoise = true;
         init_info->MultiThread = true;
         init_info->Output = false;
-        init_info->Resolution= glm::ivec2(640, 480);
+        init_info->Resolution = glm::ivec2(640, 480);
         init_info->SampleCount = 64;
+    }
+
+    void PathTracer::initializeRenderer()
+    {
+        width = init_info->Resolution.x;
+        height = init_info->Resolution.y;
+
+        if (RT)
+        {
+            glDeleteTextures(1, &RT);
+        }
+        glGenTextures(1, &RT);
+        glBindTexture(GL_TEXTURE_2D, RT);
+        // set the texture wrapping parameters
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        // set texture filtering parameters
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
+        
+        if (pixels)
+        {
+            delete pixels;
+            pixels = nullptr;
+        }
+        pixels = new unsigned char[3 * width * height];
     }
 
     vec3 PathTracer::getColor(const Ray &r, const Hittable &mesh, shared_ptr<HittableList> &lights, int depth)
@@ -56,20 +82,19 @@ namespace MiniEngine::PathTracing
         // auto light_ptr = make_shared<HittablePDF>(lights, rec.hit_point.Position);
         // MixturePDF p(light_ptr, srec.pdf_ptr);
 
-
         Ray scattered = Ray(rec.hit_point.Position, srec.pdf_ptr->generate());
         auto pdf = srec.pdf_ptr->value(scattered.direction);
 
         return emitted + srec.attenuation * rec.mat_ptr->scatterPDF(r, rec, scattered) * getColor(scattered, mesh, lights, depth - 1) / pdf;
     }
 
-    void PathTracer::startRender(unsigned char *pixels)
+    void PathTracer::startTracing(shared_ptr<Model> m_model)
     {
-        int window_size = 512;
+        transferModelData(m_model);
 
         // Image
-        const int image_width = window_size;
-        const int image_height = window_size;
+        const int image_width = init_info->Resolution.x;
+        const int image_height = init_info->Resolution.y;
         const int samples = 128;
         const int max_depth = 8;
 
@@ -95,12 +120,15 @@ namespace MiniEngine::PathTracing
         // multi thread
         for (int j = image_height - 1; j >= 0; --j)
         {
-            tbb::parallel_for(0, image_width, 
-            [this, j, samples, image_width, image_height, max_depth, &cam, &mesh, &lights, &pixels]
-            (int i){
+            tbb::parallel_for(0, image_width,
+                              [this, j, samples, image_width, image_height, max_depth, &cam, &mesh, &lights](int i)
+                              {
                 vec3 pixel_color(0, 0, 0);
                 for (int s = 0; s < samples; ++s)
                 {
+                    if (should_stop_tracing)
+                        return;
+
                     f32 u = (i + linearRand(0.f, 1.f)) / (image_width - 1);
                     f32 v = (j + linearRand(0.f, 1.f)) / (image_height - 1);
                     Ray r = cam.getRay(u, v);
@@ -110,6 +138,8 @@ namespace MiniEngine::PathTracing
                     pixel_color += sample_color;
                 }
                 writeColor(pixels, ivec2(image_width, image_height), ivec2(i, j), pixel_color, samples); });
+            if (should_stop_tracing)
+                return;
         }
 
         std::chrono::steady_clock::time_point endTime = std::chrono::steady_clock::now();
@@ -211,13 +241,11 @@ namespace MiniEngine::PathTracing
 
                 mesh_data.add(make_shared<Triangle>(vertices, mat));
 
-
-                // if (mat->is_emitted(mat->mat))
-                // {
-                //     light_data.add(make_shared<Triangle>(vt, shared_ptr<Material>()));
-                // }
+                if (mat->is_emitted(mat->mat))
+                {
+                    light_data.add(make_shared<Triangle>(vertices, shared_ptr<Material>()));
+                }
             }
         }
-
     }
 }

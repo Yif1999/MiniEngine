@@ -25,10 +25,17 @@ namespace MiniEngine::PathTracing
     class PathTracer
     {
     public:
+        int width;
+        int height;
+        unsigned int RT;
+        bool should_stop_tracing{false};
+        unsigned char *pixels = nullptr;
         shared_ptr<RenderingInitInfo> init_info;
 
         PathTracer();
-        void startRender(unsigned char *pixels);
+
+        void initializeRenderer();
+        void startTracing(shared_ptr<Model> m_model);
         void transferModelData(shared_ptr<Model> m_model);
 
     private:
