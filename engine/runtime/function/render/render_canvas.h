@@ -19,16 +19,15 @@ namespace MiniEngine
 
         void Draw(std::shared_ptr<Shader> shader)
         {
+            // get path tracer info
+            std::shared_ptr<PathTracing::PathTracer> m_path_tracer = g_runtime_global_context.m_render_system->getPathTracer();
+            
             // draw canvas plane
+            glBindTexture(GL_TEXTURE_2D, m_path_tracer->result);
             glBindVertexArray(VAO);
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
             glBindVertexArray(0);
-
-            std::shared_ptr<PathTracing::PathTracer> m_path_tracer = g_runtime_global_context.m_render_system->getPathTracer();
-            glBindTexture(GL_TEXTURE_2D, m_path_tracer->result);
             glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_path_tracer->width, m_path_tracer->height, GL_RGB, GL_UNSIGNED_BYTE, m_path_tracer->pixels);
-
-            // set active texture back to default
             glActiveTexture(GL_TEXTURE0);
         }
 
@@ -41,10 +40,10 @@ namespace MiniEngine
         void setupCanvas()
         {
             float vertices[] = {
-                half_width, 0.0f,  half_height, 1.f, 1.f,   // top right
-                half_width, -0.0f, -half_height, 1.f, 0.f,  // bottom right
-                -half_width, -0.0f, -half_height, 0.f, 0.f, // bottom left
-                -half_width, 0.0f,  half_height, 0.f, 1.f   // top left
+                half_width, 0.0f,  half_height, 1.f, 0.f,   // top right
+                half_width, -0.0f, -half_height, 1.f, 1.f,  // bottom right
+                -half_width, -0.0f, -half_height, 0.f, 1.f, // bottom left
+                -half_width, 0.0f,  half_height, 0.f, 0.f   // top left
             };
             unsigned int indices[] = {
                 // note that we start from 0!

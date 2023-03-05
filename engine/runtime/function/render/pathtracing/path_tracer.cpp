@@ -30,6 +30,14 @@ namespace MiniEngine::PathTracing
         width = init_info->Resolution.x;
         height = init_info->Resolution.y;
 
+        if (pixels)
+        {
+            delete pixels;
+            pixels = nullptr;
+        }
+        pixels = new unsigned char[3 * width * height];
+        memset(pixels, 0, sizeof(char) * width * height * 3);
+
         if (result)
         {
             glDeleteTextures(1, &result);
@@ -43,13 +51,6 @@ namespace MiniEngine::PathTracing
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
-        
-        if (pixels)
-        {
-            delete pixels;
-            pixels = nullptr;
-        }
-        pixels = new unsigned char[3 * width * height];
     }
 
     vec3 PathTracer::getColor(const Ray &r, const Hittable &mesh, shared_ptr<HittableList> &lights, int depth)
@@ -93,10 +94,10 @@ namespace MiniEngine::PathTracing
         transferModelData(m_model);
 
         // Image
-        const int image_width = init_info->Resolution.x;
-        const int image_height = init_info->Resolution.y;
-        const int samples = 128;
-        const int max_depth = 8;
+        const int image_width = width;
+        const int image_height = height;
+        const int samples = init_info->SampleCount;
+        const int max_depth = init_info->BounceLimit;
 
         // Camera
         vec3 lookfrom(6.9118194580078125, 1.6516278982162476, 2.5541365146636963);
@@ -137,7 +138,8 @@ namespace MiniEngine::PathTracing
                         sample_color={0,0,0};
                     pixel_color += sample_color;
                 }
-                writeColor(pixels, ivec2(image_width, image_height), ivec2(i, j), pixel_color, samples); });
+                pixel_color *= 1.0 / samples;
+                writeColor(pixels, ivec2(image_width, image_height), ivec2(i, j), pixel_color, 1.0); });
             if (should_stop_tracing)
                 return;
         }
@@ -149,13 +151,13 @@ namespace MiniEngine::PathTracing
         LOG_INFO("ray tracing is done in " + to_string(delta_time) + "s");
 
         // Denoise
-        float *denoise_buffer = new float[3 * 512 * 512];
+        float *denoise_buffer = new float[3 * width * height];
 
         for (int j = image_height - 1; j >= 0; --j)
         {
             for (int i = 0; i < image_width; ++i)
             {
-                vec3 swap_color = readColor(pixels, ivec2(image_width, image_height), ivec2(i, j));
+                vec3 swap_color = readColor(pixels, ivec2(image_width, image_height), ivec2(i, j), 1.0);
                 denoise_buffer[3 * (image_width * j + i) + 0] = swap_color.x;
                 denoise_buffer[3 * (image_width * j + i) + 1] = swap_color.y;
                 denoise_buffer[3 * (image_width * j + i) + 2] = swap_color.z;
@@ -168,8 +170,8 @@ namespace MiniEngine::PathTracing
 
         // Create a filter for denoising a beauty (color) image using optional auxiliary images too
         oidn::FilterRef filter = device.newFilter("RT");                           // generic ray tracing filter
-        filter.setImage("color", denoise_buffer, oidn::Format::Float3, 512, 512);  // beauty
-        filter.setImage("output", denoise_buffer, oidn::Format::Float3, 512, 512); // denoised beauty
+        filter.setImage("color", denoise_buffer, oidn::Format::Float3, width, height);  // beauty
+        filter.setImage("output", denoise_buffer, oidn::Format::Float3, width, height); // denoised beauty
         filter.commit();
 
         // Filter the image
@@ -188,34 +190,33 @@ namespace MiniEngine::PathTracing
                 swap_color.x = denoise_buffer[3 * (image_width * j + i) + 0];
                 swap_color.y = denoise_buffer[3 * (image_width * j + i) + 1];
                 swap_color.z = denoise_buffer[3 * (image_width * j + i) + 2];
-                writeColor(pixels, ivec2(image_width, image_height), ivec2(i, j), swap_color, 1);
+                writeColor(pixels, ivec2(image_width, image_height), ivec2(i, j), swap_color, 1.0);
             }
         }
     }
 
-    void PathTracer::writeColor(unsigned char *pixels, ivec2 tex_size, ivec2 tex_coord, vec3 color, int samples)
+    void PathTracer::writeColor(unsigned char *pixels, ivec2 tex_size, ivec2 tex_coord, vec3 color, float gama)
     {
         auto r = color.r;
         auto g = color.g;
         auto b = color.b;
 
-        auto scale = 1.0 / samples;
-        r = pow(scale * r, 1 / 2.2);
-        g = pow(scale * g, 1 / 2.2);
-        b = pow(scale * b, 1 / 2.2);
+        r = pow(r, 1 / gama);
+        g = pow(g, 1 / gama);
+        b = pow(b, 1 / gama);
 
         pixels[3 * (tex_size.x * tex_coord.y + tex_coord.x) + 0] = static_cast<int>(256 * Math::clamp(r, 0.0, 0.999));
         pixels[3 * (tex_size.x * tex_coord.y + tex_coord.x) + 1] = static_cast<int>(256 * Math::clamp(g, 0.0, 0.999));
         pixels[3 * (tex_size.x * tex_coord.y + tex_coord.x) + 2] = static_cast<int>(256 * Math::clamp(b, 0.0, 0.999));
     }
 
-    vec3 PathTracer::readColor(unsigned char *pixels, ivec2 tex_size, ivec2 tex_coord)
+    vec3 PathTracer::readColor(unsigned char *pixels, ivec2 tex_size, ivec2 tex_coord, float gama)
     {
         vec3 color;
 
-        color.r = pow(pixels[3 * (tex_size.x * tex_coord.y + tex_coord.x) + 0] / 255.f, 2.2);
-        color.g = pow(pixels[3 * (tex_size.x * tex_coord.y + tex_coord.x) + 1] / 255.f, 2.2);
-        color.b = pow(pixels[3 * (tex_size.x * tex_coord.y + tex_coord.x) + 2] / 255.f, 2.2);
+        color.r = pow(pixels[3 * (tex_size.x * tex_coord.y + tex_coord.x) + 0] / 255.f, gama);
+        color.g = pow(pixels[3 * (tex_size.x * tex_coord.y + tex_coord.x) + 1] / 255.f, gama);
+        color.b = pow(pixels[3 * (tex_size.x * tex_coord.y + tex_coord.x) + 2] / 255.f, gama);
 
         return color;
     }

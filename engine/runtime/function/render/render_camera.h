@@ -4,6 +4,8 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+#include "runtime/function/global/global_context.h"
+
 #include <vector>
 #include <iostream>
 
@@ -84,9 +86,12 @@ namespace MiniEngine
         }
 
         // returns the ortho matrix
-        glm::mat4 getOrthoProjMatrix()
-        {
-            return glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, 0.0f, 10.0f);
+        glm::mat4 getOrthoProjMatrix(float image_aspect)
+        {   
+            if (Aspect>image_aspect)
+                return glm::ortho(-Aspect, Aspect, -1.0f, 1.0f, 0.0f, 10.0f);
+            else
+                return glm::ortho(-image_aspect, image_aspect, -image_aspect / Aspect, image_aspect / Aspect, 0.0f, 10.0f);
         }
 
         // set aspect from ui

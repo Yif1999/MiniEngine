@@ -80,7 +80,8 @@ namespace MiniEngine
         {
             m_canvas_shader->use();
             m_canvas_shader->setInt("result", 0);
-            glm::mat4 projection = m_viewer_camera->getOrthoProjMatrix();
+            float image_aspect = (float)m_path_tracer->init_info->Resolution.x / (float)m_path_tracer->init_info->Resolution.y;
+            glm::mat4 projection = m_viewer_camera->getOrthoProjMatrix(image_aspect);
             glm::mat4 view = m_viewer_camera->getViewMatrix();
             glm::mat4 model = glm::mat4(1.0f);
             m_canvas_shader->setMat4("projection", projection);
@@ -215,6 +216,7 @@ namespace MiniEngine
         m_viewport.height = height;
 
         m_render_camera->setAspect(width / height);
+        m_viewer_camera->setAspect(width / height);
     }
 
     EngineContentViewport RenderSystem::getEngineContentViewport() const

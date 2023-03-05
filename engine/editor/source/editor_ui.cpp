@@ -736,7 +736,8 @@ namespace MiniEngine
                 if (ImGui::Button("Render"))
                 {
                     g_is_editor_mode = false;
-                    g_editor_global_context.m_render_system->setupCanvas(1.f,1.f);
+
+                    g_editor_global_context.m_render_system->setupCanvas((float)m_rendering_init_info->Resolution.x/(float)m_rendering_init_info->Resolution.y,1.f);
 
                     if (!g_editor_global_context.m_render_system->getRenderModel())
                     {
@@ -752,7 +753,7 @@ namespace MiniEngine
             }
             else
             {
-                if (ImGui::Button(" Stop "))
+                if (ImGui::Button(" Back "))
                 {
                     g_is_editor_mode = true;
 
