@@ -27,7 +27,7 @@ namespace MiniEngine::PathTracing
     public:
         int width;
         int height;
-        unsigned int RT;
+        unsigned int result;
         bool should_stop_tracing{false};
         unsigned char *pixels = nullptr;
         shared_ptr<RenderingInitInfo> init_info;

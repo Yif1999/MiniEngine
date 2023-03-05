@@ -24,9 +24,9 @@ namespace MiniEngine
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
             glBindVertexArray(0);
 
-            // std::shared_ptr<PathTracing::PathTracer> m_path_tracer = g_runtime_global_context.m_render_system->getPathTracer();
-            // glBindTexture(GL_TEXTURE_2D, m_path_tracer->RT);
-            // glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_path_tracer->width, m_path_tracer->height, GL_RGB, GL_UNSIGNED_BYTE, m_path_tracer->pixels);
+            std::shared_ptr<PathTracing::PathTracer> m_path_tracer = g_runtime_global_context.m_render_system->getPathTracer();
+            glBindTexture(GL_TEXTURE_2D, m_path_tracer->result);
+            glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_path_tracer->width, m_path_tracer->height, GL_RGB, GL_UNSIGNED_BYTE, m_path_tracer->pixels);
 
             // set active texture back to default
             glActiveTexture(GL_TEXTURE0);

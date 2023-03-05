@@ -30,12 +30,12 @@ namespace MiniEngine::PathTracing
         width = init_info->Resolution.x;
         height = init_info->Resolution.y;
 
-        if (RT)
+        if (result)
         {
-            glDeleteTextures(1, &RT);
+            glDeleteTextures(1, &result);
         }
-        glGenTextures(1, &RT);
-        glBindTexture(GL_TEXTURE_2D, RT);
+        glGenTextures(1, &result);
+        glBindTexture(GL_TEXTURE_2D, result);
         // set the texture wrapping parameters
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);

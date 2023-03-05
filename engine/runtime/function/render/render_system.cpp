@@ -30,7 +30,7 @@ namespace MiniEngine
         ASSERT(asset_manager);
 
         // configure global opengl state
-        // glEnable(GL_CULL_FACE);
+        glEnable(GL_CULL_FACE);
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_MULTISAMPLE);
         glEnable(GL_FRAMEBUFFER_SRGB);
@@ -87,8 +87,6 @@ namespace MiniEngine
             m_canvas_shader->setMat4("view", view);
             m_canvas_shader->setMat4("model", model);
             m_render_canvas->Draw(m_canvas_shader);
-            glBindTexture(GL_TEXTURE_2D, m_path_tracer->RT);
-            glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_path_tracer->width, m_path_tracer->height, GL_RGB, GL_UNSIGNED_BYTE, m_path_tracer->pixels);
         }
         else if (m_render_model)
         {
