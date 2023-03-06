@@ -530,9 +530,6 @@ namespace MiniEngine
         // Inspector
         ImGuiIO& io = ImGui::GetIO();
 
-            float t;
-            bool a;
-            int i;
         if (ImGui::TreeNode("Camera"))
         {
 

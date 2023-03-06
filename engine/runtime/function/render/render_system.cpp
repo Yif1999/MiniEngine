@@ -34,6 +34,7 @@ namespace MiniEngine
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_MULTISAMPLE);
         glEnable(GL_FRAMEBUFFER_SRGB);
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
         // setup window & viewport
         m_window = init_info.window_system->getWindow();
