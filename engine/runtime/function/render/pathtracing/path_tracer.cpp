@@ -21,7 +21,7 @@ namespace MiniEngine::PathTracing
         init_info->Denoise = true;
         init_info->MultiThread = true;
         init_info->Output = false;
-        init_info->Resolution = glm::ivec2(640, 480);
+        init_info->Resolution = glm::ivec2(1280, 720);
         init_info->SampleCount = 128;
     }
 
@@ -50,7 +50,7 @@ namespace MiniEngine::PathTracing
         // set texture filtering parameters
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, pixels);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
     }
 
     vec3 PathTracer::getColor(const Ray &r, const Hittable &mesh, shared_ptr<HittableList> &lights, int depth)
