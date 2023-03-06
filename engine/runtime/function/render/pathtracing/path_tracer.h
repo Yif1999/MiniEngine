@@ -33,12 +33,17 @@ namespace MiniEngine::PathTracing
         bool should_stop_tracing{false};
         unsigned char *pixels = nullptr;
         shared_ptr<RenderingInitInfo> init_info;
+        int state;
+        float progress;
+        float render_time;
 
         PathTracer();
 
         void initializeRenderer();
         void startTracing(shared_ptr<Model> m_model, shared_ptr<MiniEngine::Camera> m_camera);
         void transferModelData(shared_ptr<Model> m_model);
+
+        int getLightNumber();
 
     private:
         HittableList mesh_data;

@@ -691,22 +691,50 @@ namespace MiniEngine
         if (ImGui::BeginMenuBar())
         {
             ImGui::Indent(10.f);
-            // drawAxisToggleButton("Trans", trans_button_ckecked, (int)EditorAxisMode::TranslateMode);
-            // ImGui::Unindent();
-
-            // ImGui::SameLine();
-
-            // drawAxisToggleButton("Rotate", rotate_button_ckecked, (int)EditorAxisMode::RotateMode);
-
-            // ImGui::SameLine();
-
-            // drawAxisToggleButton("Scale", scale_button_ckecked, (int)EditorAxisMode::ScaleMode);
-
-            // ImGui::SameLine();
 
             if (!g_is_editor_mode)
             {
-                ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1.0f), "Press Left Alt key to display the mouse cursor!");
+                if (!g_editor_global_context.m_render_system->getPathTracer()->getLightNumber())
+                    m_error_code =2;
+
+                if (m_error_code)
+                {
+                    switch (m_error_code)
+                    {
+                    case 1:
+                        ImGui::TextColored(ImVec4(1.f, 0.5f, 0.5f, 1.0f), "Error: No scenes are loaded!");
+                        break;
+                    case 2:
+                        ImGui::TextColored(ImVec4(1.f, 0.5f, 0.5f, 1.0f), "Error: No light in the scene!");
+                    default:
+                        break;
+                    }
+                }
+                else
+                {
+                    switch (g_editor_global_context.m_render_system->getPathTracer()->state)
+                    {
+                    case 0:
+                        ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1.0f), "Collecting scene data...");
+                        break;
+                    case 1:
+                        ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1.0f), "Building BVH...");
+                        break;
+                    case 2:
+                        ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1.0f), "Rendering (%.2f%%)...", 
+                                                  g_editor_global_context.m_render_system->getPathTracer()->progress);
+                        break;
+                    case 3:
+                        ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1.0f), "Denoising...");
+                        break;
+                    case 4:
+                        ImGui::TextColored(ImVec4(0.5f, 1.f, 0.5f, 1.0f), "Rendering is completed in %.2fs!", 
+                                                  g_editor_global_context.m_render_system->getPathTracer()->render_time);
+                        break;
+                    default:
+                        break;
+                    }
+                }
             }
             else
             {
@@ -738,9 +766,11 @@ namespace MiniEngine
 
                     if (!g_editor_global_context.m_render_system->getRenderModel())
                     {
+                        m_error_code = 1;
                     }
                     else
                     {
+                        m_error_code = 0;
                         g_editor_global_context.m_render_system->getPathTracer()->initializeRenderer();
                         g_editor_global_context.m_render_system->startRendering();
                     }

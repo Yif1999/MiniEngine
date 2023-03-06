@@ -91,6 +91,9 @@ namespace MiniEngine::PathTracing
 
     void PathTracer::startTracing(shared_ptr<Model> m_model, shared_ptr<MiniEngine::Camera> m_camera)
     {
+        state = 0;
+        std::chrono::steady_clock::time_point startTime = std::chrono::steady_clock::now();
+
         transferModelData(m_model);
 
         // Image
@@ -109,134 +112,159 @@ namespace MiniEngine::PathTracing
 
         Camera cam(lookfrom, lookat, vup, fov, aperture, dist_to_focus, aspect_ratio);
 
-        // Model
-        HittableList mesh;
-        mesh.add(make_shared<BVH>(mesh_data));
-
         // Light
+        if (!getLightNumber()){
+            return;
+        }
         auto lights = make_shared<HittableList>(light_data);
 
-        // Render
-        std::chrono::steady_clock::time_point startTime = std::chrono::steady_clock::now();
-
-        // multi thread
-        for (int j = height - 1; j >= 0; --j)
+        // Model
+        HittableList mesh;
+        if (init_info->BVH)
         {
-            tbb::parallel_for(0, width,
-                              [this, j, samples, max_depth, &cam, &mesh, &lights](int i)
-                              {
-                vec3 pixel_color(0, 0, 0);
-                for (int s = 0; s < samples; ++s)
-                {
-                    if (should_stop_tracing)
-                        return;
-
-                    f32 u = (i + linearRand(0.f, 1.f)) / (width - 1);
-                    f32 v = (j + linearRand(0.f, 1.f)) / (height - 1);
-                    Ray r = cam.getRay(u, v);
-                    vec3 sample_color = getColor(r, mesh, lights, max_depth);
-                    if (isInfinity(sample_color) || isNan(sample_color))
-                        sample_color={0,0,0};
-                    pixel_color += sample_color;
-                }
-                pixel_color *= 1.0 / samples;
-                writeColor(pixels, ivec2(width, height), ivec2(i, j), pixel_color, 1.0); });
-            if (should_stop_tracing)
-                return;
+            state = 1;
+            mesh.add(make_shared<BVH>(mesh_data));
+        }
+        else
+        {
+            mesh = mesh_data;
         }
 
-        // // single thread
-        // for (int j = height - 1; j >= 0; --j)
-        // {
-        //     for (int i = 0; i < width; ++i)
-        //     {
-        //         vec3 pixel_color(0, 0, 0);
-        //         for (int s = 0; s < samples; ++s)
-        //         {
-        //             if (should_stop_tracing)
-        //                 return;
+        state = 2;
+        // Render
 
-        //             f32 u = (i + linearRand(0.f, 1.f)) / (width - 1);
-        //             f32 v = (j + linearRand(0.f, 1.f)) / (height - 1);
-        //             Ray r = cam.getRay(u, v);
-        //             vec3 sample_color = getColor(r, mesh, lights, max_depth);
-        //             if (isInfinity(sample_color) || isNan(sample_color))
-        //                 sample_color={0,0,0};
-        //             pixel_color += sample_color;
-        //         }
-        //         pixel_color *= 1.0 / samples;
-        //         writeColor(pixels, ivec2(width, height), ivec2(i, j), pixel_color, 2.2);
-        //     }
+        for (int j = height - 1; j >= 0; --j)
+        {
+            progress = Math::clamp(float(height-j) / float(height-1) * 100, 0, 100);
+            if (init_info->MultiThread)
+            {
+                // multi thread
+                tbb::parallel_for(0, width,
+                                [this, j, samples, max_depth, &cam, &mesh, &lights](int i)
+                                {
+                    vec3 pixel_color(0, 0, 0);
+                    for (int s = 0; s < samples; ++s)
+                    {
+                        if (should_stop_tracing)
+                            return;
 
-        // }
+                        f32 u = (i + linearRand(0.f, 1.f)) / (width - 1);
+                        f32 v = (j + linearRand(0.f, 1.f)) / (height - 1);
+                        Ray r = cam.getRay(u, v);
+                        vec3 sample_color = getColor(r, mesh, lights, max_depth);
+                        if (isInfinity(sample_color) || isNan(sample_color))
+                            sample_color={0,0,0};
+                        pixel_color += sample_color;
+                    }
+                    pixel_color *= 1.0 / samples;
+                    writeColor(pixels, ivec2(width, height), ivec2(i, j), pixel_color, 1.0); });
+                if (should_stop_tracing)
+                    return;
+            }
+            else
+            {
+                // single thread
+                for (int j = height - 1; j >= 0; --j)
+                {
+                    for (int i = 0; i < width; ++i)
+                    {
+                        vec3 pixel_color(0, 0, 0);
+                        for (int s = 0; s < samples; ++s)
+                        {
+                            if (should_stop_tracing)
+                                return;
+
+                            f32 u = (i + linearRand(0.f, 1.f)) / (width - 1);
+                            f32 v = (j + linearRand(0.f, 1.f)) / (height - 1);
+                            Ray r = cam.getRay(u, v);
+                            vec3 sample_color = getColor(r, mesh, lights, max_depth);
+                            if (isInfinity(sample_color) || isNan(sample_color))
+                                sample_color={0,0,0};
+                            pixel_color += sample_color;
+                        }
+                        pixel_color *= 1.0 / samples;
+                        writeColor(pixels, ivec2(width, height), ivec2(i, j), pixel_color, 2.2);
+                    }
+                }
+            }
+        }
+
+
+        if (init_info->Denoise)
+        {
+            state = 3;
+            // Denoise
+            float *denoise_buffer = new float[3 * width * height];
+
+            for (int j = height - 1; j >= 0; --j)
+            {
+                for (int i = 0; i < width; ++i)
+                {
+                    vec3 swap_color = readColor(pixels, ivec2(width, height), ivec2(i, j), 2.2);
+                    denoise_buffer[3 * (width * j + i) + 0] = swap_color.x;
+                    denoise_buffer[3 * (width * j + i) + 1] = swap_color.y;
+                    denoise_buffer[3 * (width * j + i) + 2] = swap_color.z;
+                }
+            }
+
+            // Create an Intel Open Image Denoise device
+            oidn::DeviceRef device = oidn::newDevice();
+            device.commit();
+
+            // Create a filter for denoising a beauty (color) image using optional auxiliary images too
+            oidn::FilterRef filter = device.newFilter("RT");                           // generic ray tracing filter
+            filter.setImage("color", denoise_buffer, oidn::Format::Float3, width, height);  // beauty
+            filter.setImage("output", denoise_buffer, oidn::Format::Float3, width, height); // denoised beauty
+            filter.commit();
+
+            // Filter the image
+            filter.execute();
+
+            // Check for errors
+            const char *errorMessage;
+            if (device.getError(errorMessage) != oidn::Error::None)
+                std::cout << "Error: " << errorMessage << std::endl;
+
+            for (int j = height - 1; j >= 0; --j)
+            {
+                for (int i = 0; i < width; ++i)
+                {
+                    vec3 swap_color;
+                    swap_color.x = denoise_buffer[3 * (width * j + i) + 0];
+                    swap_color.y = denoise_buffer[3 * (width * j + i) + 1];
+                    swap_color.z = denoise_buffer[3 * (width * j + i) + 2];
+                    writeColor(pixels, ivec2(width, height), ivec2(i, j), swap_color, 2.2);
+                }
+            }
+
+            free(denoise_buffer);
+        }
+
+        if (init_info->Output)
+        {
+            unsigned char *output_buffer = new unsigned char[3 * width * height];
+
+            for (int j = height - 1; j >= 0; --j)
+            {
+                for (int i = 0; i < width; ++i)
+                {
+                    vec3 srgb_color = readColor(pixels, ivec2(width, height), ivec2(i, j), 1.0);
+                    writeColor(output_buffer, ivec2(width, height), ivec2(i, j), srgb_color, 2.2);
+                }
+            }
+
+            stbi_flip_vertically_on_write(true);
+            stbi_write_png(init_info->SavePath, width, height, 3, output_buffer, 0);
+
+            free(output_buffer);
+        }
+
+        state = 4;
 
         std::chrono::steady_clock::time_point endTime = std::chrono::steady_clock::now();
         std::chrono::duration<float> time_span = std::chrono::duration_cast<std::chrono::duration<float>>(endTime - startTime);
-        float delta_time = time_span.count();
+        render_time = time_span.count();
 
-        LOG_INFO("ray tracing is done in " + to_string(delta_time) + "s");
-
-        // Denoise
-        float *denoise_buffer = new float[3 * width * height];
-
-        for (int j = height - 1; j >= 0; --j)
-        {
-            for (int i = 0; i < width; ++i)
-            {
-                vec3 swap_color = readColor(pixels, ivec2(width, height), ivec2(i, j), 2.2);
-                denoise_buffer[3 * (width * j + i) + 0] = swap_color.x;
-                denoise_buffer[3 * (width * j + i) + 1] = swap_color.y;
-                denoise_buffer[3 * (width * j + i) + 2] = swap_color.z;
-            }
-        }
-
-        // Create an Intel Open Image Denoise device
-        oidn::DeviceRef device = oidn::newDevice();
-        device.commit();
-
-        // Create a filter for denoising a beauty (color) image using optional auxiliary images too
-        oidn::FilterRef filter = device.newFilter("RT");                           // generic ray tracing filter
-        filter.setImage("color", denoise_buffer, oidn::Format::Float3, width, height);  // beauty
-        filter.setImage("output", denoise_buffer, oidn::Format::Float3, width, height); // denoised beauty
-        filter.commit();
-
-        // Filter the image
-        filter.execute();
-
-        // Check for errors
-        const char *errorMessage;
-        if (device.getError(errorMessage) != oidn::Error::None)
-            std::cout << "Error: " << errorMessage << std::endl;
-
-        for (int j = height - 1; j >= 0; --j)
-        {
-            for (int i = 0; i < width; ++i)
-            {
-                vec3 swap_color;
-                swap_color.x = denoise_buffer[3 * (width * j + i) + 0];
-                swap_color.y = denoise_buffer[3 * (width * j + i) + 1];
-                swap_color.z = denoise_buffer[3 * (width * j + i) + 2];
-                writeColor(pixels, ivec2(width, height), ivec2(i, j), swap_color, 2.2);
-            }
-        }
-
-        free(denoise_buffer);
-
-        unsigned char *output_buffer = new unsigned char[3 * width * height];
-
-        for (int j = height - 1; j >= 0; --j)
-        {
-            for (int i = 0; i < width; ++i)
-            {
-                vec3 srgb_color = readColor(pixels, ivec2(width, height), ivec2(i, j), 1.0);
-                writeColor(output_buffer, ivec2(width, height), ivec2(i, j), srgb_color, 2.2);
-            }
-        }
-
-        stbi_flip_vertically_on_write(true);
-        stbi_write_png("out.png", width, height, 3, output_buffer, 0);
-
-        free(output_buffer);
     }
 
     void PathTracer::writeColor(unsigned char *pixels, ivec2 tex_size, ivec2 tex_coord, vec3 color, float gama)
@@ -292,5 +320,10 @@ namespace MiniEngine::PathTracing
                 }
             }
         }
+    }
+
+    int PathTracer::getLightNumber()
+    {
+        return light_data.objects.size();
     }
 }
