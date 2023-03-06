@@ -16,13 +16,13 @@ namespace MiniEngine::PathTracing
     PathTracer::PathTracer()
     {
         init_info = make_shared<RenderingInitInfo>();
-        init_info->BounceLimit = 4;
+        init_info->BounceLimit = 8;
         init_info->BVH = true;
         init_info->Denoise = true;
         init_info->MultiThread = true;
         init_info->Output = false;
         init_info->Resolution = glm::ivec2(640, 480);
-        init_info->SampleCount = 64;
+        init_info->SampleCount = 128;
     }
 
     void PathTracer::initializeRenderer()
@@ -48,9 +48,9 @@ namespace MiniEngine::PathTracing
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         // set texture filtering parameters
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, pixels);
     }
 
     vec3 PathTracer::getColor(const Ray &r, const Hittable &mesh, shared_ptr<HittableList> &lights, int depth)
@@ -89,24 +89,25 @@ namespace MiniEngine::PathTracing
         return emitted + srec.attenuation * rec.mat_ptr->scatterPDF(r, rec, scattered) * getColor(scattered, mesh, lights, depth - 1) / pdf;
     }
 
-    void PathTracer::startTracing(shared_ptr<Model> m_model)
+    void PathTracer::startTracing(shared_ptr<Model> m_model, shared_ptr<MiniEngine::Camera> m_camera)
     {
         transferModelData(m_model);
 
         // Image
-        const int image_width = width;
-        const int image_height = height;
         const int samples = init_info->SampleCount;
         const int max_depth = init_info->BounceLimit;
 
         // Camera
-        vec3 lookfrom(6.9118194580078125, 1.6516278982162476, 2.5541365146636963);
-        vec3 lookat(2.328019380569458, 1.6516276597976685, 0.33640459179878235);
+        vec3 direction(cos(glm::radians(m_camera->Yaw))*cos(glm::radians(m_camera->Pitch)),sin(glm::radians(m_camera->Pitch)),sin(glm::radians(m_camera->Yaw))*cos(glm::radians(m_camera->Pitch)));
+        vec3 lookfrom(m_camera->Position);
+        vec3 lookat(m_camera->Position + direction);
         vec3 vup(0, 1, 0);
-        auto dist_to_focus = 10.0;
-        auto aperture = 0;
+        auto dist_to_focus = m_camera->FocusDistance;
+        auto aperture = m_camera->Aperture;
+        auto fov = m_camera->Zoom;
+        auto aspect_ratio = (float)init_info->Resolution.x/(float)init_info->Resolution.y;
 
-        Camera cam(lookfrom, lookat, vup, 60, aperture, dist_to_focus);
+        Camera cam(lookfrom, lookat, vup, fov, aperture, dist_to_focus, aspect_ratio);
 
         // Model
         HittableList mesh;
@@ -119,10 +120,10 @@ namespace MiniEngine::PathTracing
         std::chrono::steady_clock::time_point startTime = std::chrono::steady_clock::now();
 
         // multi thread
-        for (int j = image_height - 1; j >= 0; --j)
+        for (int j = height - 1; j >= 0; --j)
         {
-            tbb::parallel_for(0, image_width,
-                              [this, j, samples, image_width, image_height, max_depth, &cam, &mesh, &lights](int i)
+            tbb::parallel_for(0, width,
+                              [this, j, samples, max_depth, &cam, &mesh, &lights](int i)
                               {
                 vec3 pixel_color(0, 0, 0);
                 for (int s = 0; s < samples; ++s)
@@ -130,8 +131,8 @@ namespace MiniEngine::PathTracing
                     if (should_stop_tracing)
                         return;
 
-                    f32 u = (i + linearRand(0.f, 1.f)) / (image_width - 1);
-                    f32 v = (j + linearRand(0.f, 1.f)) / (image_height - 1);
+                    f32 u = (i + linearRand(0.f, 1.f)) / (width - 1);
+                    f32 v = (j + linearRand(0.f, 1.f)) / (height - 1);
                     Ray r = cam.getRay(u, v);
                     vec3 sample_color = getColor(r, mesh, lights, max_depth);
                     if (isInfinity(sample_color) || isNan(sample_color))
@@ -139,10 +140,35 @@ namespace MiniEngine::PathTracing
                     pixel_color += sample_color;
                 }
                 pixel_color *= 1.0 / samples;
-                writeColor(pixels, ivec2(image_width, image_height), ivec2(i, j), pixel_color, 1.0); });
+                writeColor(pixels, ivec2(width, height), ivec2(i, j), pixel_color, 1.0); });
             if (should_stop_tracing)
                 return;
         }
+
+        // // single thread
+        // for (int j = height - 1; j >= 0; --j)
+        // {
+        //     for (int i = 0; i < width; ++i)
+        //     {
+        //         vec3 pixel_color(0, 0, 0);
+        //         for (int s = 0; s < samples; ++s)
+        //         {
+        //             if (should_stop_tracing)
+        //                 return;
+
+        //             f32 u = (i + linearRand(0.f, 1.f)) / (width - 1);
+        //             f32 v = (j + linearRand(0.f, 1.f)) / (height - 1);
+        //             Ray r = cam.getRay(u, v);
+        //             vec3 sample_color = getColor(r, mesh, lights, max_depth);
+        //             if (isInfinity(sample_color) || isNan(sample_color))
+        //                 sample_color={0,0,0};
+        //             pixel_color += sample_color;
+        //         }
+        //         pixel_color *= 1.0 / samples;
+        //         writeColor(pixels, ivec2(width, height), ivec2(i, j), pixel_color, 2.2);
+        //     }
+
+        // }
 
         std::chrono::steady_clock::time_point endTime = std::chrono::steady_clock::now();
         std::chrono::duration<float> time_span = std::chrono::duration_cast<std::chrono::duration<float>>(endTime - startTime);
@@ -153,14 +179,14 @@ namespace MiniEngine::PathTracing
         // Denoise
         float *denoise_buffer = new float[3 * width * height];
 
-        for (int j = image_height - 1; j >= 0; --j)
+        for (int j = height - 1; j >= 0; --j)
         {
-            for (int i = 0; i < image_width; ++i)
+            for (int i = 0; i < width; ++i)
             {
-                vec3 swap_color = readColor(pixels, ivec2(image_width, image_height), ivec2(i, j), 1.0);
-                denoise_buffer[3 * (image_width * j + i) + 0] = swap_color.x;
-                denoise_buffer[3 * (image_width * j + i) + 1] = swap_color.y;
-                denoise_buffer[3 * (image_width * j + i) + 2] = swap_color.z;
+                vec3 swap_color = readColor(pixels, ivec2(width, height), ivec2(i, j), 2.2);
+                denoise_buffer[3 * (width * j + i) + 0] = swap_color.x;
+                denoise_buffer[3 * (width * j + i) + 1] = swap_color.y;
+                denoise_buffer[3 * (width * j + i) + 2] = swap_color.z;
             }
         }
 
@@ -182,17 +208,35 @@ namespace MiniEngine::PathTracing
         if (device.getError(errorMessage) != oidn::Error::None)
             std::cout << "Error: " << errorMessage << std::endl;
 
-        for (int j = image_height - 1; j >= 0; --j)
+        for (int j = height - 1; j >= 0; --j)
         {
-            for (int i = 0; i < image_width; ++i)
+            for (int i = 0; i < width; ++i)
             {
                 vec3 swap_color;
-                swap_color.x = denoise_buffer[3 * (image_width * j + i) + 0];
-                swap_color.y = denoise_buffer[3 * (image_width * j + i) + 1];
-                swap_color.z = denoise_buffer[3 * (image_width * j + i) + 2];
-                writeColor(pixels, ivec2(image_width, image_height), ivec2(i, j), swap_color, 1.0);
+                swap_color.x = denoise_buffer[3 * (width * j + i) + 0];
+                swap_color.y = denoise_buffer[3 * (width * j + i) + 1];
+                swap_color.z = denoise_buffer[3 * (width * j + i) + 2];
+                writeColor(pixels, ivec2(width, height), ivec2(i, j), swap_color, 2.2);
             }
         }
+
+        free(denoise_buffer);
+
+        unsigned char *output_buffer = new unsigned char[3 * width * height];
+
+        for (int j = height - 1; j >= 0; --j)
+        {
+            for (int i = 0; i < width; ++i)
+            {
+                vec3 srgb_color = readColor(pixels, ivec2(width, height), ivec2(i, j), 1.0);
+                writeColor(output_buffer, ivec2(width, height), ivec2(i, j), srgb_color, 2.2);
+            }
+        }
+
+        stbi_flip_vertically_on_write(true);
+        stbi_write_png("out.png", width, height, 3, output_buffer, 0);
+
+        free(output_buffer);
     }
 
     void PathTracer::writeColor(unsigned char *pixels, ivec2 tex_size, ivec2 tex_coord, vec3 color, float gama)

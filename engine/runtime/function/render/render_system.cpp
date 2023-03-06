@@ -184,7 +184,7 @@ namespace MiniEngine
     void RenderSystem::startRendering()
     {
         m_path_tracer->should_stop_tracing = false;
-        m_tracing_process = std::thread(&PathTracing::PathTracer::startTracing,m_path_tracer,m_render_model);
+        m_tracing_process = std::thread(&PathTracing::PathTracer::startTracing,m_path_tracer,m_render_model,m_render_camera);
         m_tracing_process.detach();
     };
 

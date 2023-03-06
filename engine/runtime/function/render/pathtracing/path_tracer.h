@@ -5,8 +5,10 @@
 #include "runtime/function/render/pathtracing/common/hittable.h"
 #include "runtime/function/render/pathtracing/common/material.h"
 #include "runtime/function/render/render_model.h"
+#include "runtime/function/render/render_camera.h"
 
 #include <glm/glm.hpp>
+#include <stb_image_write.h>
 
 namespace MiniEngine::PathTracing
 {
@@ -35,7 +37,7 @@ namespace MiniEngine::PathTracing
         PathTracer();
 
         void initializeRenderer();
-        void startTracing(shared_ptr<Model> m_model);
+        void startTracing(shared_ptr<Model> m_model, shared_ptr<MiniEngine::Camera> m_camera);
         void transferModelData(shared_ptr<Model> m_model);
 
     private:

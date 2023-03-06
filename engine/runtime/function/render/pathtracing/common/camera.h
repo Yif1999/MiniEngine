@@ -12,10 +12,10 @@ namespace MiniEngine::PathTracing
                vec3 up,
                float fov,
                float aperture,
-               float focus_dist)
+               float focus_dist,
+               float aspect_ratio)
         {
             auto theta = radians(fov);
-            auto aspect_ratio = 1.0;
             auto h = tan(theta / 2);
             f32 viewport_height = 2.0 * h;
             f32 viewport_width = aspect_ratio * viewport_height;

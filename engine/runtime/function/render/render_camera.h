@@ -52,9 +52,9 @@ namespace MiniEngine
         float Aspect;
         float Near;
         float Far;
-        float Aperture;
-        float FocusDistance;
-        int FocusMode;
+        float Aperture{0.f};
+        float FocusDistance{10.f};
+        int FocusMode{0};
 
         // constructor with vectors
         Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f),

@@ -21,7 +21,6 @@ namespace MiniEngine
         {
             // get path tracer info
             std::shared_ptr<PathTracing::PathTracer> m_path_tracer = g_runtime_global_context.m_render_system->getPathTracer();
-            
             // draw canvas plane
             glBindTexture(GL_TEXTURE_2D, m_path_tracer->result);
             glBindVertexArray(VAO);
@@ -46,7 +45,6 @@ namespace MiniEngine
                 -half_width, 0.0f,  half_height, 0.f, 0.f   // top left
             };
             unsigned int indices[] = {
-                // note that we start from 0!
                 0, 1, 3, // first Triangle
                 1, 2, 3  // second Triangle
             };
