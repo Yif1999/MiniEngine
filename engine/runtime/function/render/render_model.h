@@ -33,6 +33,7 @@ namespace MiniEngine
         // model data
         vector<Mesh> meshes;
         vector<Material> mats;
+        string model_path;
 
         // constructor, expects a filepath to a 3D model.
         Model(string const &path)
@@ -56,6 +57,7 @@ namespace MiniEngine
             filesystem::path directory = filesystem::path(path).parent_path();
             tinyobj::ObjReaderConfig reader_config;
             reader_config.mtl_search_path = directory.generic_string().data();
+            model_path = directory.generic_string();
 
             tinyobj::ObjReader reader;
 
@@ -66,7 +68,7 @@ namespace MiniEngine
                 {
                     std::cerr << "TinyObjReader: " << reader.Error();
                 }
-                exit(1);
+                return;
             }
 
             if (!reader.Warning().empty())
@@ -91,6 +93,11 @@ namespace MiniEngine
             std::cout << "UVs: " << attrib.texcoords.size() / 2 << std::endl;
             std::cout << "materials: " << materials.size() << std::endl;
 #endif
+
+            if (!materials.size())
+            {
+                return;
+            }
 
             // Load Material Data
             mats.resize(materials.size());

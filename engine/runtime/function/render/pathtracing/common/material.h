@@ -146,10 +146,10 @@ namespace MiniEngine::PathTracing
         MiniEngine::Material mat;
         shared_ptr<Texture> diffuse_map;
 
-        Phong(MiniEngine::Material m)
+        Phong(MiniEngine::Material m, std::string path)
         {
             this->mat = m;
-            diffuse_map = make_shared<Image>(mat.map_Kd.c_str());
+            diffuse_map = make_shared<Image>((path + "/" + mat.map_Kd).c_str());
         }
 
         virtual bool scatter(const Ray &r_in, const HitRecord &rec, ScatterRecord &srec) const override
@@ -239,7 +239,7 @@ namespace MiniEngine::PathTracing
 
         inline bool is_transparent(MiniEngine::Material mat) const
         {
-            if (mat.Ni > 1 && mat.Tr[0] < 1 || mat.Tr[1] < 1 || mat.Tr[2] < 1)
+            if (mat.Ni > 1)
             {
                 return true;
             }

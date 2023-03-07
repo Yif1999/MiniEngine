@@ -28,6 +28,11 @@ namespace MiniEngine::PathTracing
         virtual bool hit(const Ray &r, float t_min, float t_max, HitRecord &rec) const = 0;
         virtual bool aabb(AABB &bounding_box) const = 0;
 
+        virtual float getArea() const
+        {
+            return 0.0;
+        }
+
         virtual float getPDF(const vec3 &o, const vec3 &v) const
         {
             return 0.0;

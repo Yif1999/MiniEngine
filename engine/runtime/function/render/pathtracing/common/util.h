@@ -57,4 +57,5 @@ namespace MiniEngine::PathTracing
 
         return vec3(x, y, z);
     }
+
 }

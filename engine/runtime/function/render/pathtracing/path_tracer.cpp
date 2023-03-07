@@ -11,12 +11,15 @@
 #include "thirdparty/oidn/include/OpenImageDenoise/oidn.hpp"
 #include "thirdparty/tbb/include/tbb/parallel_for.h"
 
+#define MaxMainLight 16
+
 namespace MiniEngine::PathTracing
 {
     PathTracer::PathTracer()
     {
         init_info = make_shared<RenderingInitInfo>();
         init_info->BounceLimit = 8;
+        init_info->ImportSample = true;
         init_info->BVH = true;
         init_info->Denoise = true;
         init_info->MultiThread = true;
@@ -53,7 +56,7 @@ namespace MiniEngine::PathTracing
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
     }
 
-    vec3 PathTracer::getColor(const Ray &r, const Hittable &mesh, shared_ptr<HittableList> &lights, int depth)
+    vec3 PathTracer::getColor(const Ray &r, const Hittable &mesh, shared_ptr<HittableList> &lights, int depth, bool importance_sampling)
     {
         HitRecord rec;
 
@@ -77,16 +80,26 @@ namespace MiniEngine::PathTracing
 
         if (srec.is_specular)
         {
-            return srec.attenuation * getColor(srec.specular_ray, mesh, lights, depth - 1);
+            return srec.attenuation * getColor(srec.specular_ray, mesh, lights, depth - 1, importance_sampling);
         }
 
-        // auto light_ptr = make_shared<HittablePDF>(lights, rec.hit_point.Position);
-        // MixturePDF p(light_ptr, srec.pdf_ptr);
+        Ray scattered;
+        float pdf;
+        if (importance_sampling)
+        {
+            auto light_ptr = make_shared<HittablePDF>(lights, rec.hit_point.Position);
+            MixturePDF p(light_ptr, srec.pdf_ptr);
 
-        Ray scattered = Ray(rec.hit_point.Position, srec.pdf_ptr->generate());
-        auto pdf = srec.pdf_ptr->value(scattered.direction);
+            scattered = Ray(rec.hit_point.Position, p.generate());
+            pdf = p.value(scattered.direction);
+        }
+        else
+        {
+            scattered = Ray(rec.hit_point.Position, srec.pdf_ptr->generate());
+            pdf = srec.pdf_ptr->value(scattered.direction);
+        }
 
-        return emitted + srec.attenuation * rec.mat_ptr->scatterPDF(r, rec, scattered) * getColor(scattered, mesh, lights, depth - 1) / pdf;
+        return emitted + srec.attenuation * rec.mat_ptr->scatterPDF(r, rec, scattered) * getColor(scattered, mesh, lights, depth - 1, importance_sampling) / pdf;
     }
 
     void PathTracer::startTracing(shared_ptr<Model> m_model, shared_ptr<MiniEngine::Camera> m_camera)
@@ -99,9 +112,10 @@ namespace MiniEngine::PathTracing
         // Image
         const int samples = init_info->SampleCount;
         const int max_depth = init_info->BounceLimit;
+        const bool importance_sampling = init_info->ImportSample;
 
         // Light
-        if (!getLightNumber()){
+        if (!getMainLightNumber()){
             return;
         }
         auto lights = make_shared<HittableList>(light_data);
@@ -153,7 +167,7 @@ namespace MiniEngine::PathTracing
             {
                 // multi thread
                 tbb::parallel_for(0, width,
-                                [this, j, samples, max_depth, &cam, &mesh, &lights](int i)
+                                [this, j, samples, max_depth, importance_sampling , &cam, &mesh, &lights](int i)
                                 {
                     vec3 pixel_color(0, 0, 0);
                     for (int s = 0; s < samples; ++s)
@@ -164,13 +178,13 @@ namespace MiniEngine::PathTracing
                         f32 u = (i + linearRand(0.f, 1.f)) / (width - 1);
                         f32 v = (j + linearRand(0.f, 1.f)) / (height - 1);
                         Ray r = cam.getRay(u, v);
-                        vec3 sample_color = getColor(r, mesh, lights, max_depth);
+                        vec3 sample_color = getColor(r, mesh, lights, max_depth, importance_sampling);
                         if (isInfinity(sample_color) || isNan(sample_color))
                             sample_color={0,0,0};
                         pixel_color += sample_color;
                     }
                     pixel_color *= 1.0 / samples;
-                    writeColor(pixels, ivec2(width, height), ivec2(i, j), pixel_color, 1.0); });
+                    writeColor(pixels, ivec2(width, height), ivec2(i, j), pixel_color, 2.2); });
                 if (should_stop_tracing)
                     return;
             }
@@ -190,7 +204,7 @@ namespace MiniEngine::PathTracing
                             f32 u = (i + linearRand(0.f, 1.f)) / (width - 1);
                             f32 v = (j + linearRand(0.f, 1.f)) / (height - 1);
                             Ray r = cam.getRay(u, v);
-                            vec3 sample_color = getColor(r, mesh, lights, max_depth);
+                            vec3 sample_color = getColor(r, mesh, lights, max_depth, importance_sampling);
                             if (isInfinity(sample_color) || isNan(sample_color))
                                 sample_color={0,0,0};
                             pixel_color += sample_color;
@@ -315,7 +329,7 @@ namespace MiniEngine::PathTracing
         // loop meshes
         for (const auto &mesh : m_model->meshes)
         {
-            auto mat = make_shared<Phong>(mesh.material);
+            auto mat = make_shared<Phong>(mesh.material, m_model->model_path);
 
             // loop triangles
             for (int id = 0; id < mesh.indices.size(); id += 3)
@@ -333,9 +347,30 @@ namespace MiniEngine::PathTracing
                 }
             }
         }
+
+        // get main light (for importance sampling)
+        std::map<shared_ptr<Hittable>, float> light_with_area;
+        for (const auto &light : light_data.objects)
+        {
+            light_with_area.insert(pair<shared_ptr<Hittable>, float>(light, light->getArea()));
+        }
+        
+        vector<pair<shared_ptr<Hittable>, float>> map_vec;
+        for(map<shared_ptr<Hittable>, float>::iterator it = light_with_area.begin(); it != light_with_area.end(); it++){
+            map_vec.push_back( pair<shared_ptr<Hittable>, float>(it->first,it->second) );
+        }
+        sort(map_vec.begin(),map_vec.end(),hittableCompare);
+        light_data.clear();
+        for (const auto &light_map : map_vec)
+        {
+            light_data.objects.push_back(light_map.first);            
+            if (light_data.objects.size() == MaxMainLight)
+                break;
+        }
+
     }
 
-    int PathTracer::getLightNumber()
+    int PathTracer::getMainLightNumber()
     {
         return light_data.objects.size();
     }

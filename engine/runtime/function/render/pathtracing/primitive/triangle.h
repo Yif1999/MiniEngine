@@ -24,10 +24,7 @@ namespace MiniEngine::PathTracing
             if (!this->hit(Ray(origin, v), EPS, INF, rec))
                 return 0;
 
-            vec3 edge1 = vertices[1].Position - vertices[0].Position;
-            vec3 edge2 = vertices[2].Position - vertices[0].Position;
-
-            float area = length(cross(edge1, edge2)) / 2.f;
+            float area = getArea();
 
             float distance_squared = rec.t * rec.t * pow(length(v), 2);
             float cosine = fabs(dot(v, rec.hit_point.Normal) / length(v));
@@ -52,6 +49,14 @@ namespace MiniEngine::PathTracing
                 random_point = vertices[0].Position + u * edge1 + v * edge2;
 
             return random_point - origin;
+        }
+
+        virtual float getArea() const override
+        {
+            vec3 edge1 = vertices[1].Position - vertices[0].Position;
+            vec3 edge2 = vertices[2].Position - vertices[0].Position;
+
+            return length(cross(edge1, edge2)) / 2.f;
         }
 
     private:

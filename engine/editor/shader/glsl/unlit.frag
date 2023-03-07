@@ -9,4 +9,5 @@ uniform sampler2D result;
 void main()
 {
 	FragColor = texture(result, TexCoord);
+	FragColor.rgb = pow(FragColor.rgb, vec3(2.2));
 }

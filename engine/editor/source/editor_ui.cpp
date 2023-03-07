@@ -570,6 +570,7 @@ namespace MiniEngine
             ImGui::Text("Ray Tracing");
             ImGui::DragInt("Sample Count", &m_rendering_init_info->SampleCount, 1.f, 1.f, 1048576.f, "%d", ImGuiSliderFlags_AlwaysClamp);
             ImGui::DragInt("Bounce Limit", &m_rendering_init_info->BounceLimit, 1.f, 1.f, 1024.f, "%d", ImGuiSliderFlags_AlwaysClamp);
+            ImGui::Checkbox("Impotance Samling", &m_rendering_init_info->ImportSample);
             ImGui::Checkbox("BVH", &m_rendering_init_info->BVH);
             ImGui::Checkbox("Multi-Thread", &m_rendering_init_info->MultiThread);
             ImGui::Checkbox("Denoise", &m_rendering_init_info->Denoise);
@@ -694,7 +695,7 @@ namespace MiniEngine
 
             if (!g_is_editor_mode)
             {
-                if (!g_editor_global_context.m_render_system->getPathTracer()->getLightNumber())
+                if (!g_editor_global_context.m_render_system->getPathTracer()->getMainLightNumber())
                     m_error_code =2;
 
                 if (m_error_code)

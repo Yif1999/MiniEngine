@@ -10,6 +10,8 @@
 #include <glm/glm.hpp>
 #include <stb_image_write.h>
 
+#include <map>
+
 namespace MiniEngine::PathTracing
 {
     struct RenderingInitInfo
@@ -17,6 +19,7 @@ namespace MiniEngine::PathTracing
         ivec2 Resolution;
         int SampleCount;
         int BounceLimit;
+        bool ImportSample;
         bool BVH;
         bool MultiThread;
         bool Denoise;
@@ -43,14 +46,16 @@ namespace MiniEngine::PathTracing
         void startTracing(shared_ptr<Model> m_model, shared_ptr<MiniEngine::Camera> m_camera);
         void transferModelData(shared_ptr<Model> m_model);
 
-        int getLightNumber();
+        int getMainLightNumber();
 
     private:
         HittableList mesh_data;
         HittableList light_data;
 
-        glm::vec3 getColor(const Ray &r, const Hittable &model, shared_ptr<HittableList> &lights, int depth);
+        glm::vec3 getColor(const Ray &r, const Hittable &model, shared_ptr<HittableList> &lights, int depth, bool importance_sampling);
         void writeColor(unsigned char *pixels, glm::ivec2 tex_size, glm::ivec2 tex_coord, glm::vec3 color, float gama);
         glm::vec3 readColor(unsigned char *pixels, glm::ivec2 tex_size, glm::ivec2 tex_coord, float gama);
+
+        static bool hittableCompare(pair<shared_ptr<Hittable>, float> a, pair<shared_ptr<Hittable>, float> b) {return a.second > b.second;}
     };
 }

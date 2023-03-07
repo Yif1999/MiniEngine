@@ -3,6 +3,8 @@
 #include <glm/glm.hpp>
 #include <stb_image.h>
 
+#include <string>
+
 namespace MiniEngine
 {
     class Texture
@@ -26,8 +28,7 @@ namespace MiniEngine
 
             char buff[1024];
             memset(buff,0,sizeof(buff));
-            strcpy(buff,"/Volumes/T7/Dev/MiniEngine/scene/staircase/");
-            strcat(buff,filename);
+            strcpy(buff,filename);
 
             data = stbi_load(buff, &width, &height, &components_per_pixel, components_per_pixel);
 
