@@ -1,5 +1,6 @@
 #pragma once
 #include "runtime/core/meta/reflection/reflection.h"
+#include "runtime/core/math/vector3.h"
 
 namespace MiniEngine
 {
