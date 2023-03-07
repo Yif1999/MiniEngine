@@ -100,18 +100,6 @@ namespace MiniEngine::PathTracing
         const int samples = init_info->SampleCount;
         const int max_depth = init_info->BounceLimit;
 
-        // Camera
-        vec3 direction(cos(glm::radians(m_camera->Yaw))*cos(glm::radians(m_camera->Pitch)),sin(glm::radians(m_camera->Pitch)),sin(glm::radians(m_camera->Yaw))*cos(glm::radians(m_camera->Pitch)));
-        vec3 lookfrom(m_camera->Position);
-        vec3 lookat(m_camera->Position + direction);
-        vec3 vup(0, 1, 0);
-        auto dist_to_focus = m_camera->FocusDistance;
-        auto aperture = m_camera->Aperture;
-        auto fov = m_camera->Zoom;
-        auto aspect_ratio = (float)init_info->Resolution.x/(float)init_info->Resolution.y;
-
-        Camera cam(lookfrom, lookat, vup, fov, aperture, dist_to_focus, aspect_ratio);
-
         // Light
         if (!getLightNumber()){
             return;
@@ -130,9 +118,34 @@ namespace MiniEngine::PathTracing
             mesh = mesh_data;
         }
 
+        // Camera
+        vec3 direction(cos(glm::radians(m_camera->Yaw))*cos(glm::radians(m_camera->Pitch)),sin(glm::radians(m_camera->Pitch)),sin(glm::radians(m_camera->Yaw))*cos(glm::radians(m_camera->Pitch)));
+        vec3 lookfrom(m_camera->Position);
+        vec3 lookat(m_camera->Position + direction);
+        vec3 vup(0, 1, 0);
+        auto aperture = m_camera->Aperture;
+        auto fov = m_camera->Zoom;
+        auto aspect_ratio = (float)init_info->Resolution.x/(float)init_info->Resolution.y;
+
+        Camera laser(lookfrom, lookat, vup, fov, 0.f, 1.f, aspect_ratio);
+                
+        f32 dist_to_focus;
+        if (!m_camera->FocusMode)
+        { 
+            Ray r = laser.getRay(0.5f, 0.5f);
+            HitRecord rec;
+            mesh.hit(r, EPS, INF, rec);
+            dist_to_focus = rec.t;
+        }
+        else
+        {
+            dist_to_focus = m_camera->FocusDistance;
+        }
+
+        Camera cam(lookfrom, lookat, vup, fov, aperture, dist_to_focus, aspect_ratio);
+
         state = 2;
         // Render
-
         for (int j = height - 1; j >= 0; --j)
         {
             progress = Math::clamp(float(height-j) / float(height-1) * 100, 0, 100);

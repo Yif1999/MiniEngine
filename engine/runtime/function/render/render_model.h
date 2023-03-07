@@ -86,10 +86,10 @@ namespace MiniEngine
             auto &materials = reader.GetMaterials();
 
 #ifdef DEBUG_MESH
-            std::cout << "顶点数: " << attrib.vertices.size() / 3 << std::endl;
-            std::cout << "法线数: " << attrib.normals.size() / 3 << std::endl;
-            std::cout << "UV数: " << attrib.texcoords.size() / 2 << std::endl;
-            std::cout << "材质数: " << materials.size() << std::endl;
+            std::cout << "vertexs: " << attrib.vertices.size() / 3 << std::endl;
+            std::cout << "normals: " << attrib.normals.size() / 3 << std::endl;
+            std::cout << "UVs: " << attrib.texcoords.size() / 2 << std::endl;
+            std::cout << "materials: " << materials.size() << std::endl;
 #endif
 
             // Load Material Data
@@ -101,7 +101,7 @@ namespace MiniEngine
 
                 mat.name = material.name;
 #ifdef DEBUG_MATERIAL
-                std::cout << "材质" << m << ": " << mat.name << std::endl;
+                std::cout << "material" << m << ": " << mat.name << std::endl;
 #endif
         
                 mat.Kd = {material.diffuse[0], material.diffuse[1], material.diffuse[2]};

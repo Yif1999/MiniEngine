@@ -552,7 +552,7 @@ namespace MiniEngine
             ImGui::DragFloat("Far", &m_camera->Far, 1.f, 0.001f, INFINITY, "%.2f", ImGuiSliderFlags_AlwaysClamp);
             
             ImGui::Text("Depth of Field");
-            ImGui::DragFloat("Aperture", &m_camera->Aperture, 0.001f, 0.f, 0.1f, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+            ImGui::DragFloat("Aperture", &m_camera->Aperture, 0.001f, 0.f, 1.f, "%.2f", ImGuiSliderFlags_AlwaysClamp);
             ImGui::Combo("Focus Mode", &m_camera->FocusMode, "Auto\0Manual\0");
             if (m_camera->FocusMode)
                 ImGui::DragFloat("Distance", &m_camera->FocusDistance, 0.01f, 0.001, INFINITY, "%.2f", ImGuiSliderFlags_AlwaysClamp);
