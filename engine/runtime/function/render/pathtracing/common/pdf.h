@@ -59,21 +59,23 @@ namespace MiniEngine::PathTracing
     {
     public:
         shared_ptr<PDF> p[2];
+        float weight;
 
-        MixturePDF(shared_ptr<PDF> p0, shared_ptr<PDF> p1)
+        MixturePDF(shared_ptr<PDF> p0, shared_ptr<PDF> p1, float w)
         {
             p[0] = p0;
             p[1] = p1;
+            weight = w;
         }
 
         virtual float value(const vec3 &direction) const override
         {
-            return 0.5 * p[0]->value(direction) + 0.5 * p[1]->value(direction);
+            return (1.0 - weight) * p[0]->value(direction) + weight * p[1]->value(direction);
         }
 
         virtual vec3 generate() const override
         {
-            if (linearRand(0.f,1.f) < 0.5)
+            if (linearRand(0.f,1.f) < (1.0 - weight))
                 return p[0]->generate();
             else
                 return p[1]->generate();

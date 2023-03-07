@@ -11,7 +11,7 @@
 #include "thirdparty/oidn/include/OpenImageDenoise/oidn.hpp"
 #include "thirdparty/tbb/include/tbb/parallel_for.h"
 
-#define MaxMainLight 16
+#define MaxMainLight 8
 
 namespace MiniEngine::PathTracing
 {
@@ -88,7 +88,7 @@ namespace MiniEngine::PathTracing
         if (importance_sampling)
         {
             auto light_ptr = make_shared<HittablePDF>(lights, rec.hit_point.Position);
-            MixturePDF p(light_ptr, srec.pdf_ptr);
+            MixturePDF p(light_ptr, srec.pdf_ptr, 0.5);
 
             scattered = Ray(rec.hit_point.Position, p.generate());
             pdf = p.value(scattered.direction);
@@ -269,21 +269,21 @@ namespace MiniEngine::PathTracing
 
         if (init_info->Output)
         {
-            unsigned char *output_buffer = new unsigned char[3 * width * height];
+            // unsigned char *output_buffer = new unsigned char[3 * width * height];
 
-            for (int j = height - 1; j >= 0; --j)
-            {
-                for (int i = 0; i < width; ++i)
-                {
-                    vec3 srgb_color = readColor(pixels, ivec2(width, height), ivec2(i, j), 1.0);
-                    writeColor(output_buffer, ivec2(width, height), ivec2(i, j), srgb_color, 2.2);
-                }
-            }
+            // for (int j = height - 1; j >= 0; --j)
+            // {
+            //     for (int i = 0; i < width; ++i)
+            //     {
+            //         vec3 srgb_color = readColor(pixels, ivec2(width, height), ivec2(i, j), 1.0);
+            //         writeColor(output_buffer, ivec2(width, height), ivec2(i, j), srgb_color, 2.2);
+            //     }
+            // }
 
             stbi_flip_vertically_on_write(true);
-            stbi_write_png(init_info->SavePath, width, height, 3, output_buffer, 0);
+            stbi_write_png(init_info->SavePath, width, height, 3, pixels, 0);
 
-            free(output_buffer);
+            // free(output_buffer);
         }
 
         state = 4;
