@@ -11,14 +11,14 @@
 #include "thirdparty/oidn/include/OpenImageDenoise/oidn.hpp"
 #include "thirdparty/tbb/include/tbb/parallel_for.h"
 
-#define MaxMainLight 8
+#define MaxLights 8
 
 namespace MiniEngine::PathTracing
 {
     PathTracer::PathTracer()
     {
         init_info = make_shared<RenderingInitInfo>();
-        init_info->BounceLimit = 8;
+        init_info->BounceLimit = 4;
         init_info->ImportSample = true;
         init_info->BVH = true;
         init_info->Denoise = true;
@@ -163,6 +163,7 @@ namespace MiniEngine::PathTracing
         for (int j = height - 1; j >= 0; --j)
         {
             progress = Math::clamp(float(height-j) / float(height-1) * 100, 0, 100);
+
             if (init_info->MultiThread)
             {
                 // multi thread
@@ -191,27 +192,24 @@ namespace MiniEngine::PathTracing
             else
             {
                 // single thread
-                for (int j = height - 1; j >= 0; --j)
+                for (int i = 0; i < width; ++i)
                 {
-                    for (int i = 0; i < width; ++i)
+                    vec3 pixel_color(0, 0, 0);
+                    for (int s = 0; s < samples; ++s)
                     {
-                        vec3 pixel_color(0, 0, 0);
-                        for (int s = 0; s < samples; ++s)
-                        {
-                            if (should_stop_tracing)
-                                return;
+                        if (should_stop_tracing)
+                            return;
 
-                            f32 u = (i + linearRand(0.f, 1.f)) / (width - 1);
-                            f32 v = (j + linearRand(0.f, 1.f)) / (height - 1);
-                            Ray r = cam.getRay(u, v);
-                            vec3 sample_color = getColor(r, mesh, lights, max_depth, importance_sampling);
-                            if (isInfinity(sample_color) || isNan(sample_color))
-                                sample_color={0,0,0};
-                            pixel_color += sample_color;
-                        }
-                        pixel_color *= 1.0 / samples;
-                        writeColor(pixels, ivec2(width, height), ivec2(i, j), pixel_color, 2.2);
+                        f32 u = (i + linearRand(0.f, 1.f)) / (width - 1);
+                        f32 v = (j + linearRand(0.f, 1.f)) / (height - 1);
+                        Ray r = cam.getRay(u, v);
+                        vec3 sample_color = getColor(r, mesh, lights, max_depth, importance_sampling);
+                        if (isInfinity(sample_color) || isNan(sample_color))
+                            sample_color={0,0,0};
+                        pixel_color += sample_color;
                     }
+                    pixel_color *= 1.0 / samples;
+                    writeColor(pixels, ivec2(width, height), ivec2(i, j), pixel_color, 2.2);
                 }
             }
         }
@@ -242,6 +240,7 @@ namespace MiniEngine::PathTracing
             oidn::FilterRef filter = device.newFilter("RT");                           // generic ray tracing filter
             filter.setImage("color", denoise_buffer, oidn::Format::Float3, width, height);  // beauty
             filter.setImage("output", denoise_buffer, oidn::Format::Float3, width, height); // denoised beauty
+            filter.set("hdr", false);
             filter.commit();
 
             // Filter the image
@@ -364,7 +363,7 @@ namespace MiniEngine::PathTracing
         for (const auto &light_map : map_vec)
         {
             light_data.objects.push_back(light_map.first);            
-            if (light_data.objects.size() == MaxMainLight)
+            if (light_data.objects.size() == MaxLights)
                 break;
         }
 

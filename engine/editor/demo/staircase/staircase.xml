@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<camera type="perspective" width="1280" height="720" fovy="42.9957">
+	<eye x="6.9118194580078125" y="1.6516278982162476" z="2.5541365146636963"/> 
+	<lookat x="2.328019380569458" y="1.6516276597976685" z="0.33640459179878235"/> 
+	<up x="0.0" y="1.0" z="0.0"/> 
+</camera>
+<light mtlname="ceilingLight" radiance="0.5,0.5,0.5"/>
+<light mtlname="starisLight" radiance="0.5,0.5,0.5"/>
+<light mtlname="leftTopLight" radiance="0.3,0.3,0.3"/>
+<light mtlname="leftLight" radiance="2.742004577636719,
+                2.1547576084136963,
+                0.9237708320617676"/>
+<light mtlname="backLight" radiance="1.595004577636719,
+                1.2507576084136963,
+                0.5497708320617676"/>
+<light mtlname="bottomLight" radiance="1.3,1.3,1.3"/>

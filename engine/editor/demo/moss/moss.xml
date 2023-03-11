@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<camera type="perspective" width="1280" height="720" fovy="23">
+	<eye x="-1.47" y="0.63" z="4.6"/> 
+	<rotation yaw="-61.98" pitch="8.43"/> 
+</camera>

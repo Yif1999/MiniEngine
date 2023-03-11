@@ -329,10 +329,6 @@ namespace MiniEngine
             {
                 if (ImGui::MenuItem("Open.."))
                 {
-                    // g_runtime_global_context.m_world_manager->reloadCurrentScene();
-                    // g_runtime_global_context.m_render_system->clearForSceneReloading();
-                    // g_editor_global_context.m_scene_manager->onGObjectSelected(k_invalid_gobject_id);
-
                     nfdchar_t *outPath = NULL;
                     nfdresult_t result = NFD_OpenDialog( NULL, NULL, &outPath );
                         
@@ -345,10 +341,13 @@ namespace MiniEngine
                     else {
                         LOG_ERROR(NFD_GetError());
                     }
+
+                    m_error_code = 0;
                 }
                 if (ImGui::MenuItem("Close"))
                 {
                     g_runtime_global_context.m_render_system->unloadScene();
+                    m_error_code = 0;
                 }
                 ImGui::Text("-----");
                 // if (ImGui::MenuItem("Save Current Scene"))
@@ -695,7 +694,8 @@ namespace MiniEngine
 
             if (!g_is_editor_mode)
             {
-                if (!g_editor_global_context.m_render_system->getPathTracer()->getMainLightNumber())
+                if (g_editor_global_context.m_render_system->getPathTracer()->state && 
+                    !g_editor_global_context.m_render_system->getPathTracer()->getMainLightNumber())
                     m_error_code =2;
 
                 if (m_error_code)

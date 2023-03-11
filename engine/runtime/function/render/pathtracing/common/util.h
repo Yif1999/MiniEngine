@@ -26,7 +26,7 @@ namespace MiniEngine::PathTracing
 
     const float INF = numeric_limits<float>::infinity();
     const float PI = 3.1415926535897932385;
-    const float EPS = 1e-5;
+    const float EPS = 1e-3f;
 
     // Utility Functions
 

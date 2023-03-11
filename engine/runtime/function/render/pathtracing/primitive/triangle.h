@@ -76,7 +76,7 @@ namespace MiniEngine::PathTracing
         auto q = cross(r.direction, edge2);
         auto a = dot(edge1, q);
 
-        if (fabs(a) < EPS)
+        if (fabs(a) < EPS * EPS)
             return false;
 
         auto f = 1.0 / a;
