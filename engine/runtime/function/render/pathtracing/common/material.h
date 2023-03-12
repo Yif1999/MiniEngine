@@ -178,7 +178,7 @@ namespace MiniEngine::PathTracing
                 noise = normal * noise_n + tangent * noise_t + bi_tangent * noise_bt;
 
                 srec.specular_ray = Ray(rec.hit_point.Position, reflected + noise);
-                srec.attenuation = mat.Ks * 2.f;
+                srec.attenuation = mat.Ks;
                 srec.is_specular = true;
                 srec.pdf_ptr = nullptr;
 
@@ -212,16 +212,11 @@ namespace MiniEngine::PathTracing
             auto attenuation =  diffuse_map->value(rec.hit_point.Texcoord.s, rec.hit_point.Texcoord.t, rec.hit_point.Position);
             if (attenuation[0]<0)
             {
-                if (is_specular(mat))
-                    srec.attenuation = mat.Kd * 2.f;
-                else
-                    srec.attenuation = mat.Kd;
+                srec.attenuation = mat.Kd;
             }
-            else{
-                if (is_specular(mat))
-                    srec.attenuation = attenuation * 2.f;
-                else
-                    srec.attenuation = attenuation;
+            else
+            {
+                srec.attenuation = attenuation;
             }
 
             srec.is_specular = false;

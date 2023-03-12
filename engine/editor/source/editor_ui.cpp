@@ -795,7 +795,7 @@ namespace MiniEngine
                         g_editor_global_context.m_render_system->stopRendering();
                     }
                 }
-                else if (m_error_code == 3 ||
+                else if (m_error_code ||
                          g_editor_global_context.m_render_system->getPathTracer()->state == 4)
                 {
                     if (ImGui::Button(" Back "))
