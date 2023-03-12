@@ -192,6 +192,7 @@ namespace MiniEngine
     void RenderSystem::stopRendering()
     {
         m_path_tracer->should_stop_tracing = true;
+        m_path_tracer->state = 0;
     };
 
     std::shared_ptr<Model> RenderSystem::getRenderModel() const

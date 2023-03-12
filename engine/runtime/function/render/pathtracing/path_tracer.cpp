@@ -355,7 +355,8 @@ namespace MiniEngine::PathTracing
         }
         
         vector<pair<shared_ptr<Hittable>, float>> map_vec;
-        for(map<shared_ptr<Hittable>, float>::iterator it = light_with_area.begin(); it != light_with_area.end(); it++){
+        for(map<shared_ptr<Hittable>, float>::iterator it = light_with_area.begin(); it != light_with_area.end(); it++)
+        {
             map_vec.push_back( pair<shared_ptr<Hittable>, float>(it->first,it->second) );
         }
         sort(map_vec.begin(),map_vec.end(),hittableCompare);
@@ -366,7 +367,6 @@ namespace MiniEngine::PathTracing
             if (light_data.objects.size() == MaxLights)
                 break;
         }
-
     }
 
     int PathTracer::getMainLightNumber()

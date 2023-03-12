@@ -343,11 +343,13 @@ namespace MiniEngine
                     }
 
                     m_error_code = 0;
+                    g_is_editor_mode = true;
                 }
                 if (ImGui::MenuItem("Close"))
                 {
                     g_runtime_global_context.m_render_system->unloadScene();
                     m_error_code = 0;
+                    g_is_editor_mode = true;
                 }
                 ImGui::Text("-----");
                 // if (ImGui::MenuItem("Save Current Scene"))
@@ -544,7 +546,7 @@ namespace MiniEngine
                 m_camera->updateCameraVectors();
 
             ImGui::Text("Field of View");
-            ImGui::DragFloat("Degree", &m_camera->Zoom, 0.01f, 10.f, 90.f, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+            ImGui::DragFloat("Degree", &m_camera->Zoom, 0.01f, 10.f, 135.f, "%.2f", ImGuiSliderFlags_AlwaysClamp);
             
             ImGui::Text("Clip Plane");
             ImGui::DragFloat("Near", &m_camera->Near, 0.001f, 0.001f, INFINITY, "%.2f", ImGuiSliderFlags_AlwaysClamp);
@@ -707,6 +709,10 @@ namespace MiniEngine
                         break;
                     case 2:
                         ImGui::TextColored(ImVec4(1.f, 0.5f, 0.5f, 1.0f), "Error: No light in the scene!");
+                        break;
+                    case 3:
+                        ImGui::TextColored(ImVec4(1.f, 0.5f, 0.5f, 1.0f), "Error: Rendering process cancelled!");
+                        break;
                     default:
                         break;
                     }
@@ -781,11 +787,21 @@ namespace MiniEngine
             }
             else
             {
-                if (ImGui::Button(" Back "))
+                if (g_editor_global_context.m_render_system->getPathTracer()->state == 2)
                 {
-                    g_is_editor_mode = true;
-
-                    g_editor_global_context.m_render_system->stopRendering();
+                    if (ImGui::Button(" Stop "))
+                    {
+                        m_error_code = 3;
+                        g_editor_global_context.m_render_system->stopRendering();
+                    }
+                }
+                else if (m_error_code == 3 ||
+                         g_editor_global_context.m_render_system->getPathTracer()->state == 4)
+                {
+                    if (ImGui::Button(" Back "))
+                    {
+                        g_is_editor_mode = true;
+                    }
                 }
             }
 
