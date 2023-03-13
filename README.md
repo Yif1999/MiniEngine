@@ -1,6 +1,6 @@
 # MiniEngine
 
-**MiniEngine** is my personal render engine playground. ![screenshot](./image/screenshot.png)
+**MiniEngine** is my personal render engine playground. <img src="./image/screenshot.png" alt="screenshot"  />
 
 ## Prerequisites
 
@@ -73,7 +73,7 @@ MiniEngine can open **.obj** scene models with **.mtl** material files attached 
   - *Tr*: the transmittance of material.
   - *Ns*: shiness, the exponent of phong lobe.
   - *Ni*: the *Index of Refraction(IOR)* of transparent object like glass and water, materials with a value above 1 will be treated as transparent in the tracer.
-  - Ke : the light emission coefficient of material, materials with a value non-zero will be used as a light source, there must be at least one glowing material object in the scene to illuminate your objects.
+  - *Ke* : the light emission coefficient of material, materials with a value non-zero will be used as a light source, there must be at least one glowing material object in the scene to illuminate your objects.
 
 ### Editor Usage
 
@@ -96,3 +96,14 @@ We also provide an editor interface where you can tour your scene and position t
 When you've adjusted everything, click the **Render** button, ray-tracing rendering engine will complete the process of *scene metadata collection*, *BVH construction*, *image rendering*, *noise reduction* and *picture storage* in sequence. If your scene has a large number of facets, building BVH may take quite a bit of time, but it will be worth all the wait, BVH will greatly speed up light intersection during rendering, and we recommend that you turn on the BVH option anyway.
 
 Just make a pot of coffee, and wait for the results! 🥳
+
+## Sample Results
+
+|          Scene          |                 Render Result (Denoise OFF)                  |                  Render Result (Denoise ON)                  |
+| :---------------------: | :----------------------------------------------------------: | :----------------------------------------------------------: |
+|        Veach-mis        | ![veach-mis.png](https://github.com/Yif1999/MiniEngine/blob/main/engine/editor/demo/veach-mis/veach-mis.png?raw=true) | ![veach-mis_denoise.png](https://github.com/Yif1999/MiniEngine/blob/main/engine/editor/demo/veach-mis/veach-mis_denoise.png?raw=true) |
+| Cornell-Box with Dragon | ![cornell-box.png](https://github.com/Yif1999/MiniEngine/blob/main/engine/editor/demo/cornell-box/cornell-box.png?raw=true) | ![cornell-box_denoise.png](https://github.com/Yif1999/MiniEngine/blob/main/engine/editor/demo/cornell-box/cornell-box_denoise.png?raw=true) |
+|        Staircase        | ![staircase.png](https://github.com/Yif1999/MiniEngine/blob/main/engine/editor/demo/staircase/staircase.png?raw=true) | ![staircase_denoise.png](https://github.com/Yif1999/MiniEngine/blob/main/engine/editor/demo/staircase/staircase_denoise.png?raw=true) |
+|         Avocado         | ![avocado.png](https://github.com/Yif1999/MiniEngine/blob/main/engine/editor/demo/avocado/avocado.png?raw=true) | ![avocado_denoise.png](https://github.com/Yif1999/MiniEngine/blob/main/engine/editor/demo/avocado/avocado_denoise.png?raw=true) |
+|          Fruit          | ![fruit.png](https://github.com/Yif1999/MiniEngine/blob/main/engine/editor/demo/fruit/fruit.png?raw=true) | ![fruit_denoise.png](https://github.com/Yif1999/MiniEngine/blob/main/engine/editor/demo/fruit/fruit_denoise.png?raw=true) |
+|          MOSS           | ![moss.png](https://github.com/Yif1999/MiniEngine/blob/main/engine/editor/demo/moss/moss.png?raw=true) | ![moss_denoise.png](https://github.com/Yif1999/MiniEngine/blob/main/engine/editor/demo/moss/moss_denoise.png?raw=true) |
