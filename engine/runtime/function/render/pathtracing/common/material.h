@@ -203,7 +203,7 @@ namespace MiniEngine::PathTracing
 
                 srec.is_specular = true;
                 srec.pdf_ptr = nullptr;
-                srec.attenuation = mat.Tr * 2.f;
+                srec.attenuation = mat.Tr;
                 srec.specular_ray = Ray(rec.hit_point.Position, direction);
 
                 return true;
